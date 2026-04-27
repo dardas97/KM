@@ -1,4 +1,12 @@
-
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>KM-induzierte Hyperthyreose — Entscheidungshilfe</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
   *{box-sizing:border-box;margin:0;padding:0}
@@ -40,6 +48,9 @@
   .label-soft{color:#9ca3af;font-weight:400}
   body.rad-mode .label-soft{color:var(--muted)}
   .page{max-width:900px;margin:0 auto;padding:1.5rem 1rem 4rem}
+  .page-footer{text-align:center;font-size:11px;color:var(--muted);margin-top:1.5rem;padding:1rem 0 0;border-top:1px solid var(--border);line-height:1.55}
+  .page-footer .page-byline{font-size:10px;font-family:'IBM Plex Mono',monospace;letter-spacing:0.06em;opacity:0.88;display:block;margin-top:0.35rem}
+  body.rad-mode .page-footer{border-top-color:#30363d}
   header{background:linear-gradient(135deg,#0a3d62 0%,#1a5276 60%,#0e6655 100%);color:#fff;border-radius:12px;padding:2rem 8.5rem 1.5rem 2rem;margin-bottom:1.5rem;position:relative;overflow:hidden}
   @media(max-width:520px){
     header{padding:1.5rem 1rem 1.25rem 1rem;padding-top:3.25rem}
@@ -206,7 +217,45 @@
   .modal-body .modal-dose{font-family:'IBM Plex Mono',monospace;font-size:13px;background:rgba(0,0,0,0.05);padding:0.5rem 0.65rem;border-radius:6px;margin:0.35rem 0;border:1px solid var(--border)}
   body.rad-mode .modal-body .modal-dose{background:rgba(255,255,255,0.06)}
   .modal-foot{padding:0 1.25rem 1rem}
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  body{min-height:100dvh;-webkit-tap-highlight-color:transparent}
+  .page{
+    padding-left:max(1rem, env(safe-area-inset-left, 0px));
+    padding-right:max(1rem, env(safe-area-inset-right, 0px));
+    padding-bottom:max(2.5rem, env(safe-area-inset-bottom, 0px));
+  }
+  .modal-overlay{
+    padding-top:max(1rem, env(safe-area-inset-top, 0px));
+    padding-right:max(1rem, env(safe-area-inset-right, 0px));
+    padding-bottom:max(1rem, env(safe-area-inset-bottom, 0px));
+    padding-left:max(1rem, env(safe-area-inset-left, 0px));
+  }
+  .card:has(.risk-table){overflow-x:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+  @media(max-width:640px){
+    body{font-size:16px}
+    .rad-mode-toggle{min-height:44px;padding:10px 14px;display:inline-flex;align-items:center}
+    header h1{font-size:1.2rem;line-height:1.25}
+    header h1 span{font-size:0.95rem!important}
+    header p{font-size:0.88rem}
+    h2{font-size:1.05rem}
+    .nav-btn{min-height:44px;padding:10px 14px;font-size:14px}
+    .analyze-btn{min-height:48px;padding:14px 16px;font-size:16px}
+    .input-row input{font-size:16px;min-height:44px}
+    .unit-badge{align-self:stretch;display:inline-flex;align-items:center}
+    .modal-close{min-width:44px;min-height:44px;font-size:1.75rem}
+    .rec-learn-btn{min-height:44px;padding:10px 16px}
+    .risk-table{font-size:12px}
+    .risk-table th,.risk-table td{padding:10px 8px}
+    .param-grid{grid-template-columns:1fr;gap:10px}
+    .result-box{padding:1rem}
+    .card{padding:1rem}
+  }
+  @media(max-width:400px){
+    .header-badge{font-size:10px;padding:2px 8px}
+  }
 </style>
+</head>
+<body>
 
 <div class="page">
   <header>
@@ -482,12 +531,12 @@
         </div>
       </div>
     </div>
-    <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:1.5rem;padding:1rem;border-top:1px solid var(--border)">
-      Dieses Tool dient der klinischen Entscheidungsunterstützung und ersetzt keine individuelle ärztliche Beurteilung.<br>
-      Leitlinienstand: DGN 2020 · ETA 2022 · ESC 2022 · Stand April 2026<br>
-      <span style="font-size:10px;font-family:'IBM Plex Mono',monospace;letter-spacing:0.06em;opacity:0.88">Made by Dardan</span>
-    </div>
   </div>
+  <footer class="page-footer" role="contentinfo">
+    Dieses Tool dient der klinischen Entscheidungsunterstützung und ersetzt keine individuelle ärztliche Beurteilung.<br>
+    Leitlinienstand: DGN 2020 · ETA 2022 · ESC 2022 · Stand April 2026<br>
+    <span class="page-byline">Made by Dardan</span>
+  </footer>
 </div>
 
 <div class="modal-overlay" id="vitalKmModal" role="dialog" aria-labelledby="vitalKmModalTitle" aria-modal="true" onclick="if(event.target===this)closeVitalKmModal()">
@@ -573,6 +622,7 @@ function showSection(id, btn){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   btn.classList.add('active');
+  window.scrollTo(0,0);
 }
 
 function parseDE(val){
@@ -682,3 +732,5 @@ function analyze(){
 
 initRadMode();
 </script>
+</body>
+</html>
