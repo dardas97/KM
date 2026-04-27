@@ -1,0 +1,682 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --brand:#0a3d62;--brand-light:#1a5276;--brand-accent:#1abc9c;
+    --warn:#e67e22;--danger:#c0392b;--success:#27ae60;--info:#2980b9;
+    --bg:#f8f9fa;--card:#fff;--text:#1a1a2e;--muted:#6b7280;
+    --border:#dee2e6;--radius:8px;
+    --prose:#374151;--panel-soft:#fafafa;--surface-elev:#fff
+  }
+  body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.6;transition:background 0.2s,color 0.2s}
+  body.rad-mode{
+    color-scheme:dark;
+    --brand:#58a6ff;--brand-light:#79b8ff;--brand-accent:#3dd9c3;
+    --warn:#d29922;--danger:#f85149;--success:#3fb950;--info:#58a6ff;
+    --bg:#0d1117;--card:#161b22;--text:#e6edf3;--muted:#8b949e;
+    --border:#30363d;--prose:#b1bac4;--panel-soft:#21262d;--surface-elev:#0d1117
+  }
+  .rad-mode-toggle{
+    position:absolute;top:1rem;right:1rem;z-index:3;
+    font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;
+    letter-spacing:0.12em;text-transform:uppercase;
+    padding:8px 14px;border-radius:20px;cursor:pointer;transition:all 0.15s;
+    border:1px solid rgba(255,255,255,0.35);background:rgba(0,0,0,0.22);color:rgba(255,255,255,0.95)
+  }
+  .rad-mode-toggle .rad-emoji{font-size:14px;margin-right:0.35em;vertical-align:-0.1em;font-family:'Apple Color Emoji','Segoe UI Emoji',sans-serif;letter-spacing:0;text-transform:none}
+  .rad-mode-toggle:hover{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.5)}
+  body.rad-mode .rad-mode-toggle{
+    background:rgba(26,188,156,0.28);border-color:rgba(126,239,222,0.55);
+    box-shadow:0 0 16px rgba(26,188,156,0.2);color:#d2faf4
+  }
+  .prose-block{font-size:14px;color:var(--prose);line-height:1.7}
+  .dd-box{padding:10px;background:var(--panel-soft);border-radius:6px;border:1px solid var(--border)}
+  .dd-type-title{font-weight:600;font-size:13px;margin-bottom:4px}
+  .dd-type-i{color:#b71c1c}
+  .dd-type-ii{color:#e65100}
+  body.rad-mode .dd-type-i{color:#ff8a8a}
+  body.rad-mode .dd-type-ii{color:#ffa657}
+  .label-soft{color:#9ca3af;font-weight:400}
+  body.rad-mode .label-soft{color:var(--muted)}
+  .page{max-width:900px;margin:0 auto;padding:1.5rem 1rem 4rem}
+  header{background:linear-gradient(135deg,#0a3d62 0%,#1a5276 60%,#0e6655 100%);color:#fff;border-radius:12px;padding:2rem 8.5rem 1.5rem 2rem;margin-bottom:1.5rem;position:relative;overflow:hidden}
+  @media(max-width:520px){
+    header{padding:1.5rem 1rem 1.25rem 1rem;padding-top:3.25rem}
+    .rad-mode-toggle{top:0.65rem;right:0.65rem;font-size:9px;padding:7px 10px}
+  }
+  header::before{content:'';position:absolute;top:-30px;right:-30px;width:180px;height:180px;border-radius:50%;background:rgba(26,188,156,0.12);pointer-events:none}
+  header::after{content:'';position:absolute;bottom:-20px;right:60px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,0.05);pointer-events:none}
+  .header-badge{display:inline-block;background:rgba(26,188,156,0.25);color:#7fefde;font-size:11px;font-family:'IBM Plex Mono',monospace;letter-spacing:0.1em;padding:3px 10px;border-radius:20px;margin-bottom:0.75rem;border:1px solid rgba(26,188,156,0.4)}
+  header h1{font-size:1.55rem;font-weight:600;margin-bottom:0.3rem;line-height:1.3}
+  header p{font-size:0.9rem;color:rgba(255,255,255,0.75);max-width:580px}
+  nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.5rem}
+  .nav-btn{padding:7px 16px;border-radius:20px;border:1px solid var(--border);background:var(--card);font-size:13px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;color:var(--muted);transition:all 0.15s}
+  .nav-btn.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .nav-btn:hover:not(.active){background:#eef2ff;border-color:#c5cae9;color:var(--brand)}
+  body.rad-mode .nav-btn:hover:not(.active){background:#21262d;border-color:#388bfd66;color:var(--brand)}
+  .section{display:none}.section.active{display:block}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem}
+  .card-title{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:0.75rem}
+  h2{font-size:1.15rem;font-weight:600;color:var(--brand);margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:2px solid #e8f0fe}
+  body.rad-mode h2{border-bottom-color:#30363d}
+  h3{font-size:0.95rem;font-weight:600;margin-bottom:0.5rem;color:var(--text)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
+  @media(max-width:600px){.grid2,.grid3{grid-template-columns:1fr}}
+  .input-group{margin-bottom:1rem}
+  .input-group label{display:block;font-size:13px;font-weight:500;margin-bottom:4px;color:var(--muted)}
+  .input-group .hint{font-size:11px;color:#9ca3af;margin-top:2px;font-family:'IBM Plex Mono',monospace}
+  .input-row{display:flex;gap:10px;align-items:center}
+  .input-row input{flex:1;height:40px;border:1px solid var(--border);border-radius:6px;padding:0 12px;font-size:15px;font-family:'IBM Plex Mono',monospace;background:var(--bg);color:var(--text);outline:none;transition:border-color 0.15s}
+  .input-row input:focus{border-color:var(--brand);background:var(--surface-elev)}
+  body.rad-mode .input-row input:focus{background:#0d1117}
+  .unit-badge{font-size:12px;font-family:'IBM Plex Mono',monospace;background:#eef2ff;color:#5c6bc0;padding:4px 10px;border-radius:4px;white-space:nowrap;border:1px solid #c5cae9}
+  body.rad-mode .unit-badge{background:#1f2a3d;color:#79c0ff;border-color:#388bfd44}
+  .analyze-btn{width:100%;padding:12px;background:var(--brand);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:500;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;margin-top:0.5rem;transition:background 0.15s}
+  .analyze-btn:hover{background:var(--brand-light)}
+  .result-box{border-radius:10px;padding:1.25rem;margin-top:1rem;display:none}
+  .result-box.show{display:block}
+  .result-box.manifest{background:#fdecea;border:2px solid #ef9a9a}
+  .result-box.latent{background:#fff8e1;border:2px solid #ffe082}
+  .result-box.normal{background:#e8f5e9;border:2px solid #a5d6a7}
+  .result-box.hypothyroid{background:#e8eaf6;border:2px solid #9fa8da}
+  .result-box.unclear{background:#f3e5f5;border:2px solid #ce93d8}
+  .result-box.discordant{background:#e3f2fd;border:2px solid #64b5f6}
+  body.rad-mode .result-box.manifest{background:#3d1a1f;border-color:#da3633}
+  body.rad-mode .result-box.latent{background:#3d2e14;border-color:#d29922}
+  body.rad-mode .result-box.normal{background:#1f3d28;border-color:#3fb950}
+  body.rad-mode .result-box.hypothyroid{background:#1c2540;border-color:#6e7bc4}
+  body.rad-mode .result-box.unclear{background:#34243d;border-color:#a371f7}
+  body.rad-mode .result-box.discordant{background:#1a2942;border-color:#58a6ff}
+  .result-title{font-size:1rem;font-weight:600;margin-bottom:0.5rem}
+  .result-box.manifest .result-title{color:#b71c1c}
+  .result-box.latent .result-title{color:#e65100}
+  .result-box.normal .result-title{color:#1b5e20}
+  .result-box.hypothyroid .result-title{color:#283593}
+  .result-box.unclear .result-title{color:#6a1b9a}
+  .result-box.discordant .result-title{color:#0d47a1}
+  body.rad-mode .result-box.manifest .result-title{color:#ff8a8a}
+  body.rad-mode .result-box.latent .result-title{color:#ffa657}
+  body.rad-mode .result-box.normal .result-title{color:#7ee787}
+  body.rad-mode .result-box.hypothyroid .result-title{color:#a5b4fc}
+  body.rad-mode .result-box.unclear .result-title{color:#d8b4fe}
+  body.rad-mode .result-box.discordant .result-title{color:#79b8ff}
+  .result-desc{font-size:14px;line-height:1.6;margin-bottom:1rem;color:#374151}
+  body.rad-mode .result-desc{color:var(--prose)}
+  .rec-list{list-style:none;padding:0}
+  .rec-list li{font-size:13px;padding:5px 0 5px 18px;position:relative;color:#374151;border-bottom:1px solid rgba(0,0,0,0.06)}
+  body.rad-mode .rec-list li{color:var(--prose);border-bottom-color:rgba(255,255,255,0.08)}
+  .rec-list li:last-child{border-bottom:none}
+  .rec-list li::before{content:'▸';position:absolute;left:0;color:inherit;opacity:0.6}
+  .risk-badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:3px 10px;border-radius:12px;margin-bottom:0.75rem}
+  .risk-high{background:#ffebee;color:#c62828;border:1px solid #ef9a9a}
+  .risk-medium{background:#fff3e0;color:#bf360c;border:1px solid #ffcc80}
+  .risk-low{background:#e8f5e9;color:#1b5e20;border:1px solid #a5d6a7}
+  body.rad-mode .risk-high{background:#442929;color:#ff8a8a;border-color:#553939}
+  body.rad-mode .risk-medium{background:#3d3018;color:#ffa657;border-color:#5c4a22}
+  body.rad-mode .risk-low{background:#1f3d28;color:#7ee787;border-color:#2d5a3d}
+  .risk-dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex-shrink:0}
+  .param-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem}
+  .param-chip{background:rgba(0,0,0,0.04);border-radius:6px;padding:8px 10px;text-align:center}
+  body.rad-mode .param-chip{background:rgba(255,255,255,0.06)}
+  .param-chip .val{font-family:'IBM Plex Mono',monospace;font-size:1rem;font-weight:500}
+  .param-chip .lbl{font-size:11px;color:var(--muted);margin-top:2px}
+  .param-chip.abnormal .val{color:#c62828}
+  .param-chip.warn .val{color:#e65100}
+  .param-chip.ok .val{color:#1b5e20}
+  body.rad-mode .param-chip.abnormal .val{color:#ff8a8a}
+  body.rad-mode .param-chip.warn .val{color:#ffa657}
+  body.rad-mode .param-chip.ok .val{color:#7ee787}
+  .risk-table{width:100%;border-collapse:collapse;font-size:13px}
+  .risk-table th{text-align:left;padding:8px 10px;background:#f1f3f9;font-weight:600;color:var(--brand);border-bottom:2px solid #c5cae9;font-size:12px;text-transform:uppercase;letter-spacing:0.05em}
+  .risk-table td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.5}
+  .risk-table tr:last-child td{border-bottom:none}
+  .risk-table tr:hover td{background:#f8f9ff}
+  body.rad-mode .risk-table th{background:#21262d;border-bottom-color:#30363d}
+  body.rad-mode .risk-table tr:hover td{background:#1c2128}
+  .status-pill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;font-weight:500}
+  .pill-red{background:#fdecea;color:#b71c1c}
+  .pill-orange{background:#fff3e0;color:#bf360c}
+  .pill-green{background:#e8f5e9;color:#1b5e20}
+  .pill-blue{background:#e8eaf6;color:#283593}
+  .pill-gray{background:#f3f4f6;color:#4b5563}
+  body.rad-mode .pill-red{background:#442929;color:#ff8a8a;border:1px solid #553939}
+  body.rad-mode .pill-orange{background:#3d3018;color:#ffa657;border:1px solid #5c4a22}
+  body.rad-mode .pill-green{background:#1f3d28;color:#7ee787;border:1px solid #2d5a3d}
+  body.rad-mode .pill-blue{background:#1c2540;color:#a5b4fc;border:1px solid #30365a}
+  body.rad-mode .pill-gray{background:#21262d;color:#8b949e;border:1px solid #30363d}
+  .info-box{border-left:4px solid var(--brand-accent);padding:0.75rem 1rem;background:#f0fdf9;border-radius:0 6px 6px 0;margin-bottom:1rem;font-size:13.5px;color:#065f46;line-height:1.6}
+  .warn-box{border-left:4px solid var(--warn);padding:0.75rem 1rem;background:#fff8f0;border-radius:0 6px 6px 0;margin-bottom:1rem;font-size:13.5px;color:#7c3d0c;line-height:1.6}
+  .danger-box{border-left:4px solid var(--danger);padding:0.75rem 1rem;background:#fef2f2;border-radius:0 6px 6px 0;margin-bottom:1rem;font-size:13.5px;color:#7f1d1d;line-height:1.6}
+  body.rad-mode .info-box{background:#102820;border-left-color:var(--brand-accent);color:#7ee3d0}
+  body.rad-mode .warn-box{background:#2d2414;border-left-color:var(--warn);color:#e3b565}
+  body.rad-mode .danger-box{background:#2d1a1a;border-left-color:var(--danger);color:#ff9b9b}
+  .constellation-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:600px){.constellation-grid{grid-template-columns:1fr}}
+  .const-card{border-radius:8px;padding:1rem;border:1px solid transparent}
+  .const-card.manifest{background:#fdecea;border-color:#ef9a9a}
+  .const-card.latent{background:#fff8e1;border-color:#ffe082}
+  .const-card.normal{background:#e8f5e9;border-color:#a5d6a7}
+  .const-card.hypo{background:#e8eaf6;border-color:#9fa8da}
+  .const-card.discordant{background:#e3f2fd;border-color:#64b5f6}
+  body.rad-mode .const-card.manifest{background:#3d1a1f;border-color:#da3633}
+  body.rad-mode .const-card.latent{background:#3d2e14;border-color:#d29922}
+  body.rad-mode .const-card.normal{background:#1f3d28;border-color:#3fb950}
+  body.rad-mode .const-card.hypo{background:#1c2540;border-color:#6e7bc4}
+  body.rad-mode .const-card.discordant{background:#1a2942;border-color:#58a6ff}
+  .const-card .c-title{font-weight:600;font-size:13px;margin-bottom:4px}
+  .const-card.manifest .c-title{color:#b71c1c}
+  .const-card.latent .c-title{color:#e65100}
+  .const-card.normal .c-title{color:#1b5e20}
+  .const-card.hypo .c-title{color:#283593}
+  .const-card.discordant .c-title{color:#0d47a1}
+  body.rad-mode .const-card.manifest .c-title{color:#ff8a8a}
+  body.rad-mode .const-card.latent .c-title{color:#ffa657}
+  body.rad-mode .const-card.normal .c-title{color:#7ee787}
+  body.rad-mode .const-card.hypo .c-title{color:#a5b4fc}
+  body.rad-mode .const-card.discordant .c-title{color:#79b8ff}
+  .const-subhead{font-size:0.95rem;font-weight:600;color:var(--brand);margin:1.25rem 0 0.5rem;padding-bottom:0.35rem;border-bottom:1px solid var(--border)}
+  body.rad-mode .const-subhead{color:var(--brand-accent);border-bottom-color:#30363d}
+  .const-card .c-vals{font-family:'IBM Plex Mono',monospace;font-size:12px;color:#4b5563;margin-bottom:4px}
+  .const-card .c-desc{font-size:12px;color:#6b7280;line-height:1.5}
+  body.rad-mode .const-card .c-vals{color:#8b949e}
+  body.rad-mode .const-card .c-desc{color:var(--muted)}
+  .guideline-source{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--muted);padding:4px 8px;background:#f3f4f6;border-radius:4px;display:inline-block;margin-top:6px}
+  body.rad-mode .guideline-source{background:#21262d;color:var(--muted)}
+  .rec-li-vital{display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem 0.75rem;padding-top:8px;padding-bottom:8px}
+  .rec-li-vital .rec-li-vital-main{flex:1;min-width:min(100%,220px);line-height:1.5}
+  .rec-learn-btn{font-size:12px;font-weight:500;padding:6px 12px;border-radius:6px;border:1px solid var(--brand);background:var(--card);color:var(--brand);cursor:pointer;font-family:'IBM Plex Sans',sans-serif;transition:background 0.15s,color 0.15s;white-space:nowrap}
+  .rec-learn-btn:hover{background:var(--brand);color:#fff}
+  body.rad-mode .rec-learn-btn{border-color:var(--brand-accent);color:var(--brand-accent)}
+  body.rad-mode .rec-learn-btn:hover{background:rgba(61,217,195,0.2);color:#d2faf4}
+  .modal-overlay{position:fixed;inset:0;background:rgba(15,20,25,0.55);z-index:200;display:none;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(2px);pointer-events:none}
+  .modal-overlay.show{display:flex;pointer-events:auto}
+  .modal-panel{max-width:620px;width:100%;max-height:88vh;overflow:auto;background:var(--card);border-radius:12px;border:1px solid var(--border);box-shadow:0 20px 50px rgba(0,0,0,0.25)}
+  .modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;padding:1.1rem 1.25rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--card);z-index:1}
+  .modal-head h3{font-size:1.05rem;font-weight:600;color:var(--brand);margin:0;line-height:1.35;padding-right:0.5rem}
+  .modal-close{flex-shrink:0;width:36px;height:36px;border:none;border-radius:8px;background:transparent;color:var(--muted);font-size:1.5rem;line-height:1;cursor:pointer;font-family:inherit}
+  .modal-close:hover{background:rgba(0,0,0,0.06);color:var(--text)}
+  body.rad-mode .modal-close:hover{background:rgba(255,255,255,0.08)}
+  .modal-body{padding:1rem 1.25rem 1.25rem;font-size:14px;color:var(--prose);line-height:1.65}
+  .modal-body h4{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin:1rem 0 0.4rem}
+  .modal-body h4:first-child{margin-top:0}
+  .modal-body ul{margin:0.35rem 0 0.5rem 1.1rem;padding:0}
+  .modal-body li{margin:0.25rem 0}
+  .modal-body .modal-dose{font-family:'IBM Plex Mono',monospace;font-size:13px;background:rgba(0,0,0,0.05);padding:0.5rem 0.65rem;border-radius:6px;margin:0.35rem 0;border:1px solid var(--border)}
+  body.rad-mode .modal-body .modal-dose{background:rgba(255,255,255,0.06)}
+  .modal-foot{padding:0 1.25rem 1rem}
+</style>
+
+<div class="page">
+  <header>
+    <button type="button" class="rad-mode-toggle" id="radModeToggle" aria-pressed="false" title="Dunkelmodus (Lesesaal / PACS-Flair)" onclick="toggleRadMode()"><span class="rad-emoji" aria-hidden="true">🩻</span>Rad Mode</button>
+    <div class="header-badge">KLINISCHES ENTSCHEIDUNGSTOOL · RADIOLOGIE</div>
+    <h1>Kontrastmittel-induzierte Hyperthyreose<br><span style="font-weight:400;font-size:1.1rem;opacity:0.9">Prävention, Diagnostik & Leitlinienempfehlungen</span></h1>
+    <p>Für Radiologen und radiologisch tätige Ärzte · Basierend auf ESC/ETA-Leitlinien 2023 und DGN-Empfehlungen</p>
+  </header>
+
+  <nav>
+    <button class="nav-btn active" onclick="showSection('analyzer',this)">TSH/fT3/fT4-Analyse</button>
+    <button class="nav-btn" onclick="showSection('konstellationen',this)">Befundkonstellationen</button>
+    <button class="nav-btn" onclick="showSection('risiko',this)">Risikogruppen</button>
+    <button class="nav-btn" onclick="showSection('praevention',this)">Prävention & Protokolle</button>
+    <button class="nav-btn" onclick="showSection('leitlinien',this)">Leitlinienempfehlungen</button>
+  </nav>
+
+  <!-- ANALYZER -->
+  <div id="analyzer" class="section active">
+    <h2>Schilddrüsenparameter-Analyse</h2>
+    <div class="card">
+      <div class="card-title">Laborwerte eingeben <span class="label-soft">(Vor KM-Gabe)</span></div>
+      <div>
+        <div class="input-group">
+          <label>TSH (basal)</label>
+          <div class="input-row">
+            <input type="text" inputmode="decimal" id="tsh" placeholder="z.B. 1,2">
+            <span class="unit-badge">mIU/L</span>
+          </div>
+          <div class="hint">Referenz: 0,4 – 4,0 mIU/L</div>
+        </div>
+        <div class="input-group">
+          <label>fT4 (freies Thyroxin)</label>
+          <div class="input-row">
+            <input type="text" inputmode="decimal" id="ft4" placeholder="z.B. 15,0">
+            <span class="unit-badge">pmol/L</span>
+          </div>
+          <div class="hint">Referenz: 12 – 22 pmol/L</div>
+        </div>
+        <div class="input-group">
+          <label>fT3 (freies Trijodthyronin) <span class="label-soft">optional</span></label>
+          <div class="input-row">
+            <input type="text" inputmode="decimal" id="ft3" placeholder="z.B. 4,5">
+            <span class="unit-badge">pmol/L</span>
+          </div>
+          <div class="hint">Referenz: 3,5 – 6,5 pmol/L</div>
+        </div>
+      </div>
+      <button class="analyze-btn" onclick="analyze()">Konstellation analysieren ▸</button>
+    </div>
+
+    <div id="result" class="result-box">
+      <div id="result-params" class="param-grid"></div>
+      <div id="result-badge"></div>
+      <div id="result-title" class="result-title"></div>
+      <div id="result-desc" class="result-desc"></div>
+      <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:0.5rem">Empfehlungen vor KM-Gabe (leitlinienbasiert)</h3>
+      <ul id="result-recs" class="rec-list"></ul>
+    </div>
+  </div>
+
+  <!-- KONSTELLATIONEN -->
+  <div id="konstellationen" class="section">
+    <h2>Befundkonstellationen im Überblick</h2>
+    <div class="warn-box">Alle Werte in Bezug auf den jeweiligen laborspezifischen Referenzbereich interpretieren. Die folgenden Angaben sind Orientierungswerte.</div>
+    <div class="constellation-grid">
+      <div class="const-card normal">
+        <div class="c-title">Euthyreose (Normalbefund)</div>
+        <div class="c-vals">TSH: 0,4–4,0 · fT4: 12–22 · fT3: 3,5–6,5</div>
+        <div class="c-desc">Schilddrüsenfunktion normal. KM-Gabe nach Standardprotokoll möglich. Kein erhöhtes Risiko für KM-induzierte Funktionsstörung.</div>
+      </div>
+      <div class="const-card latent">
+        <div class="c-title">Latente Hyperthyreose</div>
+        <div class="c-vals">TSH: &lt;0,4 (supprimiert) · fT4: normal · fT3: normal</div>
+        <div class="c-desc">Erhöhtes Risiko für Manifestation nach Jodbelastung. Risikoabwägung vor KM-Gabe erforderlich. Ggf. Endokrinologie hinzuziehen.</div>
+      </div>
+      <div class="const-card manifest">
+        <div class="c-title">Manifeste Hyperthyreose</div>
+        <div class="c-vals">TSH: &lt;0,4 mIU/L (supprimiert) · fT4: &gt;22 und/oder fT3: &gt;6,5 pmol/L — oft TSH &lt;0,1</div>
+        <div class="c-desc">Overt thyrotoxische Konstellation (DGN/ETA): subnormales TSH mit erhöhtem peripheren Hormon, auch wenn TSH noch 0,1–0,4 mIU/L. Kontraindikation für elektive jodhaltige KM. Dringende endokrinologische Vorstellung.</div>
+      </div>
+      <div class="const-card hypo">
+        <div class="c-title">Hypothyreose / Subklinisch</div>
+        <div class="c-vals">TSH: &gt;4,0 · fT4: erniedrigt &lt;12 oder normal</div>
+        <div class="c-desc">Kein erhöhtes Risiko für KM-induzierte Hyperthyreose. Bei manifester Hypothyreose: Schilddrüse kann durch jodhaltige KM-Gabe moduliert werden.</div>
+      </div>
+    </div>
+    <h3 class="const-subhead">TSH im Referenzbereich (0,4–4,0 mIU/L): diskordante / atypische Muster</h3>
+    <p class="prose-block" style="font-size:13px;margin-bottom:0.85rem">Dieselbe Prioritätslogik wie bei <strong>Konstellation analysieren</strong> (zuerst niedriges fT3 ohne fT4-Hochlage, dann erhöhte Hormone in der dortigen Reihenfolge). Kein Ersatz für Amiodaron-/RIT-Ausschlüsse — siehe Registerkarte <strong>Risikogruppen</strong> (Sonderfälle).</p>
+    <div class="constellation-grid">
+      <div class="const-card discordant">
+        <div class="c-title">Diskordanz · V.a. ESS / NTIS</div>
+        <div class="c-vals">TSH: 0,4–4,0 · fT3: &lt;3,5 (wenn bestimmt) · fT4: nicht &gt;22 pmol/L</div>
+        <div class="c-desc">Euthyreotes Sick-Syndrom / NTIS bei systemischer Erkrankung wahrscheinlicher als primäre Hyperthyreose. Kein latent/manifest-KM-Risikoscreening; elektive KM aus Grunderkrankung bewerten, nicht aus „Hyperthyreose-Prophylaxe“.</div>
+      </div>
+      <div class="const-card discordant">
+        <div class="c-title">Diskordanz: fT3 und fT4 erhöht</div>
+        <div class="c-vals">TSH: 0,4–4,0 · fT3: &gt;6,5 · fT4: &gt;22</div>
+        <div class="c-desc">Für klassische primäre Hyperthyreose ungewöhnlich (TSH meist supprimiert). DD: Präanalytik, Assay-Interferenz, exogene Hormone, selten zentral — elektive KM aufschieben, Labor plausibilisieren.</div>
+      </div>
+      <div class="const-card discordant">
+        <div class="c-title">Diskordanz · V.a. T3-Toxikose</div>
+        <div class="c-vals">TSH: 0,4–4,0 · fT3: &gt;6,5 · fT4: &lt;12</div>
+        <div class="c-desc">T3-Toxikose / dissoziierte Autonomie oder Übergang möglich; TSH noch nicht maximal supprimiert. Endokrinologie vor elektiver KM; kein automatisches Manifest-Perchlorat-/Thyreostatikum-Schema ohne Zuordnung.</div>
+      </div>
+      <div class="const-card discordant">
+        <div class="c-title">Diskordanz · T3-dominiert</div>
+        <div class="c-vals">TSH: 0,4–4,0 · fT3: &gt;6,5 · fT4: 12–22 oder nicht erhöht</div>
+        <div class="c-desc">Isoliert hohes fT3 mit normalem oder fehlendem fT4-Hinweis — nicht mit ESS (dort meist niedriges fT3) verwechseln. fT4 sicher bestimmen; Endokrinologie/Szintigraphie vor elektiver jodhaltiger KM.</div>
+      </div>
+      <div class="const-card discordant">
+        <div class="c-title">Diskordanz: fT4 hoch, fT3 niedrig</div>
+        <div class="c-vals">TSH: 0,4–4,0 · fT4: &gt;22 · fT3: &lt;3,5</div>
+        <div class="c-desc">Bei schwerer Systemerkrankung (ESS/NTIS, dissoziierte Peripherie) möglich; parallel Labor-Artefakt ausschließen. Nicht als klassische Hyperthyreose für KM-Prophylaxe interpretieren.</div>
+      </div>
+      <div class="const-card discordant">
+        <div class="c-title">Diskordanz: isoliert erhöhtes fT4</div>
+        <div class="c-vals">TSH: 0,4–4,0 · fT4: &gt;22 · fT3: nicht &gt;6,5 (ggf. nicht erhöht / nicht angegeben)</div>
+        <div class="c-desc">DD: Präanalytik, Heparin-/Albumin-Effekte (FDH je nach Methode), Medikamente, Schwangerschaft, selten TSHom — fT3 ergänzen; elektive KM bis Klärung zurückstellen.</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:1rem">
+      <div class="card-title">Jod-Wolff-Chaikoff-Effekt & Jod-Escape</div>
+      <p class="prose-block">Nach intravasaler Gabe jodhaltigen Kontrastmittels wird eine hohe Jodlast freigesetzt (ca. <strong>13.500–37.000 µg</strong> elementares Jod bei Standard-CT-KM, entspricht dem 80–200-fachen des Tagesbedarfs). Die gesunde Schilddrüse reagiert mit dem Wolff-Chaikoff-Effekt (vorübergehende Synthesehemmung). Bei vorgeschädigter Schilddrüse (autonomes Adenom, Struma, latente Hyperthyreose) kann dieser Schutzmechanismus versagen → <strong>Jod-induzierte Hyperthyreose</strong> (Jod-Basedow-Phänomen).</p>
+    </div>
+  </div>
+
+  <!-- RISIKO -->
+  <div id="risiko" class="section">
+    <h2>Risikogruppen & Laborscreening</h2>
+    <div class="danger-box"><strong>Hochrisikogruppe:</strong> Patienten mit bekannter Hyperthyreose, autonomem Adenom, Struma multinodosa oder Thyreoiditis in der Anamnese müssen vor jodhaltiger KM-Gabe sorgfältig evaluiert werden.</div>
+    <div class="card">
+      <div class="card-title">Risikoklassifikation vor KM-Gabe</div>
+      <table class="risk-table">
+        <thead><tr><th>Risikokategorie</th><th>Befund / Anamnese</th><th>Laborkonstellation</th><th>Empfehlung</th></tr></thead>
+        <tbody>
+          <tr><td><span class="status-pill pill-red">Hoch</span></td><td>Manifeste Hyperthyreose, autonomes Adenom, M. Basedow, floride Thyreoiditis</td><td>TSH &lt;0,4 mIU/L mit fT4 und/oder fT3 erhöht (overt; häufig TSH &lt;0,1)</td><td>KM kontraindiziert (elektiv). Notfall: nur nach strenger Abwägung, Prophylaxe erwägen.</td></tr>
+          <tr><td><span class="status-pill pill-orange">Mittel</span></td><td>Latente Hyperthyreose, Struma nodosa, bekannte Schilddrüsenautonomie</td><td>TSH 0,1–0,4 (supprimiert), fT3/fT4 normal</td><td>Endokrinologie konsultieren, TSH-Kontrolle ca. 14 Tage nach KM. Prophylaxe individuell.</td></tr>
+          <tr><td><span class="status-pill pill-orange">Mittel-niedrig</span></td><td>Ältere Patienten (&gt;60 J.) aus Jodmangelgebiet, Struma diffusa</td><td>TSH oft normal, aber grenzwertig</td><td>TSH präinterventionell bestimmen. Nachkontrolle ca. 14 Tage nach KM.</td></tr>
+          <tr><td><span class="status-pill pill-green">Gering</span></td><td>Keine Schilddrüsenanamnese, junger Patient</td><td>TSH im Normbereich</td><td>Kein routinemäßiges Laborscreening erforderlich bei asymptomatischen Patienten.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">Laborparameter — Screening & Timing</div>
+      <table class="risk-table">
+        <thead><tr><th>Parameter</th><th>Wann</th><th>Bedeutung</th></tr></thead>
+        <tbody>
+          <tr><td><strong>TSH (basal)</strong></td><td>Vor KM bei Risikogruppen; bei Symptomen jederzeit</td><td>Empfindlichster Parameter für Schilddrüsenfunktionsstörung. Erster Schritt im Screening.</td></tr>
+          <tr><td><strong>fT4</strong></td><td>Bei pathologischem TSH</td><td>Unterscheidung latent vs. manifest. Erhöht = manifeste Hyperthyreose.</td></tr>
+          <tr><td><strong>fT3</strong></td><td>Bei V.a. T3-Hyperthyreose oder dissoziierten Befunden</td><td>Kann bei früher Hyperthyreose zuerst erhöht sein (T3-Toxikose). Wichtig bei Autonomie.</td></tr>
+          <tr><td><strong>TRAK (TSH-Rezeptor-AK)</strong></td><td>Bei V.a. M. Basedow</td><td>Diagnose autoimmune Hyperthyreose. Beeinflusst Therapieentscheidung.</td></tr>
+          <tr><td><strong>TPO-AK</strong></td><td>Bei V.a. Autoimmunthyreoiditis</td><td>Hashimoto-Thyreoiditis (erhöhtes Risiko für Hypo- und Hyperthyreose nach KM).</td></tr>
+          <tr><td><strong>Thyreoglobulin</strong></td><td>Bei postoperativer Kontrolle / Karzinomverlauf</td><td>Monitoring nach Schilddrüsenkarzinom-OP vor Radioiodtherapie.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="warn-box" style="margin-bottom:1rem"><strong>Von Standard-Labor-KM-Pfaden auszuschließen (keine alleinige KM-Entscheidung über die Analysemaske):</strong> <strong>Amiodaron-Einnahme</strong> — chronische Hochjodbelastung, dissoziierte oder fluktuierende TSH-/fT4-/fT3-Muster (Typ-I/II); elektive jodhaltige KM nach Leitlinien in der Regel vermeiden, Abklärung Endokrinologie/Kardiologie (s. Karte unten). <strong>Geplante oder kurzfristig anstehende Radioiodtherapie (RIT)</strong> — jodhaltige KM blockieren die Schilddrüsen-Jodaufnahme; vor RIT ist elektive KM leitlinienkonform für mindestens <strong>4–8 Wochen</strong> (häufig länger je nach Protokoll/Hochdosis-KM) zu vermeiden; eine <strong>RIT nicht unter frischer KM-Jodexposition</strong> durchführen, sondern erst nach ausreichendem Jodabstand nuklearmedizinisch-endokrinologisch neu terminieren (s. Karte unten).</div>
+    <div class="card">
+      <div class="card-title">Sonderfall: Amiodaron-Patienten</div>
+      <div class="danger-box">Patienten unter Amiodaron sind von der <strong>alleinigen</strong> TSH-/fT4-/fT3-Zuordnung (z. B. über die Analysemaske dieses Tools) zur Freigabe jodhaltiger KM <strong>auszuschließen</strong>. Amiodaron enthält ca. 37% Jod (200 mg Tablette ≈ 75 mg Jod). Jodhaltige KM sind bei Amiodaron-Patienten für elektive Untersuchungen <strong>kontraindiziert</strong>. Notfallindikation nur nach strenger Abwägung mit Kardiologie und Endokrinologie.</div>
+      <ul class="rec-list" style="font-size:13.5px">
+        <li>Amiodaron-induzierte Hyperthyreose Typ I (Iod-Jod): Thyreostatika + Perchlorat</li>
+        <li>Typ II (destruktive Thyreoiditis): Kortikosteroide (Prednisolon 40–60 mg/d)</li>
+        <li>Mischformen häufig — Kombitherapie und endokrinologische Führung erforderlich</li>
+        <li>Nach Amiodaron-Absetzen: Schilddrüsenparameter für Monate/Jahre überwachen</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">Sonderfall: Geplante Radioiodtherapie (RIT)</div>
+      <div class="warn-box">Vor therapeutischer <strong>I-131</strong>-Gabe darf keine relevante Jodvorbelastung bestehen: jodhaltiges KM blockiert die Aufnahme in die Schilddrüse und kann Dosimetrie, Szintigraphie und den Erfolg der RIT verfälschen. Nach DGN/ETA (Empfehlungsgrad A) ist <strong>elektive jodhaltige KM für mindestens 4–8 Wochen vor geplanter RIT zu vermeiden</strong> — in der Praxis und nach lokalem nuklearmedizinischen Protokoll oft <strong>längere Abstände</strong> (z. B. nach Hochdosis-KM). Eine <strong>RIT ist nicht parallel oder kurz nach jodhaltiger KM</strong> leitlinienkonform durchzuführen; zuerst Jodabstand herstellen, ggf. Urin-Jod bzw. Dosimetrie-Vorgaben des Nuklearmediziners einhalten und den RIT-Termin entsprechend verschieben.</div>
+      <ul class="rec-list" style="font-size:13.5px">
+        <li>Diagnostische Voruntersuchungen (Szintigraphie, Perchlorat-Test) können durch vorausgegangene KM ebenfalls verzerrt sein — mit Nuklearmedizin abstimmen</li>
+        <li>Bei bereits erfolgter KM: elektive RIT aufschieben, bis der geforderte Abstand dokumentiert ist</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- PRAEVENTION -->
+  <div id="praevention" class="section">
+    <h2>Prävention & Klinische Protokolle</h2>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">Prophylaxeschema (Natriumperchlorat)</div>
+        <h3>Indikation: Mittleres Risiko / latente Hyperthyreose</h3>
+        <div class="info-box" style="margin-top:0.75rem">Natriumperchlorat (Irenat®) hemmt kompetitiv die Jodaufnahme in die Schilddrüse. Einsatz bei latenter Hyperthyreose oder Schilddrüsenautonomie vor elektiver jodhaltiger KM-Gabe.</div>
+        <ul class="rec-list" style="font-size:13.5px">
+          <li>Beginn: 2–24 Std. vor KM-Gabe</li>
+          <li>Dosis: 3 × 20 Tr. (= 3 × 300 mg/d)</li>
+          <li><strong>Therapiedauer Natriumperchlorat:</strong> in der Regel <strong>ca. 14 Kalendertage</strong> (≈2 Wochen); nicht ohne nephrologisch-endokrinologische Rücksprache verlängern (aplastische Anämie-Risiko bei Langzeit/Überdosierung — Fachinfo)</li>
+          <li>Kontraindikation: Bekannte Allergie, schwere Niereninsuffizienz</li>
+          <li><strong>Labornachsorge:</strong> erste TSH-Kontrolle typisch <strong>ca. 14 Tage nach KM</strong></li>
+        </ul>
+        <div class="guideline-source">Quelle: DGN-Leitlinie 2020 / ETA 2022 · Dauer <strong>ca. 14 Tage</strong> = vereinheitlichter Praxisstandard dieses Tools</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Thyreostatika-Prophylaxe</div>
+        <h3>Indikation: Hochrisikogruppe (wenn KM unumgänglich)</h3>
+        <div class="warn-box" style="margin-top:0.75rem">Nur nach Abwägung und in Absprache mit Endokrinologie. Thyreostatika hemmen die Synthese, nicht die Freisetzung von Schilddrüsenhormonen.</div>
+        <ul class="rec-list" style="font-size:13.5px">
+          <li>Thiamazol (Methizol®) 10–30 mg/d oder Carbimazol 10–20 mg/d</li>
+          <li>Beginn ≥24 Std. vor KM-Gabe</li>
+          <li><strong>Fortführung Thyreostatikum nach KM:</strong> im gleichen Praxisrahmen wie Perchlorat typisch <strong>ca. 14 Kalendertage</strong> (≈2 Wochen), endokrinologische Kontrolle; danach Entscheidung über Fortführung</li>
+          <li>In Kombination mit Perchlorat bei sehr hohem Risiko möglich; beide Medikamente jeweils nach Schema links bzw. oben, Dauer jeweils <strong>ca. 14 Tage</strong></li>
+          <li>Cave: Agranulozytoserisiko — Blutbild-Monitoring</li>
+        </ul>
+        <div class="guideline-source">Quelle: ESC 2022 / DGN 2020 · Fortführung <strong>ca. 14 Tage</strong> = gleicher Praxisstandard wie Perchlorat-Karte</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Algorithmus: Vorgehen vor KM-Gabe</div>
+      <table class="risk-table">
+        <thead><tr><th>Schritt</th><th>Maßnahme</th><th>Zeitpunkt</th></tr></thead>
+        <tbody>
+          <tr><td style="font-family:'IBM Plex Mono',monospace;color:var(--brand)">01</td><td>Anamnese: Schilddrüsenerkrankung, Medikamente (<strong>Amiodaron</strong> — von KM-Freigabe über Labormaske ausschließen), <strong>geplante RIT</strong> (Jodabstand 4–8+ Wochen), Jodmangelgebiet</td><td>Vor Anforderung</td></tr>
+          <tr><td style="font-family:'IBM Plex Mono',monospace;color:var(--brand)">02</td><td>Risikostratifizierung (s. Risikogruppen)</td><td>Vor Anforderung</td></tr>
+          <tr><td style="font-family:'IBM Plex Mono',monospace;color:var(--brand)">03</td><td>Bei Risiko: TSH abnehmen (bei latenter Hyp.: + fT3/fT4)</td><td>Ggf. Vortag</td></tr>
+          <tr><td style="font-family:'IBM Plex Mono',monospace;color:var(--brand)">04</td><td>Bei TSH supprimiert/erniedrigt: Endokrinologie kontaktieren</td><td>Unmittelbar</td></tr>
+          <tr><td style="font-family:'IBM Plex Mono',monospace;color:var(--brand)">05</td><td>Prophylaxe einleiten falls indiziert (s. Schema)</td><td>2–24 Std. vorher</td></tr>
+          <tr><td style="font-family:'IBM Plex Mono',monospace;color:var(--brand)">06</td><td>KM-Gabe dokumentieren (Menge, Art, Jodgehalt)</td><td>Intervention</td></tr>
+          <tr><td style="font-family:'IBM Plex Mono',monospace;color:var(--brand)">07</td><td>TSH-Nachkontrolle bei allen Risikopatienten</td><td>ca. 14 Tage post KM (bei Prophylaxe; weiter nach Verlauf)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- LEITLINIEN -->
+  <div id="leitlinien" class="section">
+    <h2>Leitlinienempfehlungen (Zusammenfassung)</h2>
+    <div class="info-box">Dargestellt sind die aktuellen Empfehlungen gemäß DGN-Leitlinie (2020), ETA-Leitlinie (2022) und ESC-Leitlinie (2022) zur Prävention und Behandlung der jodinduzierten Hyperthyreose.</div>
+    <div class="card">
+      <div class="card-title">DGN — Empfehlungen (Kurzfassung 2020)</div>
+      <table class="risk-table">
+        <thead><tr><th>Situation</th><th>Empfehlung (Empfehlungsgrad)</th></tr></thead>
+        <tbody>
+          <tr><td>Gesunder Patient ohne Schilddrüsenanamnese</td><td>Kein Routine-TSH erforderlich vor KM-Gabe. <span class="status-pill pill-green">Empfehlungsgrad B</span></td></tr>
+          <tr><td>Risikogruppen (s.o.)</td><td>TSH vor KM-Gabe obligat. <span class="status-pill pill-red">Empfehlungsgrad A</span></td></tr>
+          <tr><td>Latente Hyperthyreose vor elektiver KM-Gabe</td><td>Perchlorat-Prophylaxe, Endokrinologie konsultieren. <span class="status-pill pill-orange">Empfehlungsgrad B</span></td></tr>
+          <tr><td>Manifeste Hyperthyreose</td><td>Jodhaltige KM kontraindiziert (elektiv). <span class="status-pill pill-red">Empfehlungsgrad A</span></td></tr>
+          <tr><td>Notfall-KM bei manifester Hyperthyreose</td><td>Nur bei vitaler Indikation; Prophylaxe wenn zeitlich möglich. <span class="status-pill pill-orange">Empfehlungsgrad C</span></td></tr>
+          <tr><td>Radioiod-Therapie geplant</td><td>Jodhaltige KM für mind. 4–8 Wochen vor RIT vermeiden (häufig länger je nach Protokoll); <strong>RIT nicht unter frischer KM-Jodblockade</strong>. <span class="status-pill pill-red">Empfehlungsgrad A</span></td></tr>
+        </tbody>
+      </table>
+      <div class="guideline-source">DGN-Leitlinie Schilddrüse 2020</div>
+    </div>
+    <div class="card">
+      <div class="card-title">ETA / ESC — Europäische Empfehlungen</div>
+      <table class="risk-table">
+        <thead><tr><th>Kontext</th><th>Empfehlung</th><th>Quelle</th></tr></thead>
+        <tbody>
+          <tr><td>Schilddrüsenfunktionsstörung vor Amiodaron</td><td>TSH, fT3, fT4 vor Beginn und alle 6 Monate unter Therapie</td><td><span class="status-pill pill-blue">ESC 2022</span></td></tr>
+          <tr><td>Geplante Radioiodtherapie (RIT)</td><td>Keine elektive jodhaltige KM im kontraindizierten Zeitfenster vor RIT; RIT erst nach ausreichendem Jodabstand (mind. 4–8 Wochen, länger nach Hochdosis/lokal)</td><td><span class="status-pill pill-red">DGN A / ETA</span></td></tr>
+          <tr><td>Laufende Amiodaron-Therapie + elektive KM</td><td>Jodhaltige KM vermeiden/kontraindiziert; keine alleinige Labormaske — Endokrinologie/Kardiologie</td><td><span class="status-pill pill-red">ETA / ESC</span></td></tr>
+          <tr><td>Knotige Struma vor Großeingriffen mit KM</td><td>TSH präinterventionell, ggf. Szintigraphie bei TSH &lt;1,0</td><td><span class="status-pill pill-blue">ETA 2022</span></td></tr>
+          <tr><td>Schwangerschaft + KM-Indikation</td><td>Jodhaltige KM nur bei strenger Indikation; neonatales TSH-Screening engmaschig</td><td><span class="status-pill pill-red">ETA 2022</span></td></tr>
+          <tr><td>Neonatale Schilddrüsenfunktion nach maternalem KM</td><td>TSH beim Neugeborenen in ersten 2–4 Wochen kontrollieren</td><td><span class="status-pill pill-orange">ETA 2022</span></td></tr>
+          <tr><td>Hochdosis-Jod und Euthyreose</td><td>In der Regel kein klinisches Risiko; Nachkontrolle bei Symptomen</td><td><span class="status-pill pill-green">ETA 2022</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">Wichtige Differenzialdiagnosen der KM-induzierten Hyperthyreose</div>
+      <div class="constellation-grid">
+        <div class="dd-box">
+          <div class="dd-type-title dd-type-i">Typ I (Jod-Jod)</div>
+          <ul class="rec-list" style="font-size:12.5px"><li>Vorbestehende Schilddrüsenpathologie (Autonomie, Struma)</li><li>Exzessive Hormonsynthese durch Jodüberschuss</li><li>Therapie: Thyreostatika + Perchlorat</li><li>Doppler: normaler Fluss</li></ul>
+        </div>
+        <div class="dd-box">
+          <div class="dd-type-title dd-type-ii">Typ II (Destruktiv)</div>
+          <ul class="rec-list" style="font-size:12.5px"><li>Gesunde Schilddrüse, meist durch Amiodaron</li><li>Destruktive Thyreoiditis → Hormonfreisetzung</li><li>Therapie: Kortikosteroide</li><li>Doppler: reduzierter Fluss</li></ul>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:1.5rem;padding:1rem;border-top:1px solid var(--border)">
+      Dieses Tool dient der klinischen Entscheidungsunterstützung und ersetzt keine individuelle ärztliche Beurteilung.<br>
+      Leitlinienstand: DGN 2020 · ETA 2022 · ESC 2022 · Stand April 2026<br>
+      <span style="font-size:10px;font-family:'IBM Plex Mono',monospace;letter-spacing:0.06em;opacity:0.88">Made by Dardan</span>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="vitalKmModal" role="dialog" aria-labelledby="vitalKmModalTitle" aria-modal="true" onclick="if(event.target===this)closeVitalKmModal()">
+  <div class="modal-panel" role="document">
+    <div class="modal-head">
+      <h3 id="vitalKmModalTitle">Vitale jodhaltige KM-Gabe bei manifester Hyperthyreose / thyreotoxischer Konstellation</h3>
+      <button type="button" class="modal-close" onclick="closeVitalKmModal()" aria-label="Schließen">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="margin:0 0 0.75rem;color:var(--text)">Kurzfassung für die <strong>Notfallsituation</strong>, wenn keine Zeit für vollständige thyreostatische Voroptimierung besteht und die KM-Gabe vital indiziert ist. Maßnahmen sind an Endokrinologie/Intensivmedizin zu koppeln; Dosierungen individuell an Alter, Komorbidität und V.a. thyreotoxische Krise anpassen.</p>
+      <h4>1. Abwägung &amp; Organisation</h4>
+      <ul>
+        <li>Multidisziplinäre Entscheidung (Radiologie, klinische Fachdisziplin, Endokrinologie, ggf. Intensivmedizin).</li>
+        <li>Nicht-jodhaltige Bildgebung (MRT mit GD-KM, sonographische Alternativen) erneut prüfen.</li>
+        <li>Bei durchgeführter Gabe: niedrigstmögliche KM-Menge, Hydratation, engmaschiges Monitoring (Herzfrequenz, Temperatur, neurologischer Status, EKG).</li>
+      </ul>
+      <h4>2. Natriumperchlorat (kompetitive Jodblockade)</h4>
+      <p style="margin:0">Praxisrahmen dieses Tools (vgl. Präventionskarte):</p>
+      <div class="modal-dose"><strong>Dosis:</strong> 3 × 20 Trpf. (= 3 × 300 mg Natriumperchlorat) täglich.<br>
+      <strong>Beginn:</strong> so früh wie möglich vor KM (elektiv typisch 2–24 Std.; Notfall: unverzüglich, auch ohne 24-h-Vorlauf).<br>
+      <strong>Dauer:</strong> in der Regel <strong>ca. 14 Kalendertage</strong> (≈2 Wochen). Längerfristige Gabe nur nach Fachinformation / Nephrologie-Endokrinologie-Rücksprache (aplastische Anämie-Risiko bei Überdosierung/Langzeit).</div>
+      <ul>
+        <li>Kontraindikationen: schwere Niereninsuffizienz, bekannte Überempfindlichkeit.</li>
+      </ul>
+      <h4>3. Thyreostatikum (Hemmung der Hormonneusynthese)</h4>
+      <p style="margin:0">Prophylaxe-/Hochrisiko-Schema (DGN/ETA, angepasst an Akutfall mit KM-Notwendigkeit):</p>
+      <div class="modal-dose"><strong>Thiamazol</strong> typisch <strong>10–30 mg/d</strong> oral (z. B. Methizol®), in schwerer thyreotoxischer Dekompensation nach Rücksprache oft <strong>höhere Anfangsdosen</strong> (z. B. 40–60 mg/d) — nur unter endokrinologischer/intensivmedizinischer Führung.<br><strong>Carbimazol</strong> Alternativ z. B. <strong>10–20 mg/d</strong> (Umrechnung Thiamazol-Äquivalent beachten).</div>
+      <ul>
+        <li>Thyreostatika blockieren die Synthese, <strong>nicht</strong> die Freisetzung bereits gespeicherter Hormone → Wirkungseintritt verzögert; bei drohender Krise keine alleinige „Schnellkorrektur“.</li>
+        <li>Blutbild-Monitoring (Agranulozytose-Risiko) gemäß Fachinformation.</li>
+      </ul>
+      <h4>4. Betablocker (kardiale Symptomkontrolle)</h4>
+      <div class="modal-dose"><strong>Propranolol</strong> wird in Lehrbüchern/Notfallalgorithmen häufig bevorzugt (zusätzliche Hemmung der peripheren T4→T3-Konversion), sofern keine Kontraindikation — typische oral Dosierungen im Akutfall z. B. <strong>40–80 mg/d</strong> in geteilten Gaben, titrierend nach HF und Blutdruck (ESC/thyreotoxische-Krise-Literatur; individuell anpassen).</div>
+      <p style="margin:0.35rem 0 0">Alternativen bei CI für non-selektive Betablocker: kardioselektive Betablocker nach Kardiologie-Rücksprache.</p>
+      <h4>5. Glukokortikoide</h4>
+      <ul>
+        <li>Bei <strong>V.a. thyreotoxische Krise</strong> oder schwerer Dekompensation: Hydrocortison z. B. <strong>100 mg i.v.</strong> alle 8 h (oder vergleichbares Äquivalent nach internistischem Standard) zur Hemmung der peripheren T4→T3-Konversion und bei relativem Nebenniereninsuffizienzrisiko — ETA/ATA-orientierte Krisenalgorithmen.</li>
+        <li>Bei reinem Typ-II-(destruktiv-)Muster (z. B. Amiodaron) dominieren eher Kortikoide; bei KM-induziertem Typ-I-Muster Thyreostatika + Perchlorat — oft Mischbild, daher endokrinologische Zuordnung.</li>
+      </ul>
+      <h4>6. Nach KM — Medikamente &amp; Kontrolle</h4>
+      <ul>
+        <li><strong>Natriumperchlorat</strong> und <strong>Thyreostatikum</strong> (falls eingesetzt): Fortführung im hier gewählten Praxisrahmen jeweils <strong>ca. 14 Kalendertage</strong> (≈2 Wochen), danach <strong>endokrinologisch neu bewerten</strong> (Weiterführung, Ausschleichen oder Anpassung).</li>
+        <li><strong>Labor:</strong> erste TSH-/fT4-/fT3-Kontrolle typischerweise <strong>ca. 14 Tage nach KM</strong>, weitere Intervalle nach klinischem Verlauf.</li>
+        <li>Patientenaufklärung über Warnsymptome (Herzrasen, Fieber, Verwirrtheit).</li>
+      </ul>
+      <p style="margin:0.75rem 0 0;font-size:12.5px;color:var(--muted)">Hinweis: Konkrete Arzneimittelwahl und Dosierung obliegen der verantwortlichen Fachärztin/dem Facharzt; dieses Panel ersetzt keine Fachinformation und keine individuelle Risiko-Nutzen-Abwägung.</p>
+    </div>
+    <div class="modal-foot">
+      <span class="guideline-source">Quellenrahmen: DGN Schilddrüse 2020 · ETA 2022 · ESC kardiovaskulär/Thyreotoxikose 2022 · ATA/Endocrine-Society thyrotoxic storm algorithms (Konsolidierung für KM-Notfallkontext). <strong>Medikamentendauer ca. 14 Tage</strong> für Perchlorat und Thyreostatikum: vereinheitlichter Praxisstandard dieses Tools — bei Abweichung lokale Protokolle/Fachinfo bevorzugen.</span>
+    </div>
+  </div>
+</div>
+
+<script>
+var RAD_STORAGE_KEY='km_hyperthyreose_rad_mode';
+function initRadMode(){
+  try{
+    if(localStorage.getItem(RAD_STORAGE_KEY)==='1'){
+      document.body.classList.add('rad-mode');
+      syncRadModeToggle(true);
+    }else{
+      syncRadModeToggle(false);
+    }
+  }catch(e){
+    syncRadModeToggle(document.body.classList.contains('rad-mode'));
+  }
+}
+function syncRadModeToggle(on){
+  var btn=document.getElementById('radModeToggle');
+  if(!btn)return;
+  btn.setAttribute('aria-pressed',on?'true':'false');
+  var label=on?'Rad Mode an':'Rad Mode';
+  btn.innerHTML='<span class="rad-emoji" aria-hidden="true">🩻</span>'+label;
+}
+function toggleRadMode(){
+  var on=document.body.classList.toggle('rad-mode');
+  try{localStorage.setItem(RAD_STORAGE_KEY,on?'1':'0');}catch(e){}
+  syncRadModeToggle(on);
+}
+
+function showSection(id, btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function parseDE(val){
+  if(!val || val.trim()==='') return NaN;
+  return parseFloat(val.trim().replace(',','.'));
+}
+
+function formatDE(n, decimals){
+  return n.toFixed(decimals).replace('.', ',');
+}
+
+function escapeHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderRecommendationList(recs){
+  return recs.map(function(rec){
+    if(rec && typeof rec==='object' && rec.vitalDetail){
+      return '<li class="rec-li-vital"><span class="rec-li-vital-main">'+escapeHtml(rec.text)+'</span><button type="button" class="rec-learn-btn" onclick="openVitalKmModal()">Mehr erfahren</button></li>';
+    }
+    return '<li>'+escapeHtml(rec)+'</li>';
+  }).join('');
+}
+
+function vitalKmModalOnKey(e){
+  if(e.key==='Escape')closeVitalKmModal();
+}
+
+function openVitalKmModal(){
+  var m=document.getElementById('vitalKmModal');
+  if(!m)return;
+  m.classList.add('show');
+  document.body.style.overflow='hidden';
+  document.addEventListener('keydown',vitalKmModalOnKey);
+}
+
+function closeVitalKmModal(){
+  var m=document.getElementById('vitalKmModal');
+  if(!m)return;
+  m.classList.remove('show');
+  document.body.style.overflow='';
+  document.removeEventListener('keydown',vitalKmModalOnKey);
+}
+
+function classify(tsh,ft4,ft3){
+  const hasFt4=ft4!==null&&!isNaN(ft4);
+  const hasFt3=ft3!==null&&!isNaN(ft3);
+  const ft4High=hasFt4&&ft4>22;
+  const ft4Low=hasFt4&&ft4<12;
+  const ft3High=hasFt3&&ft3>6.5;
+  const ft3Low=hasFt3&&ft3<3.5;
+  if(tsh<0.4&&(ft4High||ft3High)){return{key:'manifest',label:'Manifeste Hyperthyreose',risk:'high',riskLabel:'Hochrisiko',desc:'TSH unterhalb des Referenzbereichs (<0,4 mIU/L) bei erhöhtem fT4 und/oder fT3: manifeste (overt) Hyperthyreose bzw. thyreotoxische Konstellation im Sinne von DGN/ETA/ESC — unabhängig davon, ob das TSH bereits <0,1 mIU/L liegt oder zwischen 0,1 und 0,4 mIU/L (subnormales TSH mit peripherer Hormonerhöhung). Bei jodhaltiger KM-Gabe besteht hohe Gefahr der Exazerbation mit möglicher thyreotoxischer Krise.',context_pre:['Jodhaltige KM kontraindiziert bei elektiver Untersuchung (DGN A / ETA 2022)','Sofortige endokrinologische Vorstellung veranlassen','Alternative: Gadolinium-haltige MRT-KM oder nicht-jodhaltige Alternativen prüfen',{vitalDetail:true,text:'Bei vitaler Indikation: Perchlorat + Thyreostatikum so früh wie möglich, engmaschiges Monitoring (Fortführung beider typischerweise ca. 14 Tage — Praxisstandard dieses Tools)'},'Nach Notfall-KM: intensivmedizinisches Monitoring auf thyreotoxische Krise (Tachykardie, Fieber, Bewusstseinsstörung)'],context_post:['TSH, fT3, fT4 engmaschig: nach 24–48h, nach ca. 1 Woche, nach ca. 14 Tagen','Bei Symptomverschlechterung: sofortige stationäre Aufnahme','Thyreostatika/Perchlorat falls begonnen: Fortführung typischerweise ca. 14 Tage, danach endokrinologisch neu bewerten','Rücksprache Endokrinologie / Intensivmedizin obligat'],context_symptom:['Symptome wie Tachykardie, Tremor, Gewichtsverlust, Schwitzen, Unruhe abklären','Notfallaufnahme erwägen bei Tachykardie >120/min, Fieber, Verwirrtheit (V.a. thyreotoxische Krise)','Thyreostatikum + Betablocker + steroide Überbrückung gemäß Standard','Internistisch/endokrinologisch weiterführen']};}
+  if(tsh<0.4&&tsh>=0.1&&!ft4High&&!ft3High){return{key:'latent',label:'Latente / Subklinische Hyperthyreose',risk:'medium',riskLabel:'Mittleres Risiko',desc:'TSH erniedrigt/supprimiert bei normalen peripheren Hormonen. Schilddrüsenautonomie oder beginnende Hyperthyreose möglich. Erhöhtes Risiko für Manifestation nach jodhaltiger KM-Exposition.',context_pre:['Endokrinologische Mitbeurteilung empfohlen (DGN B)','Natriumperchlorat-Prophylaxe erwägen: 3×20 Tropfen/d, Beginn 2–24 Std. vor KM (DGN B), Fortführung ca. 14 Tage','Schilddrüsensonographie: Autonomes Adenom? Struma nodosa?','Dringlichkeit der Untersuchung abwägen — Aufschub wenn möglich','Dokumentation der Risikoaufklärung im Befund'],context_post:['TSH-Kontrolle etwa 14 Tage nach KM obligat, dann nach Verlauf','Bei Anstieg auf manifest: Endokrinologie, Therapieeinleitung','Perchlorat und ggf. Thyreostatikum: Fortführung jeweils ca. 14 Tage, danach endokrinologisch neu bewerten','Patient über Symptome der Hyperthyreose aufklären (Palpitationen, Tremor, Schwitzen)'],context_symptom:['Differentialdiagnose: nicht-schilddrüsenbedingt (Schwangerschaft, Medikamente, akute Erkrankung)','fT3/fT4 ggf. ergänzen für vollständige Klassifikation','Bei kardialen Symptomen: EKG (Vorhofflimmern!), Kardiologie','Weiterführung ambulant durch Hausarzt/Endokrinologie']};}
+  if(tsh<0.1&&!ft4High&&!ft3High){return{key:'latent',label:'Supprimiertes TSH — V.a. Autonomie',risk:'medium',riskLabel:'Mittleres Risiko',desc:'TSH deutlich supprimiert, periphere Hormonspiegel noch normal. Hinweis auf floride Schilddrüsenautonomie oder Frühstadium manifester Hyperthyreose. Jodbelastung kann zur Dekompensation führen.',context_pre:['Jodhaltige KM nur nach Risikoabwägung und endokrinologischer Rücksprache','Perchlorat-Prophylaxe einleiten (Fortführung typischerweise ca. 14 Tage)','Schilddrüsenszintigraphie erwägen (Autonomienachweis)','Alternativ MRT mit gadoliniumhaltigem KM falls möglich'],context_post:['TSH, fT4, fT3 etwa 14 Tage nach KM kontrollieren','Endokrinologische Weiterbetreuung arrangieren'],context_symptom:['fT3 und fT4 ergänzen','Szintigraphie erwägen','Endokrinologie zur Weiterklärung']};}
+  if(tsh>4.0&&!ft4Low&&!ft3Low){return{key:'hypothyroid',label:'Latente (subklinische) Hypothyreose',risk:'low',riskLabel:'Niedriges KM-Risiko',desc:'TSH erhöht, periphere Hormone noch normal. Subklinische Hypothyreose. Für jodhaltige KM-Gabe besteht kein erhöhtes Hyperthyreose-Risiko. Schilddrüsenfunktion sollte endokrinologisch weiterverfolgt werden.',context_pre:['KM-Gabe aus Schilddrüsenperspektive unbedenklich','Auf TPO-Antikörper testen (Hashimoto?)','Verlaufskontrollen TSH empfohlen'],context_post:['Keine spezifischen KM-bezogenen Maßnahmen nötig','TSH-Verlauf im Rahmen Grunderkrankung'],context_symptom:['L-Thyroxin-Substitution bei TSH >10 oder Symptomen erwägen','Endokrinologische Weiterführung']};}
+  if(tsh>4.0&&ft4Low){return{key:'hypothyroid',label:'Manifeste Hypothyreose',risk:'low',riskLabel:'Niedriges KM-Risiko',desc:'Manifeste Hypothyreose. Kein erhöhtes Risiko für KM-induzierte Hyperthyreose. L-Thyroxin-Substitution prüfen/optimieren.',context_pre:['KM aus Schilddrüsenperspektive unbedenklich','L-Thyroxin-Therapie überprüfen'],context_post:['Verlaufskontrolle im Rahmen Hypothyreose-Betreuung'],context_symptom:['L-Thyroxin einleiten/anpassen','Endokrinologische Überweisung']};}
+  if(tsh>=0.4&&tsh<=4.0){
+    if(hasFt3&&ft3Low&&!ft4High){
+      return{key:'discordant',label:'Diskordanz / V.a. ESS · NTIS',risk:'medium',riskLabel:'Internistisch klären',desc:'TSH im Normbereich (0,4–4,0 mIU/L) bei erniedrigtem fT3 (<3,5 pmol/L) und ohne gleichzeitige fT4-Hochlage (>22 pmol/L): Muster spricht für euthyreotes Sick-Syndrom (ESS) bzw. Non-Thyroidal Illness (NTIS) bei systemischer Erkrankung — nicht für eine primäre Hyperthyreose und nicht für das „latent/manifest“-KM-Risikoscreening dieses Tools.',context_pre:['Grundkrankheit und ITS-/Septik-Kontext klären; Schilddrüsenwerte als Verlaufsmarker, nicht als isolierte KM-Kontraindikation','Elektive jodhaltige KM: Risiko aus Grunderkrankung, nicht aus „Hyperthyreose-Prophylaxe“ ableiten — internistische Mitbeurteilung','fT4 ggf. ergänzen; dynamische Verläufe bei NTIS typisch — Endokrinologie bei persistierender Auffälligkeit','Keine Perchlorat-/Thyreostatikum-Schema wie bei manifester Hyperthyreose ohne Zuordnung'],context_post:['Nach KM: Verlauf überwiegend durch Grundkrankheit bestimmt; Schilddrüsenkontrollen nach internistischem Plan','Bei Erholung oft Normalisierung der peripheren Hormone — Verlauf abwarten'],context_symptom:['Substitution mit Schilddrüsenhormonen bei NTIS in der Regel nicht indiziert (Ausnahmen nur endokrinologisch)','Bei unklarem Verlauf Endokrinologie hinzuziehen']};
+    }
+    if(ft4High||ft3High){
+      if(ft3High&&ft4High){
+        return{key:'discordant',label:'Diskordanz: fT3 und fT4 erhöht (TSH normal)',risk:'medium',riskLabel:'Labor / Zentral klären',desc:'TSH im Normbereich bei gleichzeitig erhöhtem fT3 und fT4: Für eine typische primäre Hyperthyreose ungewöhnlich (dort meist TSH supprimiert). V.a. Präanalytik/Assay-Interferenz (Biotin, heterophile AK), exogene Hormonzufuhr oder selten zentrale/spezielle Entitäten (TSHom, Resistenz) — kein latent/manifest-KM-Schema aus diesem Tool.',context_pre:['Sofortige Labor-Rückfrage: Wiederholung, anderes Assay, Biotin-Karenz, Medikamente mit Interferenz','Elektive jodhaltige KM aufschieben bis zur fachärztlichen Einordnung — vital nur nach Konsil','Klinik: Schilddrüsenhormon-Einnahme, Schwangerschaft, akute Erkrankung dokumentieren','Szintigraphie/sonographische Klärung erst nach Laborplausibilisierung'],context_post:['Nach KM: keine automatische Prophylaxe; Verlauf nach Zuordnung'],context_symptom:['Bei thyreotoxischer Symptomatik trotzdem klinisch handeln (Notfall), unabhängig vom TSH-Muster']};
+      }
+      if(ft3High&&hasFt4&&ft4Low){
+        return{key:'discordant',label:'Diskordanz · V.a. T3-Toxikose',risk:'medium',riskLabel:'Endokrinologie',desc:'TSH im Normbereich bei erhöhtem fT3 (>6,5 pmol/L) und erniedrigtem fT4 (<12 pmol/L): Passt eher zu isolierter T3-Toxikose / dissoziierter Autonomie oder Übergangsphase als zu klassischer „euthyreoter“ Konstellation. TSH kann (noch) nicht maximal supprimiert sein — kein Standard-KM-Prophylaxeschema wie bei manifester Hyperthyreose ohne endokrinologische Zuordnung.',context_pre:['Endokrinologie: Szintigraphie, Sonographie, ggf. TRAK — Therapieplan vor elektiver jodhaltiger KM','TSH und fT3/fT4 kurzfristig wiederholen (Verlauf oft dynamisch)','KM: elektiv verschieben bis zur Einordnung; vital nur nach dokumentierter Risiko-Nutzen-Abwägung','Keine Übernahme der Manifest-Perchlorat-/Thyreostatikum-Empfehlungen ohne Konsil'],context_post:['Nach KM: engmaschige endokrinologische Verlaufskontrolle laut Zuweisung'],context_symptom:['Klinische Zeichen einer Hyperthyreose gezielt abfragen; bei Dekompensation wie üblich eskalieren']};
+      }
+      if(ft3High&&!ft4High){
+        return{key:'discordant',label:'Diskordanz · V.a. T3-Toxikose (fT3-dominiert)',risk:'medium',riskLabel:'Endokrinologie',desc:'TSH im Normbereich bei isoliert erhöhtem fT3, fT4 nicht erhöht (oder nicht eingegeben): Typisches Muster einer T3-dominierten Hyperthyreose / frühen Autonomie mit noch nicht supprimiertem TSH — nicht mit ESS/NTIS (dort meist niedriges fT3) verwechseln. Kein generisches KM-Prophylaxeschema aus diesem Tool ohne endokrinologische Klärung.',context_pre:['fT4 sicher bestimmen; TSH-Verlauf in 1–2 Wochen zur Dynamik','Endokrinologie: Knoten? Szintigraphie? TRAK? — vor elektiver jodhaltiger KM klären','Elektive KM verschieben bis zur Einordnung; Notfall-KM nur mit Konsil','Keine automatische „manifeste Hyperthyreose“-Prophylaxe anhand dieses Screens allein'],context_post:['Nach KM: TSH/fT3/fT4 nach endokrinologischem Plan'],context_symptom:['Palpitationen, Gewichtsverlust, Tremor — klinisch mitführen']};
+      }
+      if(ft4High&&hasFt3&&ft3Low){
+        return{key:'discordant',label:'Diskordanz: fT4 hoch, fT3 niedrig (TSH normal)',risk:'medium',riskLabel:'ESS vs. Labor',desc:'TSH normwertig bei erhöhtem fT4 und erniedrigtem fT3: Kann bei schwerer systemischer Erkrankung (ESS/NTIS mit dissoziierter Peripherie) vorkommen, erfordert aber auch Ausschluss von Assay-Artefakten oder Mischbildern. Nicht als klassische Hyperthyreose für KM-Prophylaxe interpretieren.',context_pre:['ITS/Sepsis/Mangelernährung/Medikamente im Kontext prüfen (ESS/NTIS)','Parallel: Labor-Rückfrage, Wiederholung, Biotin-Karenz','fT3-Verlauf oft richtungweisend bei NTIS — Verlaufskontrolle','Endokrinologie bei persistierender Diskrepanz'],context_post:['Nach KM: internistischer Verlauf primär; Schilddrüse sekundär mitsteuern'],context_symptom:['Keine thyreostatische „Blanko“-Therapie ohne Zuweisung']};
+      }
+      if(ft4High&&!ft3High){
+        return{key:'discordant',label:'Diskordanz: isoliert erhöhtes fT4 (TSH normal)',risk:'medium',riskLabel:'Labor klären',desc:'TSH im Normbereich bei erhöhtem fT4, fT3 nicht hoch (oder nicht angegeben): DD u. a. Assay-/Präanalytik (Heparin, FDH je nach Methode), Zentral (TSHom selten), Medikamente/Schwangerschaft — nicht das typische Bild einer T3-Toxikose.',context_pre:['Labor wiederholen; ggf. Albumin-bedingte Methoden-Störungen (FDH) ausschließen','fT3 ergänzen zur Einordnung','Elektive jodhaltige KM bis zur Klärung zurückstellen — vital mit Endokrinologie/Konsil','Kein Manifest-Hyperthyreose-Prophylaxe-Schema ohne Diagnose'],context_post:['Nach KM: Verlauf laborgeleitet'],context_symptom:['Bei Z.n. Schilddrüsenhormon-Substitution Einnahmezeitpunkt dokumentieren']};
+      }
+    }
+    return{key:'normal',label:'Euthyreose (Normalbefund)',risk:'low',riskLabel:'Kein erhöhtes Risiko',desc:'TSH im Normbereich. Periphere Hormone im Normbereich. Keine Kontraindikation für jodhaltige KM aus Schilddrüsensicht. Standardprotokoll anwendbar.',context_pre:['Kein erhöhtes Risiko für KM-induzierte Schilddrüsenfunktionsstörung','Routinemäßige KM-Gabe nach Standardprotokoll','Bei bekannten Risikofaktoren in der Anamnese: Nachkontrolle etwa 14 Tage nach KM'],context_post:['Keine speziellen schilddrüsenbezogenen Maßnahmen erforderlich','Bei neuen Symptomen (Palpitationen, Tremor, Gewichtsverlust): TSH bestimmen'],context_symptom:['Befund entspricht Normalbefund','Symptome anderweitig abklären']};
+  }
+  return{key:'unclear',label:'Unklare Konstellation',risk:'medium',riskLabel:'Überprüfung empfohlen',desc:'Die eingegebenen Werte ergeben eine unklare Konstellation. Bitte Plausibilität prüfen, ggf. Assay-Fehler ausschließen und Werte wiederholen.',context_pre:['Laborwerte überprüfen und ggf. wiederholen','Endokrinologische Einschätzung einholen'],context_post:['Verlaufskontrolle empfohlen'],context_symptom:['Klinische Gesamtbeurteilung erforderlich']};
+}
+
+function analyze(){
+  const tshVal=parseDE(document.getElementById('tsh').value);
+  const ft4Val=parseDE(document.getElementById('ft4').value);
+  const ft3Val=parseDE(document.getElementById('ft3').value);
+  if(isNaN(tshVal)){alert('Bitte mindestens den TSH-Wert eingeben (z.B. 1,2).');return;}
+  const r=classify(tshVal,isNaN(ft4Val)?null:ft4Val,isNaN(ft3Val)?null:ft3Val);
+  const box=document.getElementById('result');
+  box.className='result-box show '+r.key;
+  const tshStatus=tshVal<0.4?'abnormal':tshVal>4.0?'warn':'ok';
+  const ft4Status=!isNaN(ft4Val)?(ft4Val>22?'abnormal':ft4Val<12?'warn':'ok'):'';
+  const ft3Status=!isNaN(ft3Val)?(ft3Val>6.5?'abnormal':ft3Val<3.5?'warn':'ok'):'';
+  document.getElementById('result-params').innerHTML=`
+    <div class="param-chip ${tshStatus}"><div class="val">${formatDE(tshVal,2)}</div><div class="lbl">TSH mIU/L</div></div>
+    ${!isNaN(ft4Val)?`<div class="param-chip ${ft4Status}"><div class="val">${formatDE(ft4Val,1)}</div><div class="lbl">fT4 pmol/L</div></div>`:'<div class="param-chip"><div class="val">—</div><div class="lbl">fT4 n. eingeg.</div></div>'}
+    ${!isNaN(ft3Val)?`<div class="param-chip ${ft3Status}"><div class="val">${formatDE(ft3Val,1)}</div><div class="lbl">fT3 pmol/L</div></div>`:'<div class="param-chip"><div class="val">—</div><div class="lbl">fT3 n. eingeg.</div></div>'}
+  `;
+  const riskClass=r.risk==='high'?'risk-high':r.risk==='medium'?'risk-medium':'risk-low';
+  document.getElementById('result-badge').innerHTML=`<span class="risk-badge ${riskClass}"><span class="risk-dot"></span>${r.riskLabel}</span>`;
+  document.getElementById('result-title').textContent=r.label;
+  document.getElementById('result-desc').textContent=r.desc;
+  const recs=r.context_pre;
+  document.getElementById('result-recs').innerHTML=renderRecommendationList(recs);
+  box.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+initRadMode();
+</script>
