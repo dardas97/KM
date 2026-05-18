@@ -17,7 +17,7 @@
     --border:#dee2e6;--radius:8px;
     --prose:#374151;--panel-soft:#fafafa;--surface-elev:#fff
   }
-  body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.6;transition:background 0.2s,color 0.2s}
+  body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.6;transition:background 0.2s,color 0.2s;color-scheme:light}
   body.rad-mode{
     color-scheme:dark;
     --brand:#58a6ff;--brand-light:#79b8ff;--brand-accent:#3dd9c3;
@@ -86,6 +86,29 @@
   body.rad-mode .unit-badge{background:#1f2a3d;color:#79c0ff;border-color:#388bfd44}
   .analyze-btn{width:100%;padding:12px;background:var(--brand);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:500;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;margin-top:0.5rem;transition:background 0.15s}
   .analyze-btn:hover{background:var(--brand-light)}
+  .disease-section{margin-top:1.25rem;padding-top:1rem;border-top:1px dashed var(--border)}
+  .disease-section-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:0.6rem}
+  .disease-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px}
+  .dchk{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;background:#eceff3;font-size:13px;cursor:pointer;transition:all 0.15s}
+  .dchk:hover{border-color:var(--brand);background:#dde6f1}
+  .dchk input[type=checkbox]{margin-top:2px;accent-color:var(--brand);flex-shrink:0;cursor:pointer}
+  .dchk-label{flex:1;line-height:1.35}
+  .dchk-label small{display:block;font-size:11px;color:var(--muted);margin-top:1px}
+  .dchk.active{border-color:var(--brand);background:#d3e3f7;color:var(--brand)}
+  body.rad-mode .dchk{background:#1a2335;border-color:#2a3550}
+  body.rad-mode .dchk:hover{background:#1f2a3d;border-color:var(--accent)}
+  body.rad-mode .dchk.active{background:#1f2a3d;border-color:var(--accent)}
+  .followup{margin-top:6px;padding:8px 10px;background:#f8f9fa;border-radius:6px;border-left:3px solid var(--accent);font-size:12px;display:none}
+  .followup.show{display:block}
+  .followup label{display:block;margin-bottom:4px;font-weight:500;color:var(--text)}
+  .followup .radio-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:3px}
+  .followup .radio-row label{display:inline-flex;align-items:center;gap:5px;font-weight:400;cursor:pointer;margin-bottom:0}
+  .followup .radio-row input[type=radio]{accent-color:var(--brand);cursor:pointer}
+  body.rad-mode .followup{background:#161e2e;color:var(--text)}
+  body.rad-mode .followup label{color:var(--text)}
+  .ctx-flags{margin-top:0.75rem;padding:6px 10px;background:rgba(10,61,98,0.06);border-radius:6px;font-size:12px;font-family:'IBM Plex Mono',monospace;color:var(--brand);display:none}
+  .ctx-flags.show{display:block}
+  body.rad-mode .ctx-flags{background:rgba(121,192,255,0.08);color:var(--accent)}
   .result-box{border-radius:10px;padding:1.25rem;margin-top:1rem;display:none}
   .result-box.show{display:block}
   .result-box.manifest{background:#fdecea;border:2px solid #ef9a9a}
@@ -147,6 +170,8 @@
   body.rad-mode .risk-table th{background:#21262d;border-bottom-color:#30363d}
   body.rad-mode .risk-table tr:hover td{background:#1c2128}
   .status-pill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;font-weight:500}
+  a.status-pill{text-decoration:none}
+  a.status-pill:hover{text-decoration:underline}
   .pill-red{background:#fdecea;color:#b71c1c}
   .pill-orange{background:#fff3e0;color:#bf360c}
   .pill-green{background:#e8f5e9;color:#1b5e20}
@@ -261,16 +286,17 @@
   <header>
     <button type="button" class="rad-mode-toggle" id="radModeToggle" aria-pressed="false" title="Dunkelmodus (Lesesaal / PACS-Flair)" onclick="toggleRadMode()"><span class="rad-emoji" aria-hidden="true">🩻</span>Rad Mode</button>
     <div class="header-badge">KLINISCHES ENTSCHEIDUNGSTOOL · RADIOLOGIE</div>
-    <h1>Kontrastmittel-induzierte Hyperthyreose<br><span style="font-weight:400;font-size:1.1rem;opacity:0.9">Prävention, Diagnostik & Leitlinienempfehlungen</span></h1>
-    <p>Für Radiologen und radiologisch tätige Ärzte · Basierend auf ESC/ETA-Leitlinien 2023 und DGN-Empfehlungen</p>
+    <h1>Kontrastmittel-induzierte Schilddrüsendysfunktion<br><span style="font-weight:400;font-size:1.1rem;opacity:0.9">Prävention, Diagnostik & Leitlinienempfehlungen</span></h1>
+    <p>ETA 2021 (Bednarczuk et al., Eur Thyroid J) · ESUR Contrast Media Guidelines v10.0 (2018) · DGN S1 Radiojodtherapie 2022 (AWMF 031-003) · S3-Leitlinie Schilddrüsenkarzinom 2025 (AWMF 031-056OL) · ESC Heart Failure 2021</p>
   </header>
 
   <nav>
-    <button class="nav-btn active" onclick="showSection('analyzer',this)">TSH/fT3/fT4-Analyse</button>
-    <button class="nav-btn" onclick="showSection('konstellationen',this)">Befundkonstellationen</button>
-    <button class="nav-btn" onclick="showSection('risiko',this)">Risikogruppen</button>
-    <button class="nav-btn" onclick="showSection('praevention',this)">Prävention & Protokolle</button>
-    <button class="nav-btn" onclick="showSection('leitlinien',this)">Leitlinienempfehlungen</button>
+    <button class="nav-btn active" onclick="showSection('analyzer',this)">Analyse</button>
+    <button class="nav-btn" onclick="showSection('konstellationen',this)">Konstellationen</button>
+    <button class="nav-btn" onclick="showSection('risiko',this)">Risiko</button>
+    <button class="nav-btn" onclick="showSection('praevention',this)">Prävention</button>
+    <button class="nav-btn" onclick="showSection('leitlinien',this)">Leitlinien</button>
+    <button class="nav-btn" onclick="showSection('karzinom',this)">Karzinom</button>
   </nav>
 
   <!-- ANALYZER -->
@@ -304,6 +330,104 @@
             </div>
             <div class="hint">Referenz: 3,5 – 6,5 pmol/L</div>
           </div>
+
+          <div class="disease-section">
+            <div class="disease-section-title">Bekannte SD-Erkrankungen / Risikofaktoren <span class="label-soft" style="text-transform:none;letter-spacing:0">(Mehrfachauswahl)</span></div>
+            <div class="disease-grid">
+              <label class="dchk" id="d-basedow-wrap">
+                <input type="checkbox" id="d-basedow" onchange="onDiseaseChange()">
+                <span class="dchk-label">M. Basedow<small>Autoimmun-Hyperthyreose</small></span>
+              </label>
+              <label class="dchk" id="d-karzinom-wrap">
+                <input type="checkbox" id="d-karzinom" onchange="onDiseaseChange()">
+                <span class="dchk-label">Schilddrüsenkarzinom<small>diff./medullär/anaplastisch</small></span>
+              </label>
+              <label class="dchk" id="d-autonomie-wrap">
+                <input type="checkbox" id="d-autonomie" onchange="onDiseaseChange()">
+                <span class="dchk-label">SD-Autonomie / Adenom<small>uni-/multifokal</small></span>
+              </label>
+              <label class="dchk" id="d-struma-wrap">
+                <input type="checkbox" id="d-struma" onchange="onDiseaseChange()">
+                <span class="dchk-label">Struma nodosa/multinodosa<small>knotige Veränderung</small></span>
+              </label>
+              <label class="dchk" id="d-hashimoto-wrap">
+                <input type="checkbox" id="d-hashimoto" onchange="onDiseaseChange()">
+                <span class="dchk-label">Hashimoto-Thyreoiditis<small>chron. Autoimmun</small></span>
+              </label>
+              <label class="dchk" id="d-hypo-wrap">
+                <input type="checkbox" id="d-hypo" onchange="onDiseaseChange()">
+                <span class="dchk-label">Hypothyreose<small>manifest oder substituiert</small></span>
+              </label>
+              <label class="dchk" id="d-thyreoidektomie-wrap">
+                <input type="checkbox" id="d-thyreoidektomie" onchange="onDiseaseChange()">
+                <span class="dchk-label">Z.n. Thyreoidektomie<small>total/subtotal</small></span>
+              </label>
+              <label class="dchk" id="d-subakut-wrap">
+                <input type="checkbox" id="d-subakut" onchange="onDiseaseChange()">
+                <span class="dchk-label">Subakute Thyreoiditis<small>de Quervain</small></span>
+              </label>
+              <label class="dchk" id="d-amiodaron-wrap">
+                <input type="checkbox" id="d-amiodaron" onchange="onDiseaseChange()">
+                <span class="dchk-label">Amiodaron-Therapie<small>aktuell oder kürzlich</small></span>
+              </label>
+              <label class="dchk" id="d-schwangerschaft-wrap">
+                <input type="checkbox" id="d-schwangerschaft" onchange="onDiseaseChange()">
+                <span class="dchk-label">Schwangerschaft / Stillzeit<small>aktuell</small></span>
+              </label>
+              <label class="dchk" id="d-niereninsuffizienz-wrap">
+                <input type="checkbox" id="d-niereninsuffizienz" onchange="onDiseaseChange()">
+                <span class="dchk-label">Niereninsuffizienz<small>eGFR &lt;30 / Dialyse</small></span>
+              </label>
+              <label class="dchk" id="d-jodmangel-wrap">
+                <input type="checkbox" id="d-jodmangel" onchange="onDiseaseChange()">
+                <span class="dchk-label">Jodmangelgebiet<small>Anamnese / Region</small></span>
+              </label>
+            </div>
+
+            <!-- Conditional follow-up: Karzinom -->
+            <div class="followup" id="fu-karzinom">
+              <label>Bei Schilddrüsenkarzinom — Status:</label>
+              <div class="radio-row">
+                <label><input type="radio" name="karzinom-status" value="rit-geplant"> Radioiodtherapie geplant</label>
+                <label><input type="radio" name="karzinom-status" value="rit-vergangen"> Z.n. RIT (in Nachsorge)</label>
+                <label><input type="radio" name="karzinom-status" value="dtc-keine-rit"> DTC, keine RIT geplant</label>
+                <label><input type="radio" name="karzinom-status" value="mtc-atc"> MTC / ATC / nicht-jodspeichernd</label>
+                <label><input type="radio" name="karzinom-status" value="unklar" checked> Unklar / Verdacht</label>
+              </div>
+            </div>
+
+            <!-- Conditional follow-up: Thyreoidektomie -->
+            <div class="followup" id="fu-thyreoidektomie">
+              <label>Operationsumfang:</label>
+              <div class="radio-row">
+                <label><input type="radio" name="tx-umfang" value="total"> Totale Thyreoidektomie</label>
+                <label><input type="radio" name="tx-umfang" value="subtotal"> Subtotal / Hemi</label>
+                <label><input type="radio" name="tx-umfang" value="lthyroxin" checked> Unter L-Thyroxin</label>
+              </div>
+            </div>
+
+            <!-- Conditional follow-up: Amiodaron -->
+            <div class="followup" id="fu-amiodaron">
+              <label>Amiodaron-Status:</label>
+              <div class="radio-row">
+                <label><input type="radio" name="amio-status" value="aktiv" checked> Aktuell unter Therapie</label>
+                <label><input type="radio" name="amio-status" value="kuerzlich"> Vor &lt;6 Monaten abgesetzt</label>
+                <label><input type="radio" name="amio-status" value="alt"> Vor &gt;6 Monaten abgesetzt</label>
+              </div>
+            </div>
+
+            <!-- Conditional follow-up: Niereninsuffizienz -->
+            <div class="followup" id="fu-niereninsuffizienz">
+              <label>Nierenfunktion:</label>
+              <div class="radio-row">
+                <label><input type="radio" name="kidney-status" value="dialyse"> Dialysepflichtig</label>
+                <label><input type="radio" name="kidney-status" value="schwer" checked> eGFR &lt;30 ml/min</label>
+                <label><input type="radio" name="kidney-status" value="moderat"> eGFR 30–60 ml/min</label>
+              </div>
+            </div>
+
+            <div id="ctx-flags" class="ctx-flags"></div>
+          </div>
         </div>
         <button type="submit" class="analyze-btn">Konstellation analysieren ▸</button>
       </form>
@@ -321,164 +445,233 @@
 
   <!-- KONSTELLATIONEN -->
   <div id="konstellationen" class="section">
-    <h2>Befundkonstellationen im Überblick</h2>
-    <div class="warn-box">Alle Werte in Bezug auf den jeweiligen laborspezifischen Referenzbereich interpretieren. Die folgenden Angaben sind Orientierungswerte.</div>
-    <div class="constellation-grid">
-      <div class="const-card normal">
-        <div class="c-title">Euthyreose (Normalbefund)</div>
-        <div class="c-vals">TSH: 0,4–4,0 · fT4: 12–22 · fT3: 3,5–6,5</div>
-        <div class="c-desc">Schilddrüsenfunktion normal. KM-Gabe nach Standardprotokoll möglich. Kein erhöhtes Risiko für KM-induzierte Funktionsstörung.</div>
-      </div>
-      <div class="const-card latent">
-        <div class="c-title">Latente Hyperthyreose</div>
-        <div class="c-vals">TSH: &lt;0,4 (supprimiert) · fT4: normal · fT3: normal</div>
-        <div class="c-desc">Erhöhtes Risiko für Manifestation nach Jodbelastung. Risikoabwägung vor KM-Gabe erforderlich. Ggf. Endokrinologie hinzuziehen.</div>
-      </div>
-      <div class="const-card manifest">
-        <div class="c-title">Manifeste Hyperthyreose</div>
-        <div class="c-vals">TSH: &lt;0,4 mIU/L (supprimiert) · fT4: &gt;22 und/oder fT3: &gt;6,5 pmol/L — oft TSH &lt;0,1</div>
-        <div class="c-desc">Overt thyrotoxische Konstellation (DGN/ETA): subnormales TSH mit erhöhtem peripheren Hormon, auch wenn TSH noch 0,1–0,4 mIU/L. Kontraindikation für elektive jodhaltige KM. Dringende endokrinologische Vorstellung.</div>
-      </div>
-      <div class="const-card hypo">
-        <div class="c-title">Hypothyreose / Subklinisch</div>
-        <div class="c-vals">TSH: &gt;4,0 · fT4: erniedrigt &lt;12 oder normal</div>
-        <div class="c-desc">Kein erhöhtes Risiko für KM-induzierte Hyperthyreose. Bei manifester Hypothyreose: Schilddrüse kann durch jodhaltige KM-Gabe moduliert werden.</div>
-      </div>
+    <h2>SD-Funktionsstatus vor KM — ETA 2021 Tabelle 1</h2>
+    <div class="info-box"><strong>Quelle:</strong> European Thyroid Association 2021, Bednarczuk et al., Eur Thyroid J. Diese Tabelle gibt die ETA-Empfehlungen unverändert wieder. Bewertung erfolgt anhand des laborspezifischen Referenzbereichs (↑/↓/↔).</div>
+    <div class="card">
+      <table class="risk-table">
+        <thead><tr><th>SD-Funktionsstatus</th><th>Laborkonstellation</th><th>ETA-Empfehlung vor KM-Gabe</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Overt Hyperthyreose</strong></td><td>TSH↓ · fT4↑ und/oder fT3↑</td><td>Jodhaltige KM <strong>generell kontraindiziert</strong>. Ausnahme: lebensrettende Eingriffe. Sonst alternative Bildgebung erwägen (MRT, Nativ-CT, Echokardiographie, Sonographie). Therapiebeginn mit Thyreostatikum ± Perchlorat vor oder unmittelbar nach KM-Gabe.</td></tr>
+          <tr><td><strong>Hyperthyreose unter Thyreostatika (ATD)</strong></td><td>TSH↓ oder ↔ · fT4↔ · fT3↔</td><td>Jodhaltige KM <strong>nicht kontraindiziert</strong>. TSH/fT4/fT3 3–4 Wochen nach KM bestimmen. ATD-Dosiseskalation und/oder Perchlorat erwägen.</td></tr>
+          <tr><td><strong>Persistierende endogene subklinische Hyperthyreose</strong></td><td>TSH↓ · fT4↔ · fT3↔</td><td>Jodhaltige KM <strong>nicht kontraindiziert</strong>. Vor elektiver Untersuchung endokrinologische Konsultation zur Ätiologie der subklinischen Hyperthyreose empfohlen. TSH/fT4/fT3 3–4 Wochen nach KM. Prophylaxe in ausgewählten Fällen erwägen.</td></tr>
+          <tr><td><strong>Overt Hypothyreose</strong></td><td>TSH↑ · fT4↓</td><td>Jodhaltige KM <strong>nicht kontraindiziert</strong>. L-Thyroxin-Therapie nach aktuellen Hypothyreose-Leitlinien initiieren und überwachen.</td></tr>
+          <tr><td><strong>Subklinische Hypothyreose</strong></td><td>TSH↑ · fT4↔</td><td>Jodhaltige KM <strong>nicht kontraindiziert</strong>. L-Thyroxin-Therapie nach aktuellen Leitlinien initiieren und überwachen.</td></tr>
+          <tr><td><strong>Hypothyreose unter L-Thyroxin</strong></td><td>TSH↔</td><td>Jodhaltige KM <strong>nicht kontraindiziert</strong>. Diese Patienten haben kein erhöhtes Risiko für KM-induzierte SD-Dysfunktion und benötigen keine endokrinologische Konsultation oder spezielle Maßnahmen.</td></tr>
+          <tr><td><strong>Euthyreote Patienten mit Knotenstruma</strong> (atoxisch); euthyreote M. Basedow in Remission unter ATD</td><td>TSH↔</td><td>Jodhaltige KM <strong>nicht kontraindiziert</strong>. Normales Baseline-TSH schließt das Risiko einer KM-induzierten SD-Dysfunktion nicht aus. TSH 3–4 Wochen nach KM erwägen bei WHO-Struma Grad 2, besonders bei älteren Patienten. Bei M. Basedow in Remission: TSH bei Symptomen einer SD-Dysfunktion.</td></tr>
+        </tbody>
+      </table>
+      <div class="guideline-source">Wörtliche Übernahme aus: Bednarczuk T et al. 2021 ETA Guidelines, Eur Thyroid J 2021;10(4):269–284 · Tab. 1. ↔ = im Referenzbereich, ↑ = über Referenzbereich, ↓ = unter Referenzbereich.</div>
     </div>
-    <h3 class="const-subhead">TSH im Referenzbereich (0,4–4,0 mIU/L): diskordante / atypische Muster</h3>
-    <p class="prose-block" style="font-size:13px;margin-bottom:0.85rem">Dieselbe Prioritätslogik wie bei <strong>Konstellation analysieren</strong> (zuerst niedriges fT3 ohne fT4-Hochlage, dann erhöhte Hormone in der dortigen Reihenfolge). Kein Ersatz für Amiodaron-/RIT-Ausschlüsse — siehe Registerkarte <strong>Risikogruppen</strong> (Sonderfälle).</p>
-    <div class="constellation-grid">
-      <div class="const-card discordant">
-        <div class="c-title">Diskordanz · V.a. ESS / NTIS</div>
-        <div class="c-vals">TSH: 0,4–4,0 · fT3: &lt;3,5 (wenn bestimmt) · fT4: nicht &gt;22 pmol/L</div>
-        <div class="c-desc">Euthyreotes Sick-Syndrom / NTIS bei systemischer Erkrankung wahrscheinlicher als primäre Hyperthyreose. Kein latent/manifest-KM-Risikoscreening; elektive KM aus Grunderkrankung bewerten, nicht aus „Hyperthyreose-Prophylaxe“.</div>
-      </div>
-      <div class="const-card discordant">
-        <div class="c-title">Diskordanz: fT3 und fT4 erhöht</div>
-        <div class="c-vals">TSH: 0,4–4,0 · fT3: &gt;6,5 · fT4: &gt;22</div>
-        <div class="c-desc">Für klassische primäre Hyperthyreose ungewöhnlich (TSH meist supprimiert). DD: Präanalytik, Assay-Interferenz, exogene Hormone, selten zentral — elektive KM aufschieben, Labor plausibilisieren.</div>
-      </div>
-      <div class="const-card discordant">
-        <div class="c-title">Diskordanz · V.a. T3-Toxikose</div>
-        <div class="c-vals">TSH: 0,4–4,0 · fT3: &gt;6,5 · fT4: &lt;12</div>
-        <div class="c-desc">T3-Toxikose / dissoziierte Autonomie oder Übergang möglich; TSH noch nicht maximal supprimiert. Endokrinologie vor elektiver KM; kein automatisches Manifest-Perchlorat-/Thyreostatikum-Schema ohne Zuordnung.</div>
-      </div>
-      <div class="const-card discordant">
-        <div class="c-title">Diskordanz · T3-dominiert</div>
-        <div class="c-vals">TSH: 0,4–4,0 · fT3: &gt;6,5 · fT4: 12–22 oder nicht erhöht</div>
-        <div class="c-desc">Isoliert hohes fT3 mit normalem oder fehlendem fT4-Hinweis — nicht mit ESS (dort meist niedriges fT3) verwechseln. fT4 sicher bestimmen; Endokrinologie/Szintigraphie vor elektiver jodhaltiger KM.</div>
-      </div>
-      <div class="const-card discordant">
-        <div class="c-title">Diskordanz: fT4 hoch, fT3 niedrig</div>
-        <div class="c-vals">TSH: 0,4–4,0 · fT4: &gt;22 · fT3: &lt;3,5</div>
-        <div class="c-desc">Bei schwerer Systemerkrankung (ESS/NTIS, dissoziierte Peripherie) möglich; parallel Labor-Artefakt ausschließen. Nicht als klassische Hyperthyreose für KM-Prophylaxe interpretieren.</div>
-      </div>
-      <div class="const-card discordant">
-        <div class="c-title">Diskordanz: isoliert erhöhtes fT4</div>
-        <div class="c-vals">TSH: 0,4–4,0 · fT4: &gt;22 · fT3: nicht &gt;6,5 (ggf. nicht erhöht / nicht angegeben)</div>
-        <div class="c-desc">DD: Präanalytik, Heparin-/Albumin-Effekte (FDH je nach Methode), Medikamente, Schwangerschaft, selten TSHom — fT3 ergänzen; elektive KM bis Klärung zurückstellen.</div>
-      </div>
+
+    <div class="card">
+      <div class="card-title">ETA 2021 — Empfehlungen mit Evidenzqualität</div>
+      <table class="risk-table">
+        <thead><tr><th>Empfehlung</th><th>Stärke</th><th>Evidenzqualität</th></tr></thead>
+        <tbody>
+          <tr><td>Patienten über 65 Jahre mit Komorbiditäten: auch milde KM-induzierte (subklinische) Hyperthyreose behandeln</td><td>Stark (1)</td><td>⊕⊕⊕○</td></tr>
+          <tr><td>Manifeste Hyperthyreose vor KM: jodhaltige KM generell kontraindiziert (außer lebensrettende Indikation)</td><td>Stark</td><td>Klinischer Konsens</td></tr>
+          <tr><td>Präventive Therapie mit Thiamazol und/oder Perchlorat vor KM bei Risikopatienten: <em>"debated"</em></td><td>Schwach</td><td>Geringe Evidenz</td></tr>
+          <tr><td>Manifeste KM-induzierte Hypothyreose: temporäre Levothyroxin-Therapie bei jüngeren Patienten, Autoimmunthyreoiditis oder geplanter Schwangerschaft erwägen</td><td>Schwach</td><td>Geringe Evidenz</td></tr>
+          <tr><td>Diagnose KM-induzierte Hyperthyreose: KM-Exposition innerhalb der letzten 3 Monate; KM-induzierte Hypothyreose: bis zu 2 Jahre nach Exposition möglich</td><td>—</td><td>Beobachtungsstudien</td></tr>
+        </tbody>
+      </table>
+      <div class="guideline-source">⊕⊕⊕⊕ = hohe Qualität; ⊕⊕⊕○ = mäßig; ⊕⊕○○ = niedrig; ⊕○○○ = sehr niedrig (GRADE-System der ETA-Leitlinie)</div>
     </div>
-    <div class="card" style="margin-top:1rem">
-      <div class="card-title">Jod-Wolff-Chaikoff-Effekt & Jod-Escape</div>
-      <p class="prose-block">Nach intravasaler Gabe jodhaltigen Kontrastmittels wird eine hohe Jodlast freigesetzt (ca. <strong>13.500–37.000 µg</strong> elementares Jod bei Standard-CT-KM, entspricht dem 80–200-fachen des Tagesbedarfs). Die gesunde Schilddrüse reagiert mit dem Wolff-Chaikoff-Effekt (vorübergehende Synthesehemmung). Bei vorgeschädigter Schilddrüse (autonomes Adenom, Struma, latente Hyperthyreose) kann dieser Schutzmechanismus versagen → <strong>Jod-induzierte Hyperthyreose</strong> (Jod-Basedow-Phänomen).</p>
+
+    <div class="card">
+      <div class="card-title">Jod-Last und Wolff-Chaikoff-Effekt — Hintergrund</div>
+      <p class="prose-block">Nach intravasaler Gabe jodhaltigen Kontrastmittels wird eine hohe Jodlast freigesetzt (Standard-CT-KM enthält ca. 13.500–37.000 µg elementares Jod, etwa das 80–200-fache des Tagesbedarfs). Die gesunde Schilddrüse reagiert mit dem Wolff-Chaikoff-Effekt (vorübergehende Synthesehemmung). Bei vorgeschädigter Schilddrüse (autonomes Adenom, multinodulare Struma, latente Hyperthyreose, latenter M. Basedow) kann dieser Schutzmechanismus versagen → KM-induzierte Hyperthyreose (Jod-Basedow-Phänomen).</p>
+      <p class="prose-block" style="margin-top:0.5rem">ETA 2021: Die Prävalenz der KM-induzierten SD-Dysfunktion variiert zwischen 0,05% und 15% in Abhängigkeit von Jodversorgung und vorbestehender SD-Erkrankung. Geographische Variation: KM-induzierte Hyperthyreose v.a. in Jodmangelgebieten; KM-induzierte Hypothyreose v.a. in Regionen mit ausreichender Jodversorgung (Risikofaktor: Autoimmunthyreoiditis).</p>
     </div>
   </div>
 
   <!-- RISIKO -->
   <div id="risiko" class="section">
-    <h2>Risikogruppen & Laborscreening</h2>
-    <div class="danger-box"><strong>Hochrisikogruppe:</strong> Patienten mit bekannter Hyperthyreose, autonomem Adenom, Struma multinodosa oder Thyreoiditis in der Anamnese müssen vor jodhaltiger KM-Gabe sorgfältig evaluiert werden.</div>
+    <h2>Risikofaktoren</h2>
+    <div class="info-box"><strong>Wichtig (ETA 2021):</strong> Vor jeder radiologischen Untersuchung mit jodhaltigem KM <strong>klinische Untersuchung</strong> auf Struma, Symptome/Zeichen einer Hyper-/Hypothyreose und SD-Anamnese. <strong>Kein routinemäßiges TSH-Screening bei allen Patienten</strong> — nur bei Patienten mit Risikofaktoren.</div>
     <div class="card">
-      <div class="card-title">Risikoklassifikation vor KM-Gabe</div>
+      <div class="card-title">Risikofaktoren für KM-induzierte <em>Hyperthyreose</em></div>
       <table class="risk-table">
-        <thead><tr><th>Risikokategorie</th><th>Befund / Anamnese</th><th>Laborkonstellation</th><th>Empfehlung</th></tr></thead>
+        <thead><tr><th>Risikofaktor</th><th>Bedeutung</th></tr></thead>
         <tbody>
-          <tr><td><span class="status-pill pill-red">Hoch</span></td><td>Manifeste Hyperthyreose, autonomes Adenom, M. Basedow, floride Thyreoiditis</td><td>TSH &lt;0,4 mIU/L mit fT4 und/oder fT3 erhöht (overt; häufig TSH &lt;0,1)</td><td>KM kontraindiziert (elektiv). Notfall: nur nach strenger Abwägung, Prophylaxe erwägen.</td></tr>
-          <tr><td><span class="status-pill pill-orange">Mittel</span></td><td>Latente Hyperthyreose, Struma nodosa, bekannte Schilddrüsenautonomie</td><td>TSH 0,1–0,4 (supprimiert), fT3/fT4 normal</td><td>Endokrinologie konsultieren, TSH-Kontrolle ca. 14 Tage nach KM. Prophylaxe individuell.</td></tr>
-          <tr><td><span class="status-pill pill-orange">Mittel-niedrig</span></td><td>Ältere Patienten (&gt;60 J.) aus Jodmangelgebiet, Struma diffusa</td><td>TSH oft normal, aber grenzwertig</td><td>TSH präinterventionell bestimmen. Nachkontrolle ca. 14 Tage nach KM.</td></tr>
-          <tr><td><span class="status-pill pill-green">Gering</span></td><td>Keine Schilddrüsenanamnese, junger Patient</td><td>TSH im Normbereich</td><td>Kein routinemäßiges Laborscreening erforderlich bei asymptomatischen Patienten.</td></tr>
+          <tr><td><strong>Knotenstruma</strong> (besonders WHO-Grad 2)</td><td>Häufigster Risikofaktor; durch Schilddrüsenautonomie</td></tr>
+          <tr><td><strong>Latenter M. Basedow</strong></td><td>Seltener; subklinische Form mit erhaltener TSH-Rezeptor-Stimulation</td></tr>
+          <tr><td><strong>Endogene subklinische Hyperthyreose</strong></td><td>TSH↓ mit normalem fT4/fT3</td></tr>
+          <tr><td><strong>Leben in Jodmangelgebiet</strong> (z.B. Mitteleuropa, historisch)</td><td>Erhöhte Prävalenz Schilddrüsenautonomie</td></tr>
+          <tr><td><strong>Alter &gt;60 Jahre</strong> (mit Komorbiditäten)</td><td>Bei kardiovaskulärer Begleiterkrankung: sogar milde Hyperthyreose mit ernsten Komplikationen (Herzinsuffizienz, Vorhofflimmern, Thromboembolien)</td></tr>
         </tbody>
       </table>
+      <div class="guideline-source">Quelle: ETA 2021 Tab. 2</div>
     </div>
+
     <div class="card">
-      <div class="card-title">Laborparameter — Screening & Timing</div>
+      <div class="card-title">Risikofaktoren für KM-induzierte <em>Hypothyreose</em></div>
       <table class="risk-table">
-        <thead><tr><th>Parameter</th><th>Wann</th><th>Bedeutung</th></tr></thead>
+        <thead><tr><th>Risikofaktor</th><th>Bedeutung</th></tr></thead>
         <tbody>
-          <tr><td><strong>TSH (basal)</strong></td><td>Vor KM bei Risikogruppen; bei Symptomen jederzeit</td><td>Empfindlichster Parameter für Schilddrüsenfunktionsstörung. Erster Schritt im Screening.</td></tr>
-          <tr><td><strong>fT4</strong></td><td>Bei pathologischem TSH</td><td>Unterscheidung latent vs. manifest. Erhöht = manifeste Hyperthyreose.</td></tr>
-          <tr><td><strong>fT3</strong></td><td>Bei V.a. T3-Hyperthyreose oder dissoziierten Befunden</td><td>Kann bei früher Hyperthyreose zuerst erhöht sein (T3-Toxikose). Wichtig bei Autonomie.</td></tr>
-          <tr><td><strong>TRAK (TSH-Rezeptor-AK)</strong></td><td>Bei V.a. M. Basedow</td><td>Diagnose autoimmune Hyperthyreose. Beeinflusst Therapieentscheidung.</td></tr>
-          <tr><td><strong>TPO-AK</strong></td><td>Bei V.a. Autoimmunthyreoiditis</td><td>Hashimoto-Thyreoiditis (erhöhtes Risiko für Hypo- und Hyperthyreose nach KM).</td></tr>
-          <tr><td><strong>Thyreoglobulin</strong></td><td>Bei postoperativer Kontrolle / Karzinomverlauf</td><td>Monitoring nach Schilddrüsenkarzinom-OP vor Radioiodtherapie.</td></tr>
+          <tr><td><strong>Hashimoto-Thyreoiditis</strong> / Autoimmunthyreoiditis</td><td>Hauptrisikofaktor für KM-induzierte Hypothyreose</td></tr>
+          <tr><td><strong>Fötus und Neugeborene</strong></td><td>Erhöhtes Risiko durch maternale KM-Exposition</td></tr>
+          <tr><td><strong>Z.n. Schilddrüsen-OP</strong> (außer totaler Thyreoidektomie)</td><td>Subtotale/Hemi-Thyreoidektomie: Restgewebe vulnerabel</td></tr>
+          <tr><td><strong>Nierenerkrankung</strong></td><td>Verzögerte Elimination, prolongierte Jodbelastung</td></tr>
+          <tr><td><strong>Endogene subklinische Hypothyreose</strong></td><td>TSH↑ mit normalem fT4</td></tr>
+          <tr><td><strong>Regionen mit ausreichender Jodversorgung</strong></td><td>Im Gegensatz zur Hyperthyreose-Region</td></tr>
         </tbody>
       </table>
+      <div class="guideline-source">Quelle: ETA 2021 Tab. 2</div>
     </div>
-    <div class="warn-box" style="margin-bottom:1rem"><strong>Von Standard-Labor-KM-Pfaden auszuschließen (keine alleinige KM-Entscheidung über die Analysemaske):</strong> <strong>Amiodaron-Einnahme</strong> — chronische Hochjodbelastung, dissoziierte oder fluktuierende TSH-/fT4-/fT3-Muster (Typ-I/II); elektive jodhaltige KM nach Leitlinien in der Regel vermeiden, Abklärung Endokrinologie/Kardiologie (s. Karte unten). <strong>Geplante oder kurzfristig anstehende Radioiodtherapie (RIT)</strong> — jodhaltige KM blockieren die Schilddrüsen-Jodaufnahme; vor RIT ist elektive KM leitlinienkonform für mindestens <strong>4–8 Wochen</strong> (häufig länger je nach Protokoll/Hochdosis-KM) zu vermeiden; eine <strong>RIT nicht unter frischer KM-Jodexposition</strong> durchführen, sondern erst nach ausreichendem Jodabstand nuklearmedizinisch-endokrinologisch neu terminieren (s. Karte unten).</div>
+
+    <div class="card">
+      <div class="card-title">Labordiagnostik vor KM-Gabe — ETA 2021</div>
+      <table class="risk-table">
+        <thead><tr><th>Parameter</th><th>ETA-Indikation</th></tr></thead>
+        <tbody>
+          <tr><td><strong>TSH (basal)</strong></td><td>Serum-TSH-Bestimmung <strong>vor radiologischer Untersuchung</strong> nur bei Patienten <strong>mit Risikofaktoren</strong> für KM-induzierte SD-Dysfunktion empfohlen.</td></tr>
+          <tr><td><strong>fT4 und/oder fT3</strong></td><td>Bei pathologischem TSH-Wert ergänzen.</td></tr>
+          <tr><td><strong>TSH 3–4 Wochen nach KM</strong></td><td>Bei Hochrisikopatienten (besonders ältere Patienten und/oder mit instabiler kardiovaskulärer Grunderkrankung). Auch bei euthyreoten Patienten mit WHO-Struma Grad 2 erwägen, besonders bei älteren Patienten.</td></tr>
+        </tbody>
+      </table>
+      <div class="guideline-source">Quelle: ETA 2021 + ESUR v10.0 (2018)</div>
+    </div>
+
+    <div class="warn-box"><strong>ETA 2021 zentrale Aussage:</strong> Manifeste Hyperthyreose ist Kontraindikation für jodhaltiges KM (ESUR + ETA, übereinstimmend). Alle anderen SD-Funktionsstörungen sind <strong>keine Kontraindikation</strong> für jodhaltiges KM — TSH-Verlaufskontrolle 3–4 Wochen postinterventionell genügt.</div>
+
     <div class="card">
       <div class="card-title">Sonderfall: Amiodaron-Patienten</div>
-      <div class="danger-box">Patienten unter Amiodaron sind von der <strong>alleinigen</strong> TSH-/fT4-/fT3-Zuordnung (z. B. über die Analysemaske dieses Tools) zur Freigabe jodhaltiger KM <strong>auszuschließen</strong>. Amiodaron enthält ca. 37% Jod (200 mg Tablette ≈ 75 mg Jod). Jodhaltige KM sind bei Amiodaron-Patienten für elektive Untersuchungen <strong>kontraindiziert</strong>. Notfallindikation nur nach strenger Abwägung mit Kardiologie und Endokrinologie.</div>
+      <div class="danger-box">Amiodaron enthält ca. 37% Jod (200 mg Tablette ≈ 75 mg Jod). Bei Amiodaron-Patienten ist die Schilddrüsenfunktion bereits chronisch durch Jodüberlast moduliert. Bewertung gemäß <strong>ESC Heart Failure Guidelines 2021</strong>: TSH, fT3, fT4 vor Therapiebeginn und alle 6 Monate unter Amiodaron-Therapie.</div>
       <ul class="rec-list" style="font-size:13.5px">
-        <li>Amiodaron-induzierte Hyperthyreose Typ I (Iod-Jod): Thyreostatika + Perchlorat</li>
+        <li>Amiodaron-induzierte Hyperthyreose Typ I (Jod-Jod, vorbestehende SD-Erkrankung): Thyreostatika + Perchlorat</li>
         <li>Typ II (destruktive Thyreoiditis): Kortikosteroide (Prednisolon 40–60 mg/d)</li>
-        <li>Mischformen häufig — Kombitherapie und endokrinologische Führung erforderlich</li>
-        <li>Nach Amiodaron-Absetzen: Schilddrüsenparameter für Monate/Jahre überwachen</li>
+        <li>Mischformen häufig — Kombitherapie und endokrinologische Führung</li>
+        <li>Bei Amiodaron + Indikation für jodhaltiges KM: individuelle Abwägung mit Kardiologie + Endokrinologie</li>
       </ul>
+      <div class="guideline-source">Quelle: ESC Heart Failure Guidelines 2021 · ETA 2018 (Amiodaron-induced thyrotoxicosis)</div>
     </div>
+
     <div class="card">
-      <div class="card-title">Sonderfall: Geplante Radioiodtherapie (RIT)</div>
-      <div class="warn-box">Vor therapeutischer <strong>I-131</strong>-Gabe darf keine relevante Jodvorbelastung bestehen: jodhaltiges KM blockiert die Aufnahme in die Schilddrüse und kann Dosimetrie, Szintigraphie und den Erfolg der RIT verfälschen. Nach DGN/ETA (Empfehlungsgrad A) ist <strong>elektive jodhaltige KM für mindestens 4–8 Wochen vor geplanter RIT zu vermeiden</strong> — in der Praxis und nach lokalem nuklearmedizinischen Protokoll oft <strong>längere Abstände</strong> (z. B. nach Hochdosis-KM). Eine <strong>RIT ist nicht parallel oder kurz nach jodhaltiger KM</strong> leitlinienkonform durchzuführen; zuerst Jodabstand herstellen, ggf. Urin-Jod bzw. Dosimetrie-Vorgaben des Nuklearmediziners einhalten und den RIT-Termin entsprechend verschieben.</div>
-      <ul class="rec-list" style="font-size:13.5px">
-        <li>Diagnostische Voruntersuchungen (Szintigraphie, Perchlorat-Test) können durch vorausgegangene KM ebenfalls verzerrt sein — mit Nuklearmedizin abstimmen</li>
-        <li>Bei bereits erfolgter KM: elektive RIT aufschieben, bis der geforderte Abstand dokumentiert ist</li>
-      </ul>
+      <div class="card-title">Sonderfall: Geplante Radioiodtherapie (RIT) — DGN S1 2022</div>
+      <div class="warn-box">Vor therapeutischer I-131-Gabe darf keine relevante Jodvorbelastung bestehen. DGN S1 RIT 2022 (AWMF 031-003) empfiehlt einen <strong>Jodabstand von mindestens 4–8 Wochen</strong> zwischen jodhaltigem KM und RIT. Bei Hochdosis-KM oder fraglicher Jodbelastung ggf. Urin-Jod-Bestimmung (Ziel &lt;200 µg/L, idealerweise &lt;100 µg/L). RIT nicht unter frischer KM-Jodexposition durchführen.</div>
+      <div class="guideline-source">Quelle: DGN S1 Radiojodtherapie bei benignen Schilddrüsenerkrankungen 2022, AWMF-Register 031-003</div>
     </div>
   </div>
 
   <!-- PRAEVENTION -->
   <div id="praevention" class="section">
-    <h2>Prävention & Klinische Protokolle</h2>
+    <h2>Prävention</h2>
+    <div class="info-box"><strong>ETA 2021 zentrale Aussage:</strong> "It is debated whether preventive therapy with methimazole and/or perchlorate prior to ICM administration is justified" (Bednarczuk et al., Eur Thyroid J 2021). Die ETA gibt jedoch in Recommendation 9 und 21 <strong>konkrete Dosierungen</strong> für Perchlorat — siehe unten. Zusätzlich wird der etablierte <strong>deutsche Klinikstandard</strong> (typisches Tropfen-Schema deutscher Universitätskliniken) dargestellt, der eng am ETA-Schema liegt.</div>
+
+    <div class="card">
+      <div class="card-title">Indikationen für eine Prophylaxe (ETA 2021)</div>
+      <p class="prose-block">Prophylaktische Therapie mit Methimazol und/oder Natriumperchlorat kann erwogen werden bei:</p>
+      <ul class="rec-list" style="font-size:13.5px">
+        <li>Ausgewählten Patienten mit <strong>hohem Risiko</strong> für KM-induzierte Hyperthyreose (endogene subklinische Hyperthyreose, große Knotenstruma)</li>
+        <li>Vor <strong>Notfall-Untersuchungen</strong> bei Risikopatienten</li>
+        <li>Besonders bei <strong>älteren Patienten</strong> oder Patienten mit <strong>kardiovaskulären Komorbiditäten</strong>, bei denen eine Hyperthyreose eine erhebliche Belastung darstellen kann</li>
+        <li>Bei <strong>persistierender endogener subklinischer Hyperthyreose</strong> und/oder <strong>Knotenstruma</strong>, besonders in Jodmangelgebieten (ETA 2021)</li>
+      </ul>
+      <div class="guideline-source">Quelle: ETA 2021 (Bednarczuk et al., Eur Thyroid J 10:269)</div>
+    </div>
+
     <div class="grid2">
       <div class="card">
-        <div class="card-title">Prophylaxeschema (Natriumperchlorat)</div>
-        <h3>Indikation: Mittleres Risiko / latente Hyperthyreose</h3>
-        <div class="info-box" style="margin-top:0.75rem">Natriumperchlorat (Irenat®) hemmt kompetitiv die Jodaufnahme in die Schilddrüse. Einsatz bei latenter Hyperthyreose oder Schilddrüsenautonomie vor elektiver jodhaltiger KM-Gabe.</div>
+        <div class="card-title">Schema A: Natriumperchlorat (ETA 2021 Recommendation 21)</div>
         <ul class="rec-list" style="font-size:13.5px">
-          <li>Beginn: 2–24 Std. vor KM-Gabe</li>
-          <li>Dosis: 3 × 20 Tr. (= 3 × 300 mg/d)</li>
-          <li><strong>Therapiedauer Natriumperchlorat:</strong> in der Regel <strong>ca. 14 Kalendertage</strong> (≈2 Wochen); nicht ohne nephrologisch-endokrinologische Rücksprache verlängern (aplastische Anämie-Risiko bei Langzeit/Überdosierung — Fachinfo)</li>
-          <li>Kontraindikation: Bekannte Allergie, schwere Niereninsuffizienz</li>
-          <li><strong>Labornachsorge:</strong> erste TSH-Kontrolle typisch <strong>ca. 14 Tage nach KM</strong></li>
+          <li><strong>Tagesdosis:</strong> bis zu <strong>1.000 mg Natriumperchlorat pro Tag</strong></li>
+          <li><strong>Dauer:</strong> 1–2 Wochen</li>
+          <li><strong>Wirkmechanismus:</strong> kompetitive Hemmung des Natrium-Iodid-Symporters → reduzierte Jodaufnahme in die Schilddrüse</li>
+          <li><strong>Kontraindikation:</strong> bekannte Allergie, schwere Niereninsuffizienz</li>
+          <li><strong>Cave:</strong> aplastische Anämie bei Langzeit/Überdosierung — Blutbildkontrollen</li>
         </ul>
-        <div class="guideline-source">Quelle: DGN-Leitlinie 2020 / ETA 2022 · Dauer <strong>ca. 14 Tage</strong> = vereinheitlichter Praxisstandard dieses Tools</div>
+        <div class="guideline-source">Quelle: ETA 2021 Recommendation 21 (maximale Tagesdosis 1.000 mg, Dauer 1–2 Wochen zur Prophylaxe)</div>
       </div>
       <div class="card">
-        <div class="card-title">Thyreostatika-Prophylaxe</div>
-        <h3>Indikation: Hochrisikogruppe (wenn KM unumgänglich)</h3>
-        <div class="warn-box" style="margin-top:0.75rem">Nur nach Abwägung und in Absprache mit Endokrinologie. Thyreostatika hemmen die Synthese, nicht die Freisetzung von Schilddrüsenhormonen.</div>
+        <div class="card-title">Schema B: Methimazol/Thiamazol (ETA 2021 Recommendation 9)</div>
         <ul class="rec-list" style="font-size:13.5px">
-          <li>Thiamazol (Methizol®) 10–30 mg/d oder Carbimazol 10–20 mg/d</li>
-          <li>Beginn ≥24 Std. vor KM-Gabe</li>
-          <li><strong>Fortführung Thyreostatikum nach KM:</strong> im gleichen Praxisrahmen wie Perchlorat typisch <strong>ca. 14 Kalendertage</strong> (≈2 Wochen), endokrinologische Kontrolle; danach Entscheidung über Fortführung</li>
-          <li>In Kombination mit Perchlorat bei sehr hohem Risiko möglich; beide Medikamente jeweils nach Schema links bzw. oben, Dauer jeweils <strong>ca. 14 Tage</strong></li>
-          <li>Cave: Agranulozytoserisiko — Blutbild-Monitoring</li>
+          <li><strong>Indikation:</strong> bei manifester oder schwerer/prolongierter Hyperthyreose; in Kombination mit Perchlorat bei höchstem Risiko</li>
+          <li><strong>Dosis:</strong> Methimazol/Thiamazol 20–40 mg/d (in Kombination mit Perchlorat in ausgewählten Fällen)</li>
+          <li><strong>Beginn:</strong> vor oder unmittelbar nach KM-Gabe</li>
+          <li><strong>Cave:</strong> Agranulozytoserisiko — Blutbild-Monitoring</li>
+          <li>Methimazol hemmt die Hormonsynthese, nicht die Freisetzung gespeicherter Hormone → verzögerter Wirkungseintritt</li>
         </ul>
-        <div class="guideline-source">Quelle: ESC 2022 / DGN 2020 · Fortführung <strong>ca. 14 Tage</strong> = gleicher Praxisstandard wie Perchlorat-Karte</div>
+        <div class="guideline-source">Quelle: ETA 2021 Recommendation 9 + Tab. 1</div>
       </div>
     </div>
+
     <div class="card">
-      <div class="card-title">Algorithmus: Vorgehen vor KM-Gabe</div>
+      <div class="card-title">Deutscher Klinikstandard in Universitätskliniken (Tropfen-Schema)</div>
+      <div class="info-box" style="margin-top:0.5rem">In deutschen Universitätskliniken hat sich ein <strong>Irenat®-Tropfen-Schema</strong> etabliert, das inhaltlich nahe an den ETA-Empfehlungen liegt. 1 Tropfen Irenat® entspricht ca. 15 mg Natriumperchlorat — somit liegt das Schema bei 900 mg/d (nahe der ETA-Obergrenze von 1.000 mg/d).</div>
+
+      <h3 style="font-size:0.95rem;font-weight:600;margin-top:0.75rem;margin-bottom:0.5rem">Elektive KM-Gabe bei Risikopatienten</h3>
+      <ul class="rec-list" style="font-size:13.5px">
+        <li><strong>Indikation:</strong> latente Hyperthyreose und/oder Knotenstruma und/oder geringgradige Schilddrüsenautonomie</li>
+        <li><strong>Dosis:</strong> 3 × 20 Tropfen Perchlorat (Irenat®) täglich (≈ 900 mg/d)</li>
+        <li><strong>Beginn:</strong> 2–4 Stunden vor Untersuchung</li>
+        <li><strong>Dauer der Therapie:</strong> 14 Tage</li>
+      </ul>
+
+      <h3 style="font-size:0.95rem;font-weight:600;margin-top:0.75rem;margin-bottom:0.5rem">Notfall-KM ohne 2–4 h Vorlauf</h3>
+      <ul class="rec-list" style="font-size:13.5px">
+        <li><strong>Indikation:</strong> Risikopatient + KM-Gabe ohne einhaltbaren Vorlauf</li>
+        <li><strong>Initialdosis:</strong> 60 Tropfen Perchlorat unmittelbar vor Untersuchung</li>
+        <li><strong>Erhaltung:</strong> 3 × 20 Tropfen/d für insgesamt 14 Tage</li>
+      </ul>
+
+      <h3 style="font-size:0.95rem;font-weight:600;margin-top:0.75rem;margin-bottom:0.5rem">Manifeste Hyperthyreose / höhergradige Autonomie bei vitaler Indikation</h3>
+      <ul class="rec-list" style="font-size:13.5px">
+        <li><strong>Indikation:</strong> nur bei vitaler Indikation</li>
+        <li><strong>Perchlorat:</strong> Irenat-Schema wie oben</li>
+        <li><strong>Plus Thiamazol:</strong> 20–40 mg (Rücksprache Endokrinologe)</li>
+      </ul>
+
+      <div class="guideline-source">Quelle: Etablierter Klinikstandard deutscher Universitätskliniken (z.B. Klinikum Passau KM-Empfehlung 4.0; vergleichbare Protokolle in zahlreichen weiteren Häusern). Inhaltlich kompatibel mit ETA 2021 Recommendation 21.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Vorgehen bei manifester Hyperthyreose und vitaler KM-Indikation (ETA 2021 Tab. 1)</div>
+      <p class="prose-block">Gemäß ETA 2021 Tab. 1: Bei manifester Hyperthyreose sind jodhaltige KM <strong>generell kontraindiziert</strong>. <strong>Ausnahme: lebensrettende Eingriffe.</strong></p>
+      <ul class="rec-list" style="font-size:13.5px">
+        <li>Alternative Bildgebung erwägen: MRT, Nativ-CT, Echokardiographie (auch Belastungs- und transösophageale Echokardiographie falls verfügbar und klinisch indiziert), Sonographie</li>
+        <li>Therapie der Hyperthyreose <strong>vor oder unmittelbar nach</strong> der radiologischen Untersuchung beginnen (Thyreostatikum mit oder ohne Natriumperchlorat)</li>
+        <li>Bei Patienten bereits unter ATD: Dosiseskalation und/oder Perchlorat-Zugabe erwägen</li>
+      </ul>
+      <div class="guideline-source">Quelle: ETA 2021 Tab. 1</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Therapie der KM-induzierten Hyperthyreose (ETA 2021)</div>
+      <p class="prose-block">Die KM-induzierte Hyperthyreose entwickelt sich meist innerhalb von <strong>3–4 Wochen</strong> nach Exposition. Der Verlauf ist meist selbstlimitierend (1–18 Monate), kann jedoch bei älteren Patienten und kardiovaskulärer Grunderkrankung schwere Komplikationen verursachen.</p>
+      <ul class="rec-list" style="font-size:13.5px">
+        <li>Endokrinologische Konsultation empfohlen</li>
+        <li>Individualisierter Ansatz basierend auf klinischen Symptomen, Ätiologie, Alter, Komorbiditäten</li>
+        <li><strong>Milde Fälle:</strong> engmaschige Überwachung, Vermeidung weiterer Jodexposition, ggf. β-adrenerge Blocker</li>
+        <li><strong>Schwere Fälle:</strong> Methimazol/Thiamazol 20–40 mg/Tag; bei fehlender oder partieller Response → Überweisung in spezialisiertes Zentrum, Dosiseskalation und/oder Perchlorat-Zugabe (ETA 2021 Recommendation 9)</li>
+        <li><strong>ETA 2021 starke Empfehlung:</strong> Auch milde KM-induzierte Hyperthyreose <em>behandeln</em> bei Patienten >65 Jahre mit Komorbiditäten (Herzerkrankung, Diabetes, Niereninsuffizienz, Z.n. Schlaganfall)</li>
+      </ul>
+      <div class="guideline-source">Quelle: ETA 2021 Recommendation 9 und 22</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Therapie der KM-induzierten Hypothyreose (ETA 2021)</div>
+      <p class="prose-block">Die KM-induzierte Hypothyreose kann sich <strong>bis zu 2 Jahre</strong> nach KM-Exposition entwickeln. Meist subklinisch und selbstlimitierend (Wochen bis Monate), bei Autoimmunthyreoiditis kann sie jedoch permanent sein.</p>
+      <ul class="rec-list" style="font-size:13.5px">
+        <li>Individualisierter Ansatz inklusive Anti-TPO-Antikörper-Bestimmung</li>
+        <li>In den meisten Fällen: <strong>engmaschige Überwachung ohne Hormonsubstitution</strong></li>
+        <li>Temporäre L-Thyroxin-Therapie erwägen bei: Patienten mit overter Hypothyreose, jüngeren Patienten mit subklinischer Hypothyreose, zugrundeliegender chronischer Autoimmunthyreoiditis, Frauen mit Kinderwunsch</li>
+      </ul>
+      <div class="guideline-source">Quelle: ETA 2021</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Algorithmus: Vorgehen vor KM-Gabe (ETA 2021)</div>
       <table class="risk-table">
-        <thead><tr><th>Schritt</th><th>Maßnahme</th><th>Zeitpunkt</th></tr></thead>
+        <thead><tr><th>Schritt</th><th>Maßnahme</th></tr></thead>
         <tbody>
-          <tr><td style="font-family:'IBM Plex Mono',monospace;color:var(--brand)">01</td><td>Anamnese: Schilddrüsenerkrankung, Medikamente (<strong>Amiodaron</strong> — von KM-Freigabe über Labormaske ausschließen), <strong>geplante RIT</strong> (Jodabstand 4–8+ Wochen), Jodmangelgebiet</td><td>Vor Anforderung</td></tr>
-          <tr><td style="font-family:'IBM Plex Mono',monospace;color:var(--brand)">02</td><td>Risikostratifizierung (s. Risikogruppen)</td><td>Vor Anforderung</td></tr>
-          <tr><td style="font-family:'IBM Plex Mono',monospace;color:var(--brand)">03</td><td>Bei Risiko: TSH abnehmen (bei latenter Hyp.: + fT3/fT4)</td><td>Ggf. Vortag</td></tr>
-          <tr><td style="font-family:'IBM Plex Mono',monospace;color:var(--brand)">04</td><td>Bei TSH supprimiert/erniedrigt: Endokrinologie kontaktieren</td><td>Unmittelbar</td></tr>
-          <tr><td style="font-family:'IBM Plex Mono',monospace;color:var(--brand)">05</td><td>Prophylaxe einleiten falls indiziert (s. Schema)</td><td>2–24 Std. vorher</td></tr>
-          <tr><td style="font-family:'IBM Plex Mono',monospace;color:var(--brand)">06</td><td>KM-Gabe dokumentieren (Menge, Art, Jodgehalt)</td><td>Intervention</td></tr>
-          <tr><td style="font-family:'IBM Plex Mono',monospace;color:var(--brand)">07</td><td>TSH-Nachkontrolle bei allen Risikopatienten</td><td>ca. 14 Tage post KM (bei Prophylaxe; weiter nach Verlauf)</td></tr>
+          <tr><td style="font-family:'IBM Plex Mono',monospace;color:var(--brand)">01</td><td><strong>Klinische Untersuchung:</strong> Struma, Symptome/Zeichen einer Hyper-/Hypothyreose, SD-Anamnese</td></tr>
+          <tr><td style="font-family:'IBM Plex Mono',monospace;color:var(--brand)">02</td><td><strong>Risikofaktoren prüfen</strong> (Knotenstruma, latenter M. Basedow, Jodmangelgebiet; Hashimoto, Z.n. SD-OP, Nierenerkrankung)</td></tr>
+          <tr><td style="font-family:'IBM Plex Mono',monospace;color:var(--brand)">03</td><td><strong>TSH-Bestimmung</strong> nur bei Patienten <em>mit Risikofaktoren</em>; bei pathologischem TSH → fT4 und/oder fT3 ergänzen</td></tr>
+          <tr><td style="font-family:'IBM Plex Mono',monospace;color:var(--brand)">04</td><td>Bei manifester Hyperthyreose: <strong>KM kontraindiziert</strong> (außer lebensrettend); alle anderen Konstellationen: <strong>KM nicht kontraindiziert</strong></td></tr>
+          <tr><td style="font-family:'IBM Plex Mono',monospace;color:var(--brand)">05</td><td>Prophylaxe (Schema A/B oder deutscher Klinikstandard) nur in ausgewählten Hochrisikofällen — <em>nicht generell</em></td></tr>
+          <tr><td style="font-family:'IBM Plex Mono',monospace;color:var(--brand)">06</td><td>KM-Gabe dokumentieren (Menge, Art, Jodgehalt)</td></tr>
+          <tr><td style="font-family:'IBM Plex Mono',monospace;color:var(--brand)">07</td><td><strong>TSH-Kontrolle 3–4 Wochen post KM</strong> bei Hochrisikopatienten; bei WHO-Struma Grad 2 oder Älteren erwägen</td></tr>
         </tbody>
       </table>
     </div>
@@ -486,55 +679,188 @@
 
   <!-- LEITLINIEN -->
   <div id="leitlinien" class="section">
-    <h2>Leitlinienempfehlungen (Zusammenfassung)</h2>
-    <div class="info-box">Dargestellt sind die aktuellen Empfehlungen gemäß DGN-Leitlinie (2020), ETA-Leitlinie (2022) und ESC-Leitlinie (2022) zur Prävention und Behandlung der jodinduzierten Hyperthyreose.</div>
+    <h2>Primärquellen — verwendete Leitlinien</h2>
+    <div class="info-box">Dargestellt sind die zugrundeliegenden Primärquellen für die Empfehlungen dieses Tools.</div>
+
     <div class="card">
-      <div class="card-title">DGN — Empfehlungen (Kurzfassung 2020)</div>
-      <table class="risk-table">
-        <thead><tr><th>Situation</th><th>Empfehlung (Empfehlungsgrad)</th></tr></thead>
-        <tbody>
-          <tr><td>Gesunder Patient ohne Schilddrüsenanamnese</td><td>Kein Routine-TSH erforderlich vor KM-Gabe. <span class="status-pill pill-green">Empfehlungsgrad B</span></td></tr>
-          <tr><td>Risikogruppen (s.o.)</td><td>TSH vor KM-Gabe obligat. <span class="status-pill pill-red">Empfehlungsgrad A</span></td></tr>
-          <tr><td>Latente Hyperthyreose vor elektiver KM-Gabe</td><td>Perchlorat-Prophylaxe, Endokrinologie konsultieren. <span class="status-pill pill-orange">Empfehlungsgrad B</span></td></tr>
-          <tr><td>Manifeste Hyperthyreose</td><td>Jodhaltige KM kontraindiziert (elektiv). <span class="status-pill pill-red">Empfehlungsgrad A</span></td></tr>
-          <tr><td>Notfall-KM bei manifester Hyperthyreose</td><td>Nur bei vitaler Indikation; Prophylaxe wenn zeitlich möglich. <span class="status-pill pill-orange">Empfehlungsgrad C</span></td></tr>
-          <tr><td>Radioiod-Therapie geplant</td><td>Jodhaltige KM für mind. 4–8 Wochen vor RIT vermeiden (häufig länger je nach Protokoll); <strong>RIT nicht unter frischer KM-Jodblockade</strong>. <span class="status-pill pill-red">Empfehlungsgrad A</span></td></tr>
-        </tbody>
-      </table>
-      <div class="guideline-source">DGN-Leitlinie Schilddrüse 2020</div>
+      <div class="card-title">ETA 2021 — Hauptquelle für KM-induzierte SD-Dysfunktion</div>
+      <p class="prose-block"><strong>Bednarczuk T, Brix TH, Schima W, Zettinig G, Kahaly GJ.</strong> 2021 European Thyroid Association Guidelines for the Management of Iodine-Based Contrast Media-Induced Thyroid Dysfunction. <em>European Thyroid Journal</em> 2021;10(4):269–284. DOI: 10.1159/000517175. PubMed: 34395299.</p>
+      <p class="prose-block" style="margin-top:0.5rem"><strong>Zentrale Punkte:</strong></p>
+      <ul class="rec-list" style="font-size:13.5px">
+        <li>Manifeste Hyperthyreose ist Kontraindikation für elektive jodhaltige KM</li>
+        <li>Kein Routine-TSH-Screening bei asymptomatischen Patienten ohne Risikofaktoren</li>
+        <li>TSH-Bestimmung vor KM nur bei Patienten mit Risikofaktoren</li>
+        <li>Präventive Therapie mit Methimazol/Perchlorat: "debated" — keine starke Empfehlung</li>
+        <li><strong>Recommendation 9:</strong> Perchlorat in Kombination mit Methimazol als therapeutische Option bei KM-induzierter Hyperthyreose, max. Tagesdosis 1.000 mg über bis zu 4 Wochen</li>
+        <li><strong>Recommendation 21:</strong> Perchlorat zur <em>Prophylaxe</em> der KM-induzierten Hyperthyreose: <strong>1.000 mg/Tag für 1–2 Wochen</strong></li>
+        <li><strong>Recommendation 22 (starke Empfehlung):</strong> Auch milde KM-induzierte Hyperthyreose behandeln bei Patienten >65 Jahre mit Komorbiditäten</li>
+        <li>KM-induzierte Hyperthyreose: meist innerhalb 3–4 Wochen nach Exposition, selbstlimitierend 1–18 Monate</li>
+        <li>KM-induzierte Hypothyreose: bis zu 2 Jahre nach Exposition möglich</li>
+      </ul>
     </div>
+
     <div class="card">
-      <div class="card-title">ETA / ESC — Europäische Empfehlungen</div>
-      <table class="risk-table">
-        <thead><tr><th>Kontext</th><th>Empfehlung</th><th>Quelle</th></tr></thead>
-        <tbody>
-          <tr><td>Schilddrüsenfunktionsstörung vor Amiodaron</td><td>TSH, fT3, fT4 vor Beginn und alle 6 Monate unter Therapie</td><td><span class="status-pill pill-blue">ESC 2022</span></td></tr>
-          <tr><td>Geplante Radioiodtherapie (RIT)</td><td>Keine elektive jodhaltige KM im kontraindizierten Zeitfenster vor RIT; RIT erst nach ausreichendem Jodabstand (mind. 4–8 Wochen, länger nach Hochdosis/lokal)</td><td><span class="status-pill pill-red">DGN A / ETA</span></td></tr>
-          <tr><td>Laufende Amiodaron-Therapie + elektive KM</td><td>Jodhaltige KM vermeiden/kontraindiziert; keine alleinige Labormaske — Endokrinologie/Kardiologie</td><td><span class="status-pill pill-red">ETA / ESC</span></td></tr>
-          <tr><td>Knotige Struma vor Großeingriffen mit KM</td><td>TSH präinterventionell, ggf. Szintigraphie bei TSH &lt;1,0</td><td><span class="status-pill pill-blue">ETA 2022</span></td></tr>
-          <tr><td>Schwangerschaft + KM-Indikation</td><td>Jodhaltige KM nur bei strenger Indikation; neonatales TSH-Screening engmaschig</td><td><span class="status-pill pill-red">ETA 2022</span></td></tr>
-          <tr><td>Neonatale Schilddrüsenfunktion nach maternalem KM</td><td>TSH beim Neugeborenen in ersten 2–4 Wochen kontrollieren</td><td><span class="status-pill pill-orange">ETA 2022</span></td></tr>
-          <tr><td>Hochdosis-Jod und Euthyreose</td><td>In der Regel kein klinisches Risiko; Nachkontrolle bei Symptomen</td><td><span class="status-pill pill-green">ETA 2022</span></td></tr>
-        </tbody>
-      </table>
+      <div class="card-title">Deutscher Klinikstandard in Universitätskliniken</div>
+      <p class="prose-block">In Deutschland gibt es <strong>keine zentrale DGN- oder DRG-Leitlinie</strong> zur KM-induzierten Hyperthyreose. In deutschen Universitätskliniken hat sich jedoch ein einheitlicher Klinikstandard etabliert (z.B. Klinikum Passau KM-Empfehlung 4.0 und vergleichbare Protokolle in zahlreichen weiteren Häusern):</p>
+      <ul class="rec-list" style="font-size:13.5px">
+        <li><strong>Elektiv bei Risikopatienten:</strong> 3 × 20 Tropfen Perchlorat (Irenat®) täglich, Beginn 2–4 Std. vor Untersuchung, Dauer 14 Tage</li>
+        <li><strong>Notfall ohne Vorlauf:</strong> 60 Tropfen vor Untersuchung, dann 3 × 20 Tropfen/d für 14 Tage</li>
+        <li><strong>Manifeste Hyperthyreose bei vitaler Indikation:</strong> Perchlorat-Schema wie oben PLUS Thiamazol 20–40 mg (Rücksprache Endokrinologe)</li>
+      </ul>
+      <p class="prose-block" style="margin-top:0.5rem">Inhaltlich kompatibel mit ETA 2021 Recommendation 21 (1 Tropfen Irenat® ≈ 15 mg → 3×20 Tropfen ≈ 900 mg/d, nahe der ETA-Obergrenze von 1.000 mg/d).</p>
     </div>
+
     <div class="card">
-      <div class="card-title">Wichtige Differenzialdiagnosen der KM-induzierten Hyperthyreose</div>
+      <div class="card-title">ESUR Contrast Media Guidelines v10.0 (2018)</div>
+      <p class="prose-block"><strong>European Society of Urogenital Radiology (ESUR).</strong> ESUR Guidelines on Contrast Agents, Version 10.0, March 2018.</p>
+      <p class="prose-block" style="margin-top:0.5rem"><strong>Zentrale radiologische Punkte:</strong></p>
+      <ul class="rec-list" style="font-size:13.5px">
+        <li>Manifeste Hyperthyreose: Kontraindikation für jodhaltiges KM</li>
+        <li>Risikopatienten (M. Basedow, Knotenstruma, Schilddrüsenautonomie) — besonders bei älteren Patienten oder in Jodmangelgebieten</li>
+        <li>Washout-Periode von bis zu 2 Monaten vor Radioiodtherapie/-szintigraphie</li>
+        <li>Monitoring von Risikopatienten nach KM-Gabe empfohlen</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">DGN S1-Handlungsempfehlung Radiojodtherapie 2022</div>
+      <p class="prose-block"><strong>Deutsche Gesellschaft für Nuklearmedizin (DGN).</strong> S1-Handlungsempfehlung: Radiojodtherapie bei benignen Schilddrüsenerkrankungen. <em>AWMF-Register Nr. 031-003</em>, Stand 06/2022.</p>
+      <p class="prose-block" style="margin-top:0.5rem"><strong>Relevanz:</strong> Definiert den Jodabstand vor RIT — mindestens 4–8 Wochen, je nach KM-Dosis und Nierenfunktion länger.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">S3-Leitlinie Schilddrüsenkarzinom 2025</div>
+      <p class="prose-block"><strong>Deutsche Krebsgesellschaft, Deutsche Krebshilfe, AWMF.</strong> S3-Leitlinie Schilddrüsenkarzinom Version 1.0, Juli 2025. <em>AWMF-Register Nr. 031-056OL</em>.</p>
+      <p class="prose-block" style="margin-top:0.5rem"><strong>Relevanz:</strong> Aktuelle deutsche Empfehlungen zu Diagnostik, Therapie und Nachsorge differenzierter und nicht-jodspeichernder Schilddrüsenkarzinome — inkl. Bildgebungs-Algorithmen (siehe Karzinom-Tab).</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">ESC Heart Failure Guidelines 2021</div>
+      <p class="prose-block"><strong>McDonagh TA et al.</strong> 2021 ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure. <em>European Heart Journal</em> 2021;42(36):3599–3726.</p>
+      <p class="prose-block" style="margin-top:0.5rem"><strong>Relevanz:</strong> Empfehlungen zum Monitoring der Schilddrüsenfunktion unter Amiodaron-Therapie (vor Beginn und alle 6 Monate).</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Differenzialdiagnose: Amiodaron-induzierte Hyperthyreose Typ I vs. Typ II</div>
       <div class="constellation-grid">
         <div class="dd-box">
           <div class="dd-type-title dd-type-i">Typ I (Jod-Jod)</div>
-          <ul class="rec-list" style="font-size:12.5px"><li>Vorbestehende Schilddrüsenpathologie (Autonomie, Struma)</li><li>Exzessive Hormonsynthese durch Jodüberschuss</li><li>Therapie: Thyreostatika + Perchlorat</li><li>Doppler: normaler Fluss</li></ul>
+          <ul class="rec-list" style="font-size:12.5px">
+            <li>Vorbestehende Schilddrüsenpathologie (Autonomie, Struma)</li>
+            <li>Exzessive Hormonsynthese durch Jodüberschuss</li>
+            <li>Therapie: Thyreostatika + Perchlorat</li>
+            <li>Doppler: normaler oder vermehrter Fluss</li>
+          </ul>
         </div>
         <div class="dd-box">
           <div class="dd-type-title dd-type-ii">Typ II (Destruktiv)</div>
-          <ul class="rec-list" style="font-size:12.5px"><li>Gesunde Schilddrüse, meist durch Amiodaron</li><li>Destruktive Thyreoiditis → Hormonfreisetzung</li><li>Therapie: Kortikosteroide</li><li>Doppler: reduzierter Fluss</li></ul>
+          <ul class="rec-list" style="font-size:12.5px">
+            <li>Gesunde Schilddrüse, durch Amiodaron-Zytotoxizität</li>
+            <li>Destruktive Thyreoiditis → passive Hormonfreisetzung</li>
+            <li>Therapie: Glukokortikoide (Prednisolon 40–60 mg/d)</li>
+            <li>Doppler: reduzierter Fluss</li>
+          </ul>
         </div>
       </div>
+      <div class="guideline-source">Quelle: ETA 2018 (Amiodaron-induced thyrotoxicosis) · in dieser Leitlinie nicht primär adressiert, aber relevant bei Amiodaron-Patienten mit KM-Indikation</div>
     </div>
   </div>
+  <!-- KARZINOM -->
+  <div id="karzinom" class="section">
+    <h2>Schilddrüsenkarzinom & jodhaltige Kontrastmittel</h2>
+    <div class="warn-box"><strong>Zentrales Prinzip:</strong> Jodhaltige Kontrastmittel führen zu einer wochen- bis monatelangen Jodbeladung der Schilddrüse und damit zu einer relevanten Beeinträchtigung von <strong>Radioiod-Diagnostik (¹³¹I/¹²³I-Szintigraphie)</strong> und <strong>Radioiodtherapie (RIT)</strong>. Bei Patienten mit (V.a.) differenziertem Schilddrüsenkarzinom (DTC) ist die Indikation für jodhaltige KM daher streng zu prüfen.</div>
+
+    <div class="card">
+      <div class="card-title">Klinische Schlüsselsituationen für den Radiologen</div>
+      <table class="risk-table">
+        <thead><tr><th>Situation</th><th>KM-Empfehlung</th><th>Bemerkung</th></tr></thead>
+        <tbody>
+          <tr><td>V.a. Schilddrüsenkarzinom (sonographisch suspekter Knoten, TIRADS 4–5)</td><td>Jodhaltige KM bei elektiver CT vermeiden, wenn Radioiod-Diagnostik/-Therapie absehbar</td><td>Sonographie und ggf. MRT (Gadolinium) bevorzugen</td></tr>
+          <tr><td>Bekanntes DTC vor geplanter Radioiodtherapie (RIT)</td><td>Jodhaltige KM <strong>kontraindiziert</strong> im Intervall vor RIT</td><td>Mind. 4–8 Wochen Abstand; bei Hochdosis-KM ggf. länger (Urin-Jod-Bestimmung erwägen)</td></tr>
+          <tr><td>DTC-Nachsorge mit ¹³¹I-Ganzkörperszintigraphie</td><td>Jodhaltige KM mind. 4–8 Wochen vorher meiden</td><td>Falsch-negative Befunde durch Jod-Verdünnungseffekt</td></tr>
+          <tr><td>Staging-CT bei aggressivem/medullärem/anaplastischem SD-Karzinom</td><td>Jodhaltige KM erlaubt, da keine RIT geplant</td><td>MTC, ATC, schlecht differenziertes Karzinom = keine Jodspeicherung</td></tr>
+          <tr><td>Notfall-CT mit KM bei DTC-Patient</td><td>Vitale Indikation überwiegt</td><td>RIT-Termin ggf. verschieben; Endokrinologie/Nuklearmedizin informieren</td></tr>
+          <tr><td>Inzidentell entdeckter SD-Knoten im CT mit KM</td><td>KM-Effekt für 4–8 Wochen beachten</td><td>Sonographie zur Weiterabklärung; Punktion erst nach Jod-Washout planen</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Empfohlene Wartezeiten zwischen jodhaltiger KM-Gabe und Jod-basierter Diagnostik/Therapie</div>
+      <table class="risk-table">
+        <thead><tr><th>Folgeprozedur</th><th>Mindestabstand</th><th>Quelle / Anmerkung</th></tr></thead>
+        <tbody>
+          <tr><td>¹³¹I-Ganzkörperszintigraphie (Diagnostik)</td><td>4–8 Wochen</td><td>DGN-Leitlinie; bei Niereninsuffizienz länger</td></tr>
+          <tr><td>Radioiodtherapie (RIT) bei DTC</td><td>6–8 Wochen (Standard)</td><td>Bei Hochdosis-KM, Niereninsuffizienz, multipler KM-Gabe: 3–6 Monate</td></tr>
+          <tr><td>¹²³I-Szintigraphie</td><td>4–6 Wochen</td><td>Empfindlich gegenüber Jod-Verdünnung</td></tr>
+          <tr><td>Tc-99m-Pertechnetat-Szintigraphie</td><td>2–4 Wochen</td><td>Weniger empfindlich, aber dennoch Beeinflussung möglich</td></tr>
+          <tr><td>Urin-Jod-Bestimmung (bei unklarem Status)</td><td>—</td><td>Ziel vor RIT: Urin-Jod &lt;200 µg/L (idealerweise &lt;100 µg/L)</td></tr>
+        </tbody>
+      </table>
+      <div style="font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--muted);padding:4px 8px;background:#f3f4f6;border-radius:4px;display:inline-block;margin-top:6px">S3-Leitlinie Schilddrüsenkarzinom v1.0 (Juli 2025) — AWMF 031-056OL · DGN S1 RIT 2022 (031-003) · ETA 2021</div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">Differenziertes SD-Karzinom (DTC)</div>
+        <h3 style="font-size:0.95rem;font-weight:600;margin-bottom:0.5rem">Papilläres &amp; follikuläres Karzinom</h3>
+        <ul class="rec-list" style="font-size:13.5px">
+          <li>Speichern Jod → RIT zur Ablation und Therapie wirksam</li>
+          <li>Jodhaltige KM beeinträchtigen RIT-Effektivität</li>
+          <li>Vor jeder geplanten RIT: Jod-Karenz prüfen</li>
+          <li>Tg/anti-Tg-Antikörper als Tumormarker im Verlauf</li>
+          <li>Staging primär per Sonographie + MRT, CT nur bei spezifischer Indikation</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title">Nicht-Jod-speichernde SD-Karzinome</div>
+        <h3 style="font-size:0.95rem;font-weight:600;margin-bottom:0.5rem">MTC · ATC · schlecht differenziert</h3>
+        <ul class="rec-list" style="font-size:13.5px">
+          <li>Medulläres SD-Karzinom (MTC): Calcitonin/CEA als Marker</li>
+          <li>Anaplastisches SD-Karzinom (ATC): hochaggressiv, FDG-PET-CT bevorzugt</li>
+          <li>Keine RIT — daher keine Jodkarenz erforderlich</li>
+          <li>Jodhaltige KM für Staging/Verlauf erlaubt</li>
+          <li>MRT v.a. bei Halsweichteilen und Trachea-Infiltration</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Bildgebung bei Schilddrüsenkarzinom — Übersicht</div>
+      <table class="risk-table">
+        <thead><tr><th>Modalität</th><th>Indikation</th><th>KM-Aspekt</th></tr></thead>
+        <tbody>
+          <tr><td>Sonographie (B-Mode + Farbdoppler)</td><td>Erstdiagnostik, Knotencharakterisierung (TIRADS), Lymphknoten-Staging zervikal</td><td>Kein KM erforderlich</td></tr>
+          <tr><td>Feinnadelpunktion (FNAC)</td><td>Bei TIRADS 4–5 oder &gt;1 cm; Bethesda-Klassifikation</td><td>Vor jodhaltiger KM-Gabe planen</td></tr>
+          <tr><td>MRT (Gadolinium)</td><td>Halsweichteile, mediastinale Ausdehnung, Tracheainfiltration</td><td><strong>Bevorzugt</strong> bei DTC vor RIT — kein Jod</td></tr>
+          <tr><td>CT mit jodhaltigem KM</td><td>Pulmonale/mediastinale Metastasen, Notfall-Staging</td><td>Bei DTC: Jodkarenz vor RIT beachten</td></tr>
+          <tr><td>FDG-PET-CT</td><td>Tg-positives, Iod-negatives DTC; ATC; MTC mit hoher Calcitonin-Verdopplungszeit</td><td>Geringe KM-Menge; bei Niedrigdosis-CT meist ohne jodhaltiges KM möglich</td></tr>
+          <tr><td>¹³¹I/¹²³I-Szintigraphie</td><td>DTC-Nachsorge, Restgewebe/Metastasen</td><td>Strikte Jodkarenz erforderlich (4–8 Wochen)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Praktischer Algorithmus für den Radiologen</div>
+      <table class="risk-table">
+        <thead><tr><th>Schritt</th><th>Maßnahme</th></tr></thead>
+        <tbody>
+          <tr><td style="font-family:'IBM Plex Mono',monospace;color:var(--brand)">01</td><td>Anamnese: Bekanntes SD-Karzinom? Z.n. Thyreoidektomie? Geplante RIT/Szintigraphie?</td></tr>
+          <tr><td style="font-family:'IBM Plex Mono',monospace;color:var(--brand)">02</td><td>Bei DTC oder geplanter RIT: KM-Indikation kritisch hinterfragen — Alternative MRT?</td></tr>
+          <tr><td style="font-family:'IBM Plex Mono',monospace;color:var(--brand)">03</td><td>Wenn jodhaltige KM unverzichtbar: Nuklearmedizin/Endokrinologie kontaktieren, RIT-Termin ggf. verschieben</td></tr>
+          <tr><td style="font-family:'IBM Plex Mono',monospace;color:var(--brand)">04</td><td>Dokumentation der KM-Gabe (Substanz, Menge, Datum) im Befund — wichtig für Folgeplanung</td></tr>
+          <tr><td style="font-family:'IBM Plex Mono',monospace;color:var(--brand)">05</td><td>Ggf. Urin-Jod-Bestimmung vor geplanter RIT (Ziel &lt;200 µg/L)</td></tr>
+          <tr><td style="font-family:'IBM Plex Mono',monospace;color:var(--brand)">06</td><td>Bei MTC/ATC/anaplastischem Karzinom: keine Jodkarenz nötig — KM regulär möglich</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="info-box"><strong>Merke:</strong> Die Jodbelastung durch ein einziges Standard-CT-KM (≈ 13.500–37.000 µg) übersteigt den täglichen Bedarf um den Faktor 80–200 und kann die Effektivität einer nachfolgenden Radioiodtherapie über Wochen reduzieren. Bei Patienten mit DTC ist daher eine enge Abstimmung mit der Nuklearmedizin essenziell.</div>
+  </div>
+
   <footer class="page-footer" role="contentinfo">
     Dieses Tool dient der klinischen Entscheidungsunterstützung und ersetzt keine individuelle ärztliche Beurteilung.<br>
-    Leitlinienstand: DGN 2020 · ETA 2022 · ESC 2022 · Stand April 2026<br>
+    Quellen: ETA 2021 (Bednarczuk et al., Eur Thyroid J 10:269) · ESUR Contrast Media v10.0 (2018) · DGN S1 RIT 2022 (AWMF 031-003) · S3 Schilddrüsenkarzinom 2025 (AWMF 031-056OL) · ESC HF 2021 · Deutscher Klinikstandard in Universitätskliniken · Stand April 2026<br>
     <span class="page-byline">Made by Dardan</span>
   </footer>
 </div>
@@ -546,46 +872,52 @@
       <button type="button" class="modal-close" onclick="closeVitalKmModal()" aria-label="Schließen">×</button>
     </div>
     <div class="modal-body">
-      <p style="margin:0 0 0.75rem;color:var(--text)">Kurzfassung für die <strong>Notfallsituation</strong>, wenn keine Zeit für vollständige thyreostatische Voroptimierung besteht und die KM-Gabe vital indiziert ist. Maßnahmen sind an Endokrinologie/Intensivmedizin zu koppeln; Dosierungen individuell an Alter, Komorbidität und V.a. thyreotoxische Krise anpassen.</p>
-      <h4>1. Abwägung &amp; Organisation</h4>
+      <p style="margin:0 0 0.75rem;color:var(--text)">Kurzfassung für die <strong>vitale / lebensrettende</strong> KM-Indikation bei overt Hyperthyreose nach ETA 2021 Tab. 1.</p>
+
+      <h4>1. Abwägung &amp; Organisation (ETA 2021)</h4>
       <ul>
-        <li>Multidisziplinäre Entscheidung (Radiologie, klinische Fachdisziplin, Endokrinologie, ggf. Intensivmedizin).</li>
-        <li>Nicht-jodhaltige Bildgebung (MRT mit GD-KM, sonographische Alternativen) erneut prüfen.</li>
-        <li>Bei durchgeführter Gabe: niedrigstmögliche KM-Menge, Hydratation, engmaschiges Monitoring (Herzfrequenz, Temperatur, neurologischer Status, EKG).</li>
+        <li>Multidisziplinäre Entscheidung (Radiologie, Notfallmedizin, Endokrinologie, Intensivmedizin)</li>
+        <li>Alternative Bildgebung erneut prüfen (MRT, Nativ-CT, Echokardiographie incl. TEE, Sonographie)</li>
+        <li>Niedrigstmögliche KM-Menge; Hydratation; engmaschiges Monitoring (HF, Temperatur, neurologischer Status, EKG)</li>
+        <li>Behandlung der Hyperthyreose <strong>vor</strong> oder <strong>unmittelbar nach</strong> der radiologischen Untersuchung beginnen (ETA 2021 Tab. 1)</li>
       </ul>
-      <h4>2. Natriumperchlorat (kompetitive Jodblockade)</h4>
-      <p style="margin:0">Praxisrahmen dieses Tools (vgl. Präventionskarte):</p>
-      <div class="modal-dose"><strong>Dosis:</strong> 3 × 20 Trpf. (= 3 × 300 mg Natriumperchlorat) täglich.<br>
-      <strong>Beginn:</strong> so früh wie möglich vor KM (elektiv typisch 2–24 Std.; Notfall: unverzüglich, auch ohne 24-h-Vorlauf).<br>
-      <strong>Dauer:</strong> in der Regel <strong>ca. 14 Kalendertage</strong> (≈2 Wochen). Längerfristige Gabe nur nach Fachinformation / Nephrologie-Endokrinologie-Rücksprache (aplastische Anämie-Risiko bei Überdosierung/Langzeit).</div>
+
+      <h4>2. ETA 2021 Recommendation 21 — Natriumperchlorat (Prophylaxe)</h4>
+      <div class="modal-dose"><strong>Dosis:</strong> bis zu <strong>1.000 mg Natriumperchlorat pro Tag</strong>.<br>
+      <strong>Dauer:</strong> 1–2 Wochen.<br>
+      <strong>Wirkmechanismus:</strong> kompetitive Hemmung des Natrium-Iodid-Symporters.<br>
+      <strong>Kontraindikation:</strong> schwere Niereninsuffizienz, bekannte Überempfindlichkeit. Cave aplastische Anämie bei Langzeitgabe.</div>
+
+      <h4>3. ETA 2021 Recommendation 9 — Methimazol/Thiamazol</h4>
+      <div class="modal-dose">In Kombination mit Perchlorat als therapeutische Option bei KM-induzierter Hyperthyreose (max. Tagesdosis Perchlorat 1.000 mg über bis zu 4 Wochen).<br>
+      <strong>Methimazol/Thiamazol:</strong> 20–40 mg/d bei schwerer/prolongierter Hyperthyreose oder älteren Patienten mit kardialer Grunderkrankung.</div>
+
+      <h4>4. Deutscher Klinikstandard in Universitätskliniken (Tropfen-Schema)</h4>
+      <div class="modal-dose"><strong>Elektiv:</strong> 3 × 20 Tropfen Irenat® täglich (≈ 900 mg/d), Beginn 2–4 Std. vor KM, Dauer 14 Tage.<br>
+      <strong>Notfall ohne Vorlauf:</strong> 60 Tropfen unmittelbar vor KM, dann 3 × 20 Tr./d für 14 Tage.<br>
+      <strong>Manifeste Hyperthyreose / vitale Indikation:</strong> Perchlorat-Schema PLUS Thiamazol 20–40 mg (Rücksprache Endokrinologe).</div>
+      <p style="margin:0.35rem 0 0;font-size:12.5px">Inhaltlich kompatibel mit ETA 2021 Recommendation 21.</p>
+
+      <h4>5. Adjuvante Maßnahmen bei drohender thyreotoxischer Krise</h4>
       <ul>
-        <li>Kontraindikationen: schwere Niereninsuffizienz, bekannte Überempfindlichkeit.</li>
+        <li><strong>β-adrenerger Blocker:</strong> z.B. Propranolol (zusätzliche Hemmung peripherer T4→T3-Konversion), Dosierung nach Kardiologie</li>
+        <li><strong>Glukokortikoide:</strong> bei V.a. thyreotoxische Krise (Hydrocortison 100 mg i.v. alle 8h oder vergleichbares Schema nach internistischem Standard)</li>
+        <li>Thyreostatika hemmen die <em>Synthese</em>, nicht die <em>Freisetzung</em> bereits gespeicherter Hormone — Wirkungseintritt verzögert</li>
+        <li>Blutbild-Monitoring (Agranulozytose-Risiko)</li>
       </ul>
-      <h4>3. Thyreostatikum (Hemmung der Hormonneusynthese)</h4>
-      <p style="margin:0">Prophylaxe-/Hochrisiko-Schema (DGN/ETA, angepasst an Akutfall mit KM-Notwendigkeit):</p>
-      <div class="modal-dose"><strong>Thiamazol</strong> typisch <strong>10–30 mg/d</strong> oral (z. B. Methizol®), in schwerer thyreotoxischer Dekompensation nach Rücksprache oft <strong>höhere Anfangsdosen</strong> (z. B. 40–60 mg/d) — nur unter endokrinologischer/intensivmedizinischer Führung.<br><strong>Carbimazol</strong> Alternativ z. B. <strong>10–20 mg/d</strong> (Umrechnung Thiamazol-Äquivalent beachten).</div>
+
+      <h4>6. Nachkontrolle (ETA 2021)</h4>
       <ul>
-        <li>Thyreostatika blockieren die Synthese, <strong>nicht</strong> die Freisetzung bereits gespeicherter Hormone → Wirkungseintritt verzögert; bei drohender Krise keine alleinige „Schnellkorrektur“.</li>
-        <li>Blutbild-Monitoring (Agranulozytose-Risiko) gemäß Fachinformation.</li>
+        <li><strong>TSH, fT3, fT4: 3–4 Wochen nach KM</strong> (ETA 2021 Tab. 1) bei allen Risikopatienten</li>
+        <li>Bei Symptomverschlechterung: sofortige Wiedervorstellung</li>
+        <li>Patient über Warnsymptome aufklären (Herzrasen, Fieber, Verwirrtheit, Gewichtsverlust)</li>
+        <li>ETA 2021 Recommendation 22 (starke Empfehlung): Bei Patienten >65 Jahre mit Komorbiditäten auch milde KM-induzierte Hyperthyreose behandeln</li>
       </ul>
-      <h4>4. Betablocker (kardiale Symptomkontrolle)</h4>
-      <div class="modal-dose"><strong>Propranolol</strong> wird in Lehrbüchern/Notfallalgorithmen häufig bevorzugt (zusätzliche Hemmung der peripheren T4→T3-Konversion), sofern keine Kontraindikation — typische oral Dosierungen im Akutfall z. B. <strong>40–80 mg/d</strong> in geteilten Gaben, titrierend nach HF und Blutdruck (ESC/thyreotoxische-Krise-Literatur; individuell anpassen).</div>
-      <p style="margin:0.35rem 0 0">Alternativen bei CI für non-selektive Betablocker: kardioselektive Betablocker nach Kardiologie-Rücksprache.</p>
-      <h4>5. Glukokortikoide</h4>
-      <ul>
-        <li>Bei <strong>V.a. thyreotoxische Krise</strong> oder schwerer Dekompensation: Hydrocortison z. B. <strong>100 mg i.v.</strong> alle 8 h (oder vergleichbares Äquivalent nach internistischem Standard) zur Hemmung der peripheren T4→T3-Konversion und bei relativem Nebenniereninsuffizienzrisiko — ETA/ATA-orientierte Krisenalgorithmen.</li>
-        <li>Bei reinem Typ-II-(destruktiv-)Muster (z. B. Amiodaron) dominieren eher Kortikoide; bei KM-induziertem Typ-I-Muster Thyreostatika + Perchlorat — oft Mischbild, daher endokrinologische Zuordnung.</li>
-      </ul>
-      <h4>6. Nach KM — Medikamente &amp; Kontrolle</h4>
-      <ul>
-        <li><strong>Natriumperchlorat</strong> und <strong>Thyreostatikum</strong> (falls eingesetzt): Fortführung im hier gewählten Praxisrahmen jeweils <strong>ca. 14 Kalendertage</strong> (≈2 Wochen), danach <strong>endokrinologisch neu bewerten</strong> (Weiterführung, Ausschleichen oder Anpassung).</li>
-        <li><strong>Labor:</strong> erste TSH-/fT4-/fT3-Kontrolle typischerweise <strong>ca. 14 Tage nach KM</strong>, weitere Intervalle nach klinischem Verlauf.</li>
-        <li>Patientenaufklärung über Warnsymptome (Herzrasen, Fieber, Verwirrtheit).</li>
-      </ul>
+
       <p style="margin:0.75rem 0 0;font-size:12.5px;color:var(--muted)">Hinweis: Konkrete Arzneimittelwahl und Dosierung obliegen der verantwortlichen Fachärztin/dem Facharzt; dieses Panel ersetzt keine Fachinformation und keine individuelle Risiko-Nutzen-Abwägung.</p>
     </div>
     <div class="modal-foot">
-      <span class="guideline-source">Quellenrahmen: DGN Schilddrüse 2020 · ETA 2022 · ESC kardiovaskulär/Thyreotoxikose 2022 · ATA/Endocrine-Society thyrotoxic storm algorithms (Konsolidierung für KM-Notfallkontext). <strong>Medikamentendauer ca. 14 Tage</strong> für Perchlorat und Thyreostatikum: vereinheitlichter Praxisstandard dieses Tools — bei Abweichung lokale Protokolle/Fachinfo bevorzugen.</span>
+      <span class="guideline-source">Quellen: ETA 2021 (Bednarczuk et al., Eur Thyroid J 10:269) Recommendations 9, 21, 22 + Tab. 1 · Deutscher Klinikstandard in Universitätskliniken (z.B. Klinikum Passau KM-Empfehlung 4.0 und vergleichbare Protokolle). ETA 2021: präventive Therapie "debated" — schwache Empfehlung; konkrete Dosierung in Recommendation 21 (1.000 mg Perchlorat/d für 1–2 Wochen).</span>
     </div>
   </div>
 </div>
@@ -641,9 +973,9 @@ function escapeHtml(s){
 function renderRecommendationList(recs){
   return recs.map(function(rec){
     if(rec && typeof rec==='object' && rec.vitalDetail){
-      return '<li class="rec-li-vital"><span class="rec-li-vital-main">'+escapeHtml(rec.text)+'</span><button type="button" class="rec-learn-btn" onclick="openVitalKmModal()">Mehr erfahren</button></li>';
+      return '<li class="rec-li-vital"><span class="rec-li-vital-main">'+rec.text+'</span><button type="button" class="rec-learn-btn" onclick="openVitalKmModal()">Mehr erfahren</button></li>';
     }
-    return '<li>'+escapeHtml(rec)+'</li>';
+    return '<li>'+rec+'</li>';
   }).join('');
 }
 
@@ -674,11 +1006,11 @@ function classify(tsh,ft4,ft3){
   const ft4Low=hasFt4&&ft4<12;
   const ft3High=hasFt3&&ft3>6.5;
   const ft3Low=hasFt3&&ft3<3.5;
-  if(tsh<0.4&&(ft4High||ft3High)){return{key:'manifest',label:'Manifeste Hyperthyreose',risk:'high',riskLabel:'Hochrisiko',desc:'TSH unterhalb des Referenzbereichs (<0,4 mIU/L) bei erhöhtem fT4 und/oder fT3: manifeste (overt) Hyperthyreose bzw. thyreotoxische Konstellation im Sinne von DGN/ETA/ESC — unabhängig davon, ob das TSH bereits <0,1 mIU/L liegt oder zwischen 0,1 und 0,4 mIU/L (subnormales TSH mit peripherer Hormonerhöhung). Bei jodhaltiger KM-Gabe besteht hohe Gefahr der Exazerbation mit möglicher thyreotoxischer Krise.',context_pre:['Jodhaltige KM kontraindiziert bei elektiver Untersuchung (DGN A / ETA 2022)','Sofortige endokrinologische Vorstellung veranlassen','Alternative: Gadolinium-haltige MRT-KM oder nicht-jodhaltige Alternativen prüfen',{vitalDetail:true,text:'Bei vitaler Indikation: Perchlorat + Thyreostatikum so früh wie möglich, engmaschiges Monitoring (Fortführung beider typischerweise ca. 14 Tage — Praxisstandard dieses Tools)'},'Nach Notfall-KM: intensivmedizinisches Monitoring auf thyreotoxische Krise (Tachykardie, Fieber, Bewusstseinsstörung)'],context_post:['TSH, fT3, fT4 engmaschig: nach 24–48h, nach ca. 1 Woche, nach ca. 14 Tagen','Bei Symptomverschlechterung: sofortige stationäre Aufnahme','Thyreostatika/Perchlorat falls begonnen: Fortführung typischerweise ca. 14 Tage, danach endokrinologisch neu bewerten','Rücksprache Endokrinologie / Intensivmedizin obligat'],context_symptom:['Symptome wie Tachykardie, Tremor, Gewichtsverlust, Schwitzen, Unruhe abklären','Notfallaufnahme erwägen bei Tachykardie >120/min, Fieber, Verwirrtheit (V.a. thyreotoxische Krise)','Thyreostatikum + Betablocker + steroide Überbrückung gemäß Standard','Internistisch/endokrinologisch weiterführen']};}
-  if(tsh<0.4&&tsh>=0.1&&!ft4High&&!ft3High){return{key:'latent',label:'Latente / Subklinische Hyperthyreose',risk:'medium',riskLabel:'Mittleres Risiko',desc:'TSH erniedrigt/supprimiert bei normalen peripheren Hormonen. Schilddrüsenautonomie oder beginnende Hyperthyreose möglich. Erhöhtes Risiko für Manifestation nach jodhaltiger KM-Exposition.',context_pre:['Endokrinologische Mitbeurteilung empfohlen (DGN B)','Natriumperchlorat-Prophylaxe erwägen: 3×20 Tropfen/d, Beginn 2–24 Std. vor KM (DGN B), Fortführung ca. 14 Tage','Schilddrüsensonographie: Autonomes Adenom? Struma nodosa?','Dringlichkeit der Untersuchung abwägen — Aufschub wenn möglich','Dokumentation der Risikoaufklärung im Befund'],context_post:['TSH-Kontrolle etwa 14 Tage nach KM obligat, dann nach Verlauf','Bei Anstieg auf manifest: Endokrinologie, Therapieeinleitung','Perchlorat und ggf. Thyreostatikum: Fortführung jeweils ca. 14 Tage, danach endokrinologisch neu bewerten','Patient über Symptome der Hyperthyreose aufklären (Palpitationen, Tremor, Schwitzen)'],context_symptom:['Differentialdiagnose: nicht-schilddrüsenbedingt (Schwangerschaft, Medikamente, akute Erkrankung)','fT3/fT4 ggf. ergänzen für vollständige Klassifikation','Bei kardialen Symptomen: EKG (Vorhofflimmern!), Kardiologie','Weiterführung ambulant durch Hausarzt/Endokrinologie']};}
-  if(tsh<0.1&&!ft4High&&!ft3High){return{key:'latent',label:'Supprimiertes TSH — V.a. Autonomie',risk:'medium',riskLabel:'Mittleres Risiko',desc:'TSH deutlich supprimiert, periphere Hormonspiegel noch normal. Hinweis auf floride Schilddrüsenautonomie oder Frühstadium manifester Hyperthyreose. Jodbelastung kann zur Dekompensation führen.',context_pre:['Jodhaltige KM nur nach Risikoabwägung und endokrinologischer Rücksprache','Perchlorat-Prophylaxe einleiten (Fortführung typischerweise ca. 14 Tage)','Schilddrüsenszintigraphie erwägen (Autonomienachweis)','Alternativ MRT mit gadoliniumhaltigem KM falls möglich'],context_post:['TSH, fT4, fT3 etwa 14 Tage nach KM kontrollieren','Endokrinologische Weiterbetreuung arrangieren'],context_symptom:['fT3 und fT4 ergänzen','Szintigraphie erwägen','Endokrinologie zur Weiterklärung']};}
-  if(tsh>4.0&&!ft4Low&&!ft3Low){return{key:'hypothyroid',label:'Latente (subklinische) Hypothyreose',risk:'low',riskLabel:'Niedriges KM-Risiko',desc:'TSH erhöht, periphere Hormone noch normal. Subklinische Hypothyreose. Für jodhaltige KM-Gabe besteht kein erhöhtes Hyperthyreose-Risiko. Schilddrüsenfunktion sollte endokrinologisch weiterverfolgt werden.',context_pre:['KM-Gabe aus Schilddrüsenperspektive unbedenklich','Auf TPO-Antikörper testen (Hashimoto?)','Verlaufskontrollen TSH empfohlen'],context_post:['Keine spezifischen KM-bezogenen Maßnahmen nötig','TSH-Verlauf im Rahmen Grunderkrankung'],context_symptom:['L-Thyroxin-Substitution bei TSH >10 oder Symptomen erwägen','Endokrinologische Weiterführung']};}
-  if(tsh>4.0&&ft4Low){return{key:'hypothyroid',label:'Manifeste Hypothyreose',risk:'low',riskLabel:'Niedriges KM-Risiko',desc:'Manifeste Hypothyreose. Kein erhöhtes Risiko für KM-induzierte Hyperthyreose. L-Thyroxin-Substitution prüfen/optimieren.',context_pre:['KM aus Schilddrüsenperspektive unbedenklich','L-Thyroxin-Therapie überprüfen'],context_post:['Verlaufskontrolle im Rahmen Hypothyreose-Betreuung'],context_symptom:['L-Thyroxin einleiten/anpassen','Endokrinologische Überweisung']};}
+  if(tsh<0.4&&(ft4High||ft3High)){return{key:'manifest',label:'Overt Hyperthyreose (ETA 2021)',risk:'high',riskLabel:'KM kontraindiziert',desc:'TSH↓ mit erhöhtem fT4 und/oder fT3: overt Hyperthyreose nach ETA 2021 Tab. 1. Jodhaltige KM sind generell kontraindiziert — Ausnahme: lebensrettende Eingriffe.',context_pre:['Jodhaltige KM generell kontraindiziert (ETA 2021 Tab. 1; ESUR 2018)','Alternative Bildgebung erwägen: MRT, Nativ-CT, Echokardiographie (auch Belastungs-/TEE), Sonographie','Bei vitaler/lebensrettender Indikation: Thyreostatikum + Perchlorat vor oder unmittelbar nach KM-Gabe (ETA 2021 Recommendation 9 + 21)','ETA 2021 Recommendation 21: Perchlorat bis 1.000 mg/Tag für 1–2 Wochen zur Prophylaxe','Deutscher Klinikstandard: 3 × 20 Tr. Irenat® (≈ 900 mg/d) für 14 Tage; Notfall: 60 Tr. initial dann 3 × 20 Tr./d','Methimazol/Thiamazol 20–40 mg/d bei schwerer Hyperthyreose','Bei Patienten >65 Jahre mit Komorbiditäten: auch milde Hyperthyreose behandeln (ETA 2021 Recommendation 22 starke Empfehlung)','Endokrinologische Konsultation'],context_post:['TSH, fT3, fT4 nach 3–4 Wochen (ETA 2021)','Bei Patienten unter ATD: Dosiseskalation und/oder Perchlorat-Zugabe erwägen','Bei Therapieversagen: Überweisung in spezialisiertes Zentrum'],context_symptom:['Endokrinologische Konsultation','β-adrenerge Blocker bei milden Fällen mit kardialen Symptomen','Bei schweren Fällen: Methimazol/Thiamazol 20–40 mg/d','Bei Notfallaufnahme (Tachykardie >120/min, Fieber, Verwirrtheit): V.a. thyreotoxische Krise']};}
+  if(tsh<0.4&&tsh>=0.1&&!ft4High&&!ft3High){return{key:'latent',label:'Persistente endogene subklinische Hyperthyreose (ETA 2021)',risk:'medium',riskLabel:'KM nicht kontraindiziert',desc:'TSH↓ mit normalen peripheren Hormonen — entspricht der "persistierenden endogenen subklinischen Hyperthyreose" nach ETA 2021 Tab. 1. Jodhaltige KM sind <strong>nicht kontraindiziert</strong>. Empfohlene Vorgehensweise:',context_pre:['Jodhaltige KM nicht kontraindiziert (ETA 2021 Tab. 1)','Vor elektiver Untersuchung: endokrinologische Konsultation zur Klärung der Ätiologie der subklinischen Hyperthyreose empfohlen','Prophylaxe <em>nur in ausgewählten Fällen</em> erwägen — besonders bei: endogener subklinischer Hyperthyreose, großer Knotenstruma, älteren Patienten, kardiovaskulären Komorbiditäten','ETA 2021 Recommendation 21: Perchlorat bis 1.000 mg/Tag für 1–2 Wochen','Deutscher Klinikstandard: 3 × 20 Tr. Irenat® (≈ 900 mg/d), Beginn 2–4 Std. vor KM, Dauer 14 Tage','Hinweis ETA 2021: Wirksamkeit der präventiven Therapie ist "debated"'],context_post:['TSH, fT4, fT3 <strong>3–4 Wochen nach KM</strong> bestimmen (ETA 2021)','Bei Manifestation: endokrinologische Behandlung (ETA 2021 Recommendation 9)','Bei Patienten >65 Jahre mit Komorbiditäten: auch milde Hyperthyreose behandeln (ETA 2021 Recommendation 22 starke Empfehlung)'],context_symptom:['fT3/fT4 ergänzen','Bei kardialen Symptomen (Palpitationen, Vorhofflimmern): EKG, Kardiologie','Endokrinologische Weiterführung']};}
+  if(tsh<0.1&&!ft4High&&!ft3High){return{key:'latent',label:'Subklinische Hyperthyreose / V.a. floride Autonomie',risk:'medium',riskLabel:'KM nicht kontraindiziert',desc:'TSH deutlich supprimiert (<0,1 mIU/L), periphere Hormonspiegel noch normal. Nach ETA 2021 zählt dies zur "persistierenden endogenen subklinischen Hyperthyreose" — jodhaltige KM sind nicht generell kontraindiziert. Vor elektiver Untersuchung wird jedoch endokrinologische Konsultation zur Klärung der Ätiologie empfohlen.',context_pre:['Jodhaltige KM nicht generell kontraindiziert (ETA 2021 Tab. 1)','Endokrinologische Konsultation zur Klärung der Ätiologie (floride Autonomie? Frühstadium overt Hyperthyreose?) — besonders vor elektiver Untersuchung','Prophylaxe bei diesem Subtyp erwägen — gehört zu den explizit genannten ETA-Indikationen','ETA 2021 Recommendation 21: Perchlorat bis 1.000 mg/Tag für 1–2 Wochen','Deutscher Klinikstandard: 3 × 20 Tr. Irenat® (≈ 900 mg/d), Beginn 2–4 Std. vor KM, Dauer 14 Tage','Schilddrüsenszintigraphie zur Autonomiediagnostik erwägen'],context_post:['TSH, fT4, fT3 <strong>3–4 Wochen nach KM</strong> (ETA 2021)','Endokrinologische Weiterbetreuung'],context_symptom:['fT3/fT4 ergänzen','Szintigraphie erwägen','Endokrinologische Konsultation']};}
+  if(tsh>4.0&&!ft4Low&&!ft3Low){return{key:'hypothyroid',label:'Subklinische Hypothyreose (ETA 2021)',risk:'low',riskLabel:'KM nicht kontraindiziert',desc:'TSH↑ bei normalen peripheren Hormonen — subklinische Hypothyreose. Jodhaltige KM sind nach ETA 2021 Tab. 1 <strong>nicht kontraindiziert</strong>. L-Thyroxin-Therapie nach aktuellen Hypothyreose-Leitlinien initiieren/überwachen.',context_pre:['Jodhaltige KM nicht kontraindiziert (ETA 2021 Tab. 1)','L-Thyroxin-Therapie nach aktuellen Leitlinien initiieren und überwachen','Anti-TPO-Antikörper-Bestimmung zur Klärung der Ätiologie (Hashimoto?) — Risikofaktor für KM-induzierte Hypothyreose'],context_post:['Klinische Verlaufskontrolle; KM-induzierte Hypothyreose bis zu 2 Jahre nach Exposition möglich (ETA 2021)','Temporäre L-Thyroxin-Therapie erwägen bei: jüngeren Patienten mit Symptomen, Autoimmunthyreoiditis, Frauen mit Kinderwunsch'],context_symptom:['L-Thyroxin-Substitution bei TSH >10 oder Symptomen','Endokrinologische Weiterführung']};}
+  if(tsh>4.0&&ft4Low){return{key:'hypothyroid',label:'Overt Hypothyreose (ETA 2021)',risk:'low',riskLabel:'KM nicht kontraindiziert',desc:'TSH↑ mit fT4↓ — overt Hypothyreose. Jodhaltige KM sind nach ETA 2021 Tab. 1 <strong>nicht kontraindiziert</strong>. L-Thyroxin-Therapie nach aktuellen Hypothyreose-Leitlinien initiieren und überwachen.',context_pre:['Jodhaltige KM nicht kontraindiziert (ETA 2021 Tab. 1)','L-Thyroxin-Therapie initiieren/optimieren nach aktuellen Leitlinien','Anti-TPO-Antikörper zur Ätiologieklärung'],context_post:['Verlaufskontrolle Hypothyreose; KM-induzierte Verschlechterung bis 2 Jahre möglich'],context_symptom:['L-Thyroxin einleiten/anpassen','Endokrinologische Überweisung']};}
   if(tsh>=0.4&&tsh<=4.0){
     if(hasFt3&&ft3Low&&!ft4High){
       return{key:'discordant',label:'Diskordanz / V.a. ESS · NTIS',risk:'medium',riskLabel:'Internistisch klären',desc:'TSH im Normbereich (0,4–4,0 mIU/L) bei erniedrigtem fT3 (<3,5 pmol/L) und ohne gleichzeitige fT4-Hochlage (>22 pmol/L): Muster spricht für euthyreotes Sick-Syndrom (ESS) bzw. Non-Thyroidal Illness (NTIS) bei systemischer Erkrankung — nicht für eine primäre Hyperthyreose und nicht für das „latent/manifest“-KM-Risikoscreening dieses Tools.',context_pre:['Grundkrankheit und ITS-/Septik-Kontext klären; Schilddrüsenwerte als Verlaufsmarker, nicht als isolierte KM-Kontraindikation','Elektive jodhaltige KM: Risiko aus Grunderkrankung, nicht aus „Hyperthyreose-Prophylaxe“ ableiten — internistische Mitbeurteilung','fT4 ggf. ergänzen; dynamische Verläufe bei NTIS typisch — Endokrinologie bei persistierender Auffälligkeit','Keine Perchlorat-/Thyreostatikum-Schema wie bei manifester Hyperthyreose ohne Zuordnung'],context_post:['Nach KM: Verlauf überwiegend durch Grundkrankheit bestimmt; Schilddrüsenkontrollen nach internistischem Plan','Bei Erholung oft Normalisierung der peripheren Hormone — Verlauf abwarten'],context_symptom:['Substitution mit Schilddrüsenhormonen bei NTIS in der Regel nicht indiziert (Ausnahmen nur endokrinologisch)','Bei unklarem Verlauf Endokrinologie hinzuziehen']};
@@ -700,9 +1032,170 @@ function classify(tsh,ft4,ft3){
         return{key:'discordant',label:'Diskordanz: isoliert erhöhtes fT4 (TSH normal)',risk:'medium',riskLabel:'Labor klären',desc:'TSH im Normbereich bei erhöhtem fT4, fT3 nicht hoch (oder nicht angegeben): DD u. a. Assay-/Präanalytik (Heparin, FDH je nach Methode), Zentral (TSHom selten), Medikamente/Schwangerschaft — nicht das typische Bild einer T3-Toxikose.',context_pre:['Labor wiederholen; ggf. Albumin-bedingte Methoden-Störungen (FDH) ausschließen','fT3 ergänzen zur Einordnung','Elektive jodhaltige KM bis zur Klärung zurückstellen — vital mit Endokrinologie/Konsil','Kein Manifest-Hyperthyreose-Prophylaxe-Schema ohne Diagnose'],context_post:['Nach KM: Verlauf laborgeleitet'],context_symptom:['Bei Z.n. Schilddrüsenhormon-Substitution Einnahmezeitpunkt dokumentieren']};
       }
     }
-    return{key:'normal',label:'Euthyreose (Normalbefund)',risk:'low',riskLabel:'Kein erhöhtes Risiko',desc:'TSH im Normbereich. Periphere Hormone im Normbereich. Keine Kontraindikation für jodhaltige KM aus Schilddrüsensicht. Standardprotokoll anwendbar.',context_pre:['Kein erhöhtes Risiko für KM-induzierte Schilddrüsenfunktionsstörung','Routinemäßige KM-Gabe nach Standardprotokoll','Bei bekannten Risikofaktoren in der Anamnese: Nachkontrolle etwa 14 Tage nach KM'],context_post:['Keine speziellen schilddrüsenbezogenen Maßnahmen erforderlich','Bei neuen Symptomen (Palpitationen, Tremor, Gewichtsverlust): TSH bestimmen'],context_symptom:['Befund entspricht Normalbefund','Symptome anderweitig abklären']};
+    return{key:'normal',label:'Euthyreose (Normalbefund)',risk:'low',riskLabel:'Kein erhöhtes Risiko',desc:'TSH und periphere Hormone im Normbereich. Keine Kontraindikation für jodhaltige KM aus SD-Sicht (ETA 2021 Tab. 1). Hinweis: Normales Baseline-TSH schließt das Risiko einer KM-induzierten SD-Dysfunktion <em>nicht</em> aus — bei vorhandenen Risikofaktoren (Knotenstruma, Z.n. SD-OP, Hashimoto, Älterer >60 J. aus Jodmangelgebiet) Verlaufskontrolle erwägen.',context_pre:['Kein erhöhtes Risiko für KM-induzierte SD-Dysfunktion in dieser Konstellation','Routinemäßige KM-Gabe nach Standardprotokoll','Bei euthyreoter Knotenstruma (besonders WHO Grad 2) oder Älteren mit Komorbiditäten: TSH 3–4 Wochen nach KM erwägen (ETA 2021)'],context_post:['Keine speziellen SD-bezogenen Maßnahmen erforderlich','Bei neuen Symptomen (Palpitationen, Tremor, Gewichtsverlust): TSH bestimmen','KM-induzierte Hyperthyreose v.a. 3–4 Wochen post KM; Hypothyreose bis 2 Jahre post KM möglich'],context_symptom:['Befund entspricht Normalbefund','Symptome anderweitig abklären']};
   }
   return{key:'unclear',label:'Unklare Konstellation',risk:'medium',riskLabel:'Überprüfung empfohlen',desc:'Die eingegebenen Werte ergeben eine unklare Konstellation. Bitte Plausibilität prüfen, ggf. Assay-Fehler ausschließen und Werte wiederholen.',context_pre:['Laborwerte überprüfen und ggf. wiederholen','Endokrinologische Einschätzung einholen'],context_post:['Verlaufskontrolle empfohlen'],context_symptom:['Klinische Gesamtbeurteilung erforderlich']};
+}
+
+function getDiseaseFlags(){
+  const ids=['basedow','karzinom','autonomie','struma','hashimoto','hypo','thyreoidektomie','subakut','amiodaron','schwangerschaft','niereninsuffizienz','jodmangel'];
+  const flags={};
+  ids.forEach(id=>flags[id]=document.getElementById('d-'+id).checked);
+  // collect follow-up values
+  flags.karzinomStatus=document.querySelector('input[name="karzinom-status"]:checked')?.value||'';
+  flags.txUmfang=document.querySelector('input[name="tx-umfang"]:checked')?.value||'';
+  flags.amioStatus=document.querySelector('input[name="amio-status"]:checked')?.value||'';
+  flags.kidneyStatus=document.querySelector('input[name="kidney-status"]:checked')?.value||'';
+  return flags;
+}
+
+function onDiseaseChange(){
+  // Toggle active styling
+  document.querySelectorAll('.dchk').forEach(lbl=>{
+    const cb=lbl.querySelector('input[type=checkbox]');
+    if(cb&&cb.checked) lbl.classList.add('active'); else lbl.classList.remove('active');
+  });
+  // Show/hide follow-ups
+  const f=getDiseaseFlags();
+  document.getElementById('fu-karzinom').classList.toggle('show', f.karzinom);
+  document.getElementById('fu-thyreoidektomie').classList.toggle('show', f.thyreoidektomie);
+  document.getElementById('fu-amiodaron').classList.toggle('show', f.amiodaron);
+  document.getElementById('fu-niereninsuffizienz').classList.toggle('show', f.niereninsuffizienz);
+  // Live summary of clinical flags
+  updateCtxFlags(f);
+}
+
+function updateCtxFlags(f){
+  const flags=[];
+  if(f.basedow) flags.push('Basedow');
+  if(f.karzinom){
+    let k='Karzinom';
+    if(f.karzinomStatus==='rit-geplant') k+=' (RIT geplant)';
+    else if(f.karzinomStatus==='rit-vergangen') k+=' (Z.n. RIT)';
+    else if(f.karzinomStatus==='dtc-keine-rit') k+=' (DTC, keine RIT)';
+    else if(f.karzinomStatus==='mtc-atc') k+=' (MTC/ATC)';
+    flags.push(k);
+  }
+  if(f.autonomie) flags.push('Autonomie');
+  if(f.struma) flags.push('Struma nodosa');
+  if(f.hashimoto) flags.push('Hashimoto');
+  if(f.hypo) flags.push('Hypothyreose');
+  if(f.thyreoidektomie) flags.push('Z.n. TX');
+  if(f.subakut) flags.push('Thyreoiditis (de Quervain)');
+  if(f.amiodaron) flags.push('Amiodaron'+(f.amioStatus==='aktiv'?' (aktiv)':f.amioStatus==='kuerzlich'?' (kürzlich abgesetzt)':' (alt)'));
+  if(f.schwangerschaft) flags.push('Schwangerschaft/Stillzeit');
+  if(f.niereninsuffizienz) flags.push('Niereninsuffizienz'+(f.kidneyStatus==='dialyse'?' (Dialyse)':f.kidneyStatus==='schwer'?' (eGFR<30)':' (eGFR 30–60)'));
+  if(f.jodmangel) flags.push('Jodmangelgebiet');
+  const el=document.getElementById('ctx-flags');
+  if(flags.length===0){ el.classList.remove('show'); el.textContent=''; return; }
+  el.classList.add('show');
+  el.textContent='▸ Erkannte Faktoren: '+flags.join(' · ');
+}
+
+function diseaseSpecificRecs(f, r){
+  // Returns an array of {priority, text} entries to PREPEND to the standard recs
+  const out=[];
+
+  // HIGHEST PRIORITY: Karzinom + RIT geplant
+  if(f.karzinom && f.karzinomStatus==='rit-geplant'){
+    out.push({priority:'critical', text:'⚠ Geplante Radioiodtherapie: jodhaltige KM kontraindiziert. Jodkarenz mind. 4–8 Wochen vor RIT (DGN S1 RIT 2022, AWMF 031-003); bei Hochdosis-KM/Niereninsuffizienz oft länger. Nuklearmedizin/Endokrinologie kontaktieren — RIT-Termin ggf. verschieben.'});
+    out.push({priority:'high', text:'Alternative Bildgebung nach S3-Leitlinie Schilddrüsenkarzinom 2025 (AWMF 031-056OL): Sonographie, MRT mit Gadolinium, ggf. FDG-PET ohne jodhaltiges KM.'});
+    out.push({priority:'medium', text:'Falls jodhaltiges KM unverzichtbar: Urin-Jod-Bestimmung vor RIT erwägen (Ziel <200 µg/L, idealerweise <100 µg/L).'});
+  }
+  if(f.karzinom && f.karzinomStatus==='rit-vergangen'){
+    out.push({priority:'high', text:'Z.n. RIT in Nachsorge: jodhaltiges KM beeinträchtigt I-131-Ganzkörperszintigraphie — Karenz von 4–8 Wochen vor Folgeszintigraphie einhalten (DGN S1 GKS).'});
+    out.push({priority:'medium', text:'Tg/anti-Tg-Antikörper als Verlaufsmarker (S3-Leitlinie Schilddrüsenkarzinom 2025); KM-Gabe im Befund dokumentieren.'});
+  }
+  if(f.karzinom && f.karzinomStatus==='mtc-atc'){
+    out.push({priority:'low', text:'MTC/ATC/anaplastisches Karzinom: keine Jodspeicherung — keine Jodkarenz erforderlich. Jodhaltige KM für Staging/Verlauf erlaubt (S3-Leitlinie Schilddrüsenkarzinom 2025).'});
+    out.push({priority:'medium', text:'Bei MTC: Calcitonin/CEA als Tumormarker. Bei ATC: FDG-PET-CT bevorzugt.'});
+  }
+  if(f.karzinom && f.karzinomStatus==='dtc-keine-rit'){
+    out.push({priority:'medium', text:'DTC ohne aktuell geplante RIT: jodhaltige KM grundsätzlich möglich, aber zukünftige RIT-Option erhalten — KM-Gabe dokumentieren, Nuklearmedizin informieren.'});
+  }
+  if(f.karzinom && (f.karzinomStatus==='unklar'||f.karzinomStatus==='')){
+    out.push({priority:'high', text:'Karzinom-Status unklar: vor elektiver KM-Gabe Klärung mit Nuklearmedizin/Endokrinologie zur Frage einer geplanten RIT.'});
+  }
+
+  // Basedow
+  if(f.basedow){
+    out.push({priority:'medium', text:'M. Basedow: Risikofaktor für KM-induzierte Hyperthyreose (ETA 2021 Tab. 2). TRAK bestimmen falls nicht bekannt; bei euthyreotem M. Basedow in Remission ist KM <em>nicht kontraindiziert</em> (ETA 2021 Tab. 1).'});
+    if(r.key==='manifest'){
+      out.push({priority:'high', text:'Basedow + overt Hyperthyreose: jodhaltige KM kontraindiziert (außer lebensrettend, ETA 2021 Tab. 1). Therapie mit Thyreostatikum vor/unmittelbar nach KM.'});
+    }
+    if(r.key==='latent'){
+      out.push({priority:'medium', text:'Basedow + subklinische Hyperthyreose: KM nach ETA 2021 nicht kontraindiziert, aber endokrinologische Konsultation vor elektiver Untersuchung; Prophylaxe in ausgewählten Fällen erwägen (ETA 2021 Recommendation 21: bis 1.000 mg Perchlorat/Tag für 1–2 Wochen; deutscher Klinikstandard: 3×20 Tr. Irenat® für 14 Tage).'});
+    }
+  }
+
+  // Autonomie
+  if(f.autonomie){
+    out.push({priority:'high', text:'SD-Autonomie (Knotenstruma WHO Grad 2): häufigster Risikofaktor für KM-induzierte Hyperthyreose (ETA 2021 Tab. 2). Sonographie + ggf. Szintigraphie vor elektiver KM erwägen; bei subklinischer Hyperthyreose: Prophylaxe nach ETA 2021 Recommendation 21 (Perchlorat bis 1.000 mg/d für 1–2 Wochen) bzw. deutscher Klinikstandard.'});
+  }
+
+  // Struma nodosa
+  if(f.struma && !f.autonomie){
+    out.push({priority:'medium', text:'Knotenstruma (ETA 2021 Risikofaktor): bei WHO Grad 2 oder älteren Patienten TSH 3–4 Wochen nach KM bestimmen (ETA 2021 Tab. 1).'});
+  }
+
+  // Hashimoto
+  if(f.hashimoto){
+    out.push({priority:'medium', text:'Hashimoto-Thyreoiditis: <strong>Hauptrisikofaktor für KM-induzierte Hypothyreose</strong> (ETA 2021 Tab. 2). Anti-TPO-Bestimmung; TSH-Kontrolle 3–4 Wochen post KM und bei Symptomen bis 2 Jahre danach (ETA 2021).'});
+  }
+
+  // Thyreoidektomie
+  if(f.thyreoidektomie){
+    if(f.txUmfang==='total'){
+      out.push({priority:'low', text:'Z.n. totaler Thyreoidektomie: keine SD-bezogene KM-Kontraindikation. L-Thyroxin-Substitution überprüfen.'});
+    } else if(f.txUmfang==='subtotal'){
+      out.push({priority:'medium', text:'Z.n. subtotaler/Hemi-Thyreoidektomie: Restgewebe vorhanden — Jod-Basedow-Risiko bei vorbestehender Autonomie nicht ausgeschlossen. TSH-Kontrolle.'});
+    } else {
+      out.push({priority:'low', text:'Substituierter Patient: TSH unter L-Thyroxin überprüfen; bei iatrogen supprimiertem TSH (z.B. nach DTC) kein Hinweis auf Hyperthyreose.'});
+    }
+  }
+
+  // Subakute Thyreoiditis
+  if(f.subakut){
+    out.push({priority:'medium', text:'Subakute Thyreoiditis (de Quervain): destruktive Hyperthyreose möglich, gefolgt von Hypothyreose. Jodhaltige KM: keine echte Kontraindikation, aber Verlauf engmaschig kontrollieren.'});
+  }
+
+  // Amiodaron
+  if(f.amiodaron){
+    if(f.amioStatus==='aktiv'){
+      out.push({priority:'critical', text:'⚠ Aktive Amiodaron-Therapie: jodhaltige KM bei elektiver Untersuchung kontraindiziert (Risiko Typ I/II-Hyperthyreose). Kardiologie/Endokrinologie zur Abwägung.'});
+    } else if(f.amioStatus==='kuerzlich'){
+      out.push({priority:'high', text:'Amiodaron <6 Monate abgesetzt: relevante Restjodbelastung. Vor elektiver KM-Gabe TSH/fT4/fT3, ggf. Urin-Jod.'});
+    } else {
+      out.push({priority:'medium', text:'Amiodaron >6 Monate abgesetzt: Restrisiko geringer, aber TSH-Kontrolle vor und nach KM empfohlen.'});
+    }
+  }
+
+  // Schwangerschaft
+  if(f.schwangerschaft){
+    out.push({priority:'high', text:'Schwangerschaft/Stillzeit: jodhaltige KM nur bei strenger Indikation (ETA 2021). Risiko fetaler/neonataler Hypothyreose.'});
+    out.push({priority:'medium', text:'Bei unvermeidbarer KM-Gabe: neonatales TSH-Screening in den ersten 2–4 Wochen; in Stillzeit Stillpause für 24h erwägen (Studienlage uneinheitlich).'});
+  }
+
+  // Niereninsuffizienz
+  if(f.niereninsuffizienz){
+    if(f.kidneyStatus==='dialyse'){
+      out.push({priority:'medium', text:'Dialysepflichtige Niereninsuffizienz: KM-Elimination verzögert, Jodbelastung verlängert. Dialyse direkt nach KM nicht zwingend, aber prolongierte Wirkung beachten.'});
+    } else if(f.kidneyStatus==='schwer'){
+      out.push({priority:'high', text:'eGFR <30 ml/min: prolongierte Jodbelastung, längere Karenz vor RIT erwägen. Perchlorat relativ kontraindiziert (renale Elimination) — Dosisreduktion + Monitoring.'});
+    } else {
+      out.push({priority:'medium', text:'eGFR 30–60 ml/min: KM-Hydrierung sicherstellen; Perchlorat unter Monitoring möglich.'});
+    }
+  }
+
+  // Jodmangelgebiet
+  if(f.jodmangel){
+    out.push({priority:'medium', text:'Jodmangelgebiet (z.B. Mitteleuropa historisch): erhöhte Prävalenz Schilddrüsenautonomie auch ohne Anamnese — bei älteren Patienten TSH präinterventionell erwägen.'});
+  }
+
+  // Sort by priority: critical → high → medium → low
+  const order={critical:0,high:1,medium:2,low:3};
+  out.sort((a,b)=>order[a.priority]-order[b.priority]);
+  return out;
 }
 
 function analyze(){
@@ -711,6 +1204,7 @@ function analyze(){
   const ft3Val=parseDE(document.getElementById('ft3').value);
   if(isNaN(tshVal)){alert('Bitte mindestens den TSH-Wert eingeben (z.B. 1,2).');return;}
   const r=classify(tshVal,isNaN(ft4Val)?null:ft4Val,isNaN(ft3Val)?null:ft3Val);
+  const f=getDiseaseFlags();
   const box=document.getElementById('result');
   box.className='result-box show '+r.key;
   const tshStatus=tshVal<0.4?'abnormal':tshVal>4.0?'warn':'ok';
@@ -724,9 +1218,18 @@ function analyze(){
   const riskClass=r.risk==='high'?'risk-high':r.risk==='medium'?'risk-medium':'risk-low';
   document.getElementById('result-badge').innerHTML=`<span class="risk-badge ${riskClass}"><span class="risk-dot"></span>${r.riskLabel}</span>`;
   document.getElementById('result-title').textContent=r.label;
-  document.getElementById('result-desc').textContent=r.desc;
-  const recs=r.context_pre;
-  document.getElementById('result-recs').innerHTML=renderRecommendationList(recs);
+  document.getElementById('result-desc').innerHTML=r.desc;
+
+  // Build recommendations: disease-specific (prioritized) PLUS standard pre-KM recs
+  const dsRecs=diseaseSpecificRecs(f, r);
+  const stdRecs=r.context_pre;
+  let combined=[];
+  if(dsRecs.length>0){
+    combined=dsRecs.map(d=>d.text).concat(stdRecs);
+  } else {
+    combined=stdRecs;
+  }
+  document.getElementById('result-recs').innerHTML=renderRecommendationList(combined);
   box.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
