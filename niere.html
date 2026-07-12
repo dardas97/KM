@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KM-Gabe bei Niereninsuffizienz — Entscheidungshilfe</title>
+<link rel="stylesheet" href="km.css">
+</head>
+<body class="tool-niere">
+<script src="km.js"></script>
+<div class="page">
+  <header class="masthead">
+    <div class="mast-ruler" aria-hidden="true"></div>
+    <div class="mast-top">
+      <a href="index.html" class="home-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 5.5 8 12l6.5 6.5"/></svg>Übersicht</a>
+      <span class="header-badge">KLINISCHES ENTSCHEIDUNGSTOOL · RADIOLOGIE</span>
+      <button type="button" class="rad-mode-toggle" id="radModeToggle" aria-pressed="false" title="Lesesaal-Dunkelmodus" onclick="toggleRadMode()"><span class="mode-track" aria-hidden="true"><span class="mode-thumb"></span></span><span class="mode-label">Rad&nbsp;Mode</span></button>
+    </div>
+    <div class="mast-main">
+      <div class="tool-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.9 3.6c-4.6 0-8.4 3.7-8.4 8.4s3.8 8.4 8.4 8.4c2.6 0 4.2-1.5 4.2-3.4 0-2.4-3-2.6-3-5s3-2.6 3-5c0-1.9-1.6-3.4-4.2-3.4z"/><path d="M15.6 12h3.2"/></svg></div>
+      <div class="mast-text">
+        <h1>Jodhaltige KM bei Niereninsuffizienz<span class="h1-sub">Risikobewertung · Hydrierung · Mindestabstände</span></h1>
+        <p class="mast-desc">Hauseigener Klinikstandard zur Kontrastmittelgabe bei eingeschränkter Nierenfunktion. Basis: eGFR nach CKD-EPI.</p>
+      </div>
+    </div>
+  </header>
+
+  <nav>
+    <button class="nav-btn active" onclick="showSection('rechner',this)">eGFR-Rechner</button>
+    <button class="nav-btn" onclick="showSection('protokoll',this)">Protokoll</button>
+    <button class="nav-btn" onclick="showSection('hydrierung',this)">Hydrierung</button>
+    <button class="nav-btn" onclick="showSection('abstaende',this)">Mindestabstände</button>
+    <button class="nav-btn" onclick="showSection('grundlagen',this)">Grundlagen</button>
+  </nav>
+
+  <!-- eGFR-RECHNER -->
+  <div id="rechner" class="section active">
+    <h2>Risikobewertung anhand eGFR</h2>
+    <div class="info-box"><strong>Aktuelle Terminologie:</strong> Der Begriff "Kontrastmittel-assoziierte Nierenschädigung" (CA-AKI) ersetzt den älteren Begriff "Kontrastmittel-Nephropathie". Ein Kausalzusammenhang zwischen KM-Gabe und Nephropathie ist nicht belegbar. Zur Risikostratifizierung ist die <strong>eGFR nach CKD-EPI</strong> maßgeblich.</div>
+
+    <div class="card">
+      <div class="card-title">Eingabe — eGFR und Risikofaktoren</div>
+      <div class="input-group">
+        <label>eGFR (CKD-EPI)</label>
+        <div class="input-row">
+          <input type="text" inputmode="decimal" id="egfr" placeholder="z.B. 45" autocomplete="off">
+          <span class="unit-badge">mL/min/1,73m²</span>
+        </div>
+        <div class="hint">Wert sollte nicht älter als 1 Monat sein (bei stabilen Patienten)</div>
+      </div>
+
+      <div class="disease-section" style="margin-top:1rem;padding-top:1rem;border-top:1px dashed var(--border)">
+        <div class="disease-section-title">Zusätzliche Risikofaktoren (Mehrfachauswahl)</div>
+        <div class="disease-grid">
+          <label class="dchk" id="d-dialysis-wrap">
+            <input type="checkbox" id="d-dialysis" onchange="onKidneyChange()">
+            <span class="dchk-label">Dialysepflichtig<small>HD oder PD</small></span>
+          </label>
+          <label class="dchk" id="d-nyha-wrap">
+            <input type="checkbox" id="d-nyha" onchange="onKidneyChange()">
+            <span class="dchk-label">Herzinsuffizienz NYHA 3–4<small>schwerwiegend</small></span>
+          </label>
+          <label class="dchk" id="d-metformin-wrap">
+            <input type="checkbox" id="d-metformin" onchange="onKidneyChange()">
+            <span class="dchk-label">Metformin-Therapie<small>aktuell</small></span>
+          </label>
+        </div>
+      </div>
+
+      <button class="analyze-btn" onclick="analyzeKidney()">Risiko bewerten ▸</button>
+    </div>
+
+    <div id="result" class="result-box">
+      <div id="result-badge"></div>
+      <div id="result-params" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem"></div>
+      <div id="result-title" class="result-title"></div>
+      <div id="result-desc" class="result-desc"></div>
+      <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:0.5rem">Empfehlungen</h3>
+      <ul id="result-recs" class="rec-list"></ul>
+      <div id="hydration-block"></div>
+    </div>
+  </div>
+
+  <!-- PROTOKOLL -->
+  <div id="protokoll" class="section">
+    <h2>KM-Protokoll nach Nierenfunktion</h2>
+
+    <div class="card" style="border-left:4px solid var(--success)">
+      <div class="card-title" style="color:var(--success)">eGFR ≥ 30 mL/min</div>
+      <ul class="rec-list" style="font-size:13.5px">
+        <li>Patienten mit eGFR ≥ 30 mL/min haben <strong>KEIN erhöhtes Risiko</strong> einer Kontrastmittel-assoziierten Nierenschädigung</li>
+        <li>Patienten bedürfen <strong>KEINER besonderen zusätzlichen Maßnahmen</strong></li>
+        <li>Mindestabstand zwischen zwei KM-Gaben (Jod oder Gd³⁺): <strong>4 h</strong></li>
+        <li>Es ist <strong>NICHT notwendig Metformin</strong> bei eGFR ≥ 30 mL/min zu pausieren</li>
+      </ul>
+    </div>
+
+    <div class="card" style="border-left:4px solid var(--warn)">
+      <div class="card-title" style="color:var(--warn)">eGFR &lt; 30 mL/min</div>
+      <ul class="rec-list" style="font-size:13.5px">
+        <li>Für Patienten mit eGFR &lt; 30 mL/min ist eine Kontrastmittel-assoziierte Nierenschädigung <strong>möglich</strong></li>
+        <li>Bei <strong>adäquatem Volumenhaushalt (Euvolämie)</strong> besteht <strong>kein erhöhtes Risiko</strong></li>
+        <li>Sicherstellung der Euvolämie durch <strong>präventive Hydrierung</strong> (siehe Tab "Hydrierung")</li>
+        <li>Alleinige <strong>orale Hydrierung ist NICHT empfohlen</strong></li>
+        <li>Keine weiteren Supportivmaßnahmen empfohlen (kein ACC, kein Theophyllin etc.)</li>
+        <li>Keine Empfehlungen zur Dialysetherapie vor oder nach KM-Gabe</li>
+        <li>Mindestabstand zwischen zwei jodhaltigen KM-Gaben: <strong>48 h</strong></li>
+        <li>Mindestabstand zwischen Jod- und Gd³⁺ KM-Gabe: <strong>7 d</strong></li>
+      </ul>
+    </div>
+
+    <div class="card" style="border-left:4px solid var(--info)">
+      <div class="card-title" style="color:var(--info)">Dialysepflicht</div>
+      <ul class="rec-list" style="font-size:13.5px">
+        <li>Alle jodhaltigen KM können durch <strong>Hämo-/Peritonealdialyse</strong> entfernt werden</li>
+        <li>Eine <strong>zeitliche Abstimmung</strong> von KM-Injektion und Hämodialysesitzung ist <strong>NICHT erforderlich</strong></li>
+        <li>Eine zusätzliche Hämodialyse zur KM-Elimination ist <strong>NICHT notwendig</strong>, auch nicht bei erhaltener Restdiurese</li>
+        <li>Bei Restdiurese: Abstand zwischen zwei jodhaltigen KM-Gaben mindestens <strong>48 h</strong></li>
+      </ul>
+    </div>
+
+    <div class="card" style="border-left:4px solid var(--danger)">
+      <div class="card-title" style="color:var(--danger)">Akute Nierenschädigung (AKI/ANV)</div>
+      <div class="danger-box" style="margin-top:0.25rem">KM-Gabe bei Patienten mit <strong>vorbestehend akuter Nierenschädigung (nach AKIN)</strong> nur nach <strong>strenger Indikationsstellung</strong> mit therapeutischer Konsequenz bzw. zu erwartendem klinischen Nutzen.</div>
+    </div>
+  </div>
+
+  <!-- HYDRIERUNG -->
+  <div id="hydrierung" class="section">
+    <h2>Präventive Hydrierung</h2>
+    <div class="info-box">Indikation: <strong>eGFR &lt; 30 mL/min</strong> und/oder Hinweis auf nicht-euvolämen Status.</div>
+
+    <div class="card">
+      <div class="card-title">Standardschema — i.v. Hydrierung</div>
+      <div style="text-align:center;margin:1rem 0">
+        <span class="dose-highlight">NaCl 0,9% &nbsp;·&nbsp; 1 mL/kg/h &nbsp;·&nbsp; 4 h vor bis 4 h nach KM-Gabe</span>
+      </div>
+      <ul class="rec-list" style="font-size:13.5px">
+        <li>Beginn: <strong>4 Stunden vor</strong> der KM-Gabe</li>
+        <li>Fortführung: <strong>4 Stunden nach</strong> der KM-Gabe</li>
+        <li>Dosierung: <strong>1 mL/kg Körpergewicht pro Stunde</strong> NaCl 0,9%</li>
+        <li>Alleinige orale Hydrierung ist <strong>nicht empfohlen</strong></li>
+      </ul>
+      <div class="warn-box" style="margin-top:0.75rem">Bei schwerwiegender Herzinsuffizienz (<strong>NYHA 3–4</strong>): reduziertes Schema <strong>NaCl 0,9% 0,5 mL/kg/h</strong> statt 1 mL/kg/h (4 h vor bis 4 h nach KM-Gabe) zur Vermeidung einer Flüssigkeitsüberladung und in-hospital worsening heart failure. Abstimmung mit Kardiologie/Internistik.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Was NICHT empfohlen wird</div>
+      <ul class="rec-list" style="font-size:13.5px">
+        <li><strong>Kein N-Acetylcystein (ACC)</strong> — keine ausreichende Evidenz</li>
+        <li><strong>Kein Theophyllin</strong> — keine ausreichende Evidenz</li>
+        <li><strong>Keine alleinige orale Hydrierung</strong> — i.v.-Schema verwenden</li>
+        <li><strong>Keine prophylaktische Dialyse</strong> vor oder nach KM-Gabe</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Rechenbeispiel</div>
+      <p style="font-size:13.5px;color:var(--prose)">Beispiel: Patient 70 kg, eGFR 25 mL/min, elektive CT mit jodhaltigem KM.</p>
+      <ul class="rec-list" style="font-size:13.5px">
+        <li>Hydrationsrate: 70 kg × 1 mL/kg/h = <strong>70 mL/h NaCl 0,9%</strong></li>
+        <li>Gesamtvolumen: 70 mL/h × 8 h = <strong>560 mL</strong></li>
+        <li>Beginn: 4 h vor KM-Gabe</li>
+        <li>Ende: 4 h nach KM-Gabe</li>
+      </ul>
+      <p style="font-size:13.5px;color:var(--prose);margin-top:0.75rem">Bei NYHA 3–4 (gleicher Patient):</p>
+      <ul class="rec-list" style="font-size:13.5px">
+        <li>Hydrationsrate: 70 kg × <strong>0,5 mL/kg/h</strong> = <strong>35 mL/h NaCl 0,9%</strong></li>
+        <li>Gesamtvolumen: 35 mL/h × 8 h = <strong>280 mL</strong></li>
+        <li>Engmaschiges Monitoring auf Zeichen einer Flüssigkeitsüberladung</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- MINDESTABSTÄNDE -->
+  <div id="abstaende" class="section">
+    <h2>Mindestabstände zwischen KM-Gaben</h2>
+
+    <div class="card">
+      <div class="card-title">Übersicht — Abstände nach Nierenfunktion</div>
+      <table class="risk-table">
+        <thead><tr><th>Nierenstatus</th><th>Jod → Jod</th><th>Jod ↔ Gd³⁺</th><th>Gd³⁺ → Gd³⁺</th></tr></thead>
+        <tbody>
+          <tr><td><strong>eGFR ≥ 30 mL/min</strong></td><td>4 h</td><td>4 h</td><td>4 h</td></tr>
+          <tr><td><strong>eGFR &lt; 30 mL/min</strong></td><td>48 h</td><td>7 d</td><td>7 d</td></tr>
+          <tr><td><strong>Dialysepflichtig mit Restdiurese</strong></td><td>≥ 48 h</td><td>Dialyse ≥4 h nach KM empfohlen</td><td>Dialyse ≥4 h nach KM empfohlen</td></tr>
+          <tr><td><strong>Dialysepflichtig anurisch</strong></td><td>Keine spezielle Wartezeit</td><td>Dialyse ≥4 h nach KM empfohlen</td><td>Dialyse ≥4 h nach KM empfohlen</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Gadolinium-haltige KM bei eingeschränkter Nierenfunktion</div>
+      <ul class="rec-list" style="font-size:13.5px">
+        <li><strong>eGFR ≥ 30 mL/min:</strong> keine besonderen Maßnahmen, Mindestabstand 4 h zwischen zwei KM-Gaben (Jod oder Gd³⁺)</li>
+        <li><strong>eGFR &lt; 30 mL/min:</strong> Stopp Eisen-Substitution 3 d vor bis 7 d nach Gd³⁺-Gabe, immer venöse BGA, Bestimmung Serum-Phosphat; Mindestabstand <strong>7 d</strong> zwischen zwei KM-Gaben (Jod oder Gd³⁺)</li>
+        <li><strong>Dialysepflichtig:</strong> Dialyse (Dauer ≥4 h) im unmittelbaren Anschluss empfohlen — Vorab-Koordination mit Dialyseabteilung notwendig. Eine mindestens 4-stündige Dialyse eliminiert <strong>97 %</strong> des MR-Kontrastmittels</li>
+        <li><strong>PD-Patienten:</strong> passager intensiviertes PD-Regime empfohlen, kein Wechsel auf HD; Abstimmung mit Dialyseabteilung</li>
+      </ul>
+      <div class="guideline-source">Quelle: Hauseigener Klinikstandard</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Mehrfachuntersuchung am gleichen Tag</div>
+      <ul class="rec-list" style="font-size:13.5px">
+        <li>Bei eGFR ≥ 30 mL/min: zweite KM-Gabe nach <strong>4 h</strong> möglich</li>
+        <li>Bei eGFR &lt; 30 mL/min und Notwendigkeit einer zweiten Untersuchung: Indikation streng prüfen, ggf. Aufschub von <strong>48 h</strong></li>
+        <li>Bei geplanter abdomineller Doppeluntersuchung (CT + MRT): zuerst KM-CT, dann MRT (sonst Gd³⁺-Artefakte der ableitenden Harnwege in der CT)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- GRUNDLAGEN -->
+  <div id="grundlagen" class="section">
+    <h2>Grundlagen</h2>
+
+    <div class="card">
+      <div class="card-title">Terminologie — Was hat sich geändert?</div>
+      <ul class="rec-list" style="font-size:13.5px">
+        <li>Der Begriff <strong>"Kontrastmittel-Nephropathie"</strong> ist obsolet</li>
+        <li>Aktuelle Bezeichnung: <strong>"Kontrastmittel-assoziierte Nierenschädigung" (CA-AKI)</strong></li>
+        <li>Ein <strong>Kausalzusammenhang</strong> zwischen KM-Gabe und Nephropathie ist <strong>derzeit nicht belegbar</strong></li>
+        <li>Aktuelle Daten zeigen, dass das früher angenommene Risiko bei modernen niedrig-osmolaren KM deutlich überschätzt wurde</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">eGFR-Bestimmung — CKD-EPI</div>
+      <p style="font-size:13.5px;color:var(--prose);margin-bottom:0.5rem">Die <strong>CKD-EPI-Formel</strong> (Chronic Kidney Disease Epidemiology Collaboration) ist Standard zur eGFR-Bestimmung vor KM-Gabe.</p>
+      <ul class="rec-list" style="font-size:13.5px">
+        <li>Bestimmung über Serum-Kreatinin, Alter, Geschlecht</li>
+        <li>Genauer als MDRD-Formel, insbesondere bei eGFR &gt; 60 mL/min</li>
+        <li>Kreatinin sollte nicht älter als 1 Monat sein (bei stabilen Patienten)</li>
+        <li>Bei akuter Nierenschädigung: Kreatinin-Verlauf entscheidend, nicht Einzelwert</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Metformin und KM</div>
+      <ul class="rec-list" style="font-size:13.5px">
+        <li>Bei eGFR ≥ 30 mL/min: <strong>kein Pausieren</strong> erforderlich</li>
+        <li>Bei eGFR &lt; 30 mL/min: Metformin ist primär kontraindiziert (Grunderkrankung) — vor KM nephrologische Mitbetreuung</li>
+        <li>Begründung: Risiko einer Laktatazidose bei Metformin ist an die Nierenfunktion gekoppelt, <em>nicht</em> direkt an die KM-Gabe</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Was tun bei AKI/ANV?</div>
+      <div class="warn-box" style="margin-top:0.5rem">Bei akuter Nierenschädigung (nach AKIN-Kriterien) ist die KM-Gabe besonders kritisch zu prüfen.</div>
+      <ul class="rec-list" style="font-size:13.5px">
+        <li>KM nur bei <strong>strenger Indikation</strong> mit therapeutischer Konsequenz</li>
+        <li>Erwarteter klinischer Nutzen muss das potenzielle Risiko überwiegen</li>
+        <li>Alternativen prüfen: MRT (mit oder ohne Gd³⁺), Nativ-CT, Sonographie</li>
+        <li>Nephrologische Mitbetreuung empfohlen</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Risikofaktoren für CA-AKI (historisch)</div>
+      <p style="font-size:13.5px;color:var(--prose);margin-bottom:0.5rem">Auch wenn der Kausalzusammenhang nicht belegt ist, gelten folgende Faktoren als Risikomarker für eine Verschlechterung der Nierenfunktion nach KM-Gabe:</p>
+      <ul class="rec-list" style="font-size:13.5px">
+        <li>eGFR &lt; 30 mL/min</li>
+        <li>Akute Nierenschädigung (AKI)</li>
+        <li>Diabetische Nephropathie</li>
+        <li>Dehydratation / nicht-euvolämer Status</li>
+        <li>Herzinsuffizienz (NYHA 3–4)</li>
+        <li>Hypoxie, Sepsis, kardiogener Schock</li>
+        <li>Multiples Myelom (mit Bence-Jones-Proteinurie)</li>
+        <li>Nephrotoxische Komedikation (NSAR, Aminoglykoside)</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer class="page-footer">
+    Dieses Tool dient der klinischen Entscheidungsunterstützung und ersetzt keine individuelle ärztliche Beurteilung.<br>
+    Hauseigener Klinikstandard · Stand Juli 2026
+    <span class="page-byline">Made by Dardan</span>
+  </footer>
+</div>
+
+<script>
+function parseDE(s){
+  if(typeof s !== 'string') return NaN;
+  return parseFloat(s.replace(',','.').trim());
+}
+function formatDE(n,d){
+  if(isNaN(n)) return '—';
+  return n.toFixed(d).replace('.',',');
+}
+
+function onKidneyChange(){
+  document.querySelectorAll('.dchk').forEach(function(lbl){
+    var cb=lbl.querySelector('input[type=checkbox]');
+    if(cb&&cb.checked) lbl.classList.add('active'); else lbl.classList.remove('active');
+  });
+}
+
+function getKidneyFlags(){
+  return {
+    egfr: parseDE(document.getElementById('egfr').value),
+    dialysis: document.getElementById('d-dialysis').checked,
+    nyha: document.getElementById('d-nyha').checked,
+    metformin: document.getElementById('d-metformin').checked
+  };
+}
+
+function buildHydrationBlock(isNyha){
+  var rate = isNyha ? 0.5 : 1.0;
+  var rateLabel = isNyha ? '0,5 mL/kg/h (reduziert wegen NYHA 3–4)' : '1 mL/kg/h';
+  return '<div class="hydration-calc">'+
+    '<div class="hydration-calc-title">Hydrierungs-Rechner</div>'+
+    '<div class="hydration-calc-input-row">'+
+    '<label for="weight-input">Körpergewicht des Patienten:</label>'+
+    '<input type="text" inputmode="decimal" id="weight-input" placeholder="z.B. 70" oninput="updateHydration('+(isNyha?'true':'false')+')" autocomplete="off">'+
+    '<span class="unit-badge">kg</span>'+
+    '</div>'+
+    '<div id="hydration-output" data-nyha="'+(isNyha?'1':'0')+'">'+
+    '<div class="hydration-calc-detail" style="margin-top:0.5rem;color:var(--muted)">Gewicht eingeben für konkrete Dosis &middot; Schema: '+rateLabel+', 4 h vor bis 4 h nach KM</div>'+
+    '</div>'+
+    '</div>';
+}
+
+function updateHydration(isNyha){
+  var w = parseDE(document.getElementById('weight-input').value);
+  var out = document.getElementById('hydration-output');
+  if(!out) return;
+  if(isNaN(w) || w <= 0){
+    var rateLabel = isNyha ? '0,5 mL/kg/h (reduziert wegen NYHA 3–4)' : '1 mL/kg/h';
+    out.innerHTML = '<div class="hydration-calc-detail" style="margin-top:0.5rem;color:var(--muted)">Gewicht eingeben für konkrete Dosis &middot; Schema: '+rateLabel+', 4 h vor bis 4 h nach KM</div>';
+    return;
+  }
+  var rate = isNyha ? 0.5 : 1.0;
+  var hourlyMl = Math.round(w * rate);
+  var totalMl = hourlyMl * 8;
+  var rateLabel = isNyha ? '0,5 mL/kg/h (reduziert NYHA 3–4)' : '1 mL/kg/h';
+  out.innerHTML =
+    '<div class="hydration-calc-main"><span class="dose-highlight">NaCl 0,9% &nbsp;·&nbsp; '+hourlyMl+' mL/h &nbsp;·&nbsp; 4 h vor – 4 h nach KM</span></div>'+
+    '<div class="hydration-calc-detail">'+
+    'Rate: '+formatDE(w,0)+' kg × '+rateLabel+' = <strong>'+hourlyMl+' mL/h</strong><br>'+
+    '<strong>Vor KM-Gabe:</strong> '+hourlyMl+' mL/h × 4 h = <strong>'+(hourlyMl*4)+' mL NaCl 0,9%</strong><br>'+
+    '<strong>Nach KM-Gabe:</strong> '+hourlyMl+' mL/h × 4 h = <strong>'+(hourlyMl*4)+' mL NaCl 0,9%</strong><br>'+
+    'Gesamtvolumen: <strong>'+totalMl+' mL</strong>'+
+    (isNyha?'<br><em>Engmaschiges Monitoring auf Flüssigkeitsüberladung</em>':'')+
+    '</div>';
+}
+
+function analyzeKidney(){
+  var f=getKidneyFlags();
+  if(isNaN(f.egfr) && !f.dialysis){
+    alert('Bitte eGFR-Wert eingeben (z.B. 45) oder Dialysepflicht markieren.');
+    return;
+  }
+
+  var risk='low', label='', desc='', recs=[];
+
+  // Branch by clinical state: dialysis > AKI > stable
+  if(f.dialysis){
+    risk='medium';
+    label='Dialysepflichtige Niereninsuffizienz';
+    desc='Alle jodhaltigen KM können durch Hämo-/Peritonealdialyse entfernt werden. Eine zeitliche Abstimmung mit der Dialyse ist nicht erforderlich.';
+    recs.push('Jodhaltiges KM kann gegeben werden — alle KM sind dialysabel');
+    recs.push('<strong>Keine zeitliche Abstimmung</strong> von KM-Injektion und Hämodialyse erforderlich');
+    recs.push('<strong>Keine zusätzliche Dialyse</strong> zur KM-Elimination notwendig, auch nicht bei erhaltener Restdiurese');
+    recs.push('Bei <strong>Restdiurese:</strong> Abstand zwischen zwei jodhaltigen KM-Gaben mindestens <strong>48 h</strong>');
+    recs.push('Bei <strong>Anurie:</strong> keine spezielle Wartezeit zwischen KM-Gaben erforderlich');
+    recs.push('Mindestabstand zu Gd³⁺-KM: 7 Tage (separate Gd³⁺-Empfehlungen beachten)');
+  } else {
+    // Stable kidney function - branch by eGFR
+    if(f.egfr >= 30){
+      risk='low';
+      label='eGFR ≥ 30 mL/min — kein erhöhtes Risiko';
+      desc='Patienten mit eGFR ≥ 30 mL/min haben KEIN erhöhtes Risiko einer Kontrastmittel-assoziierten Nierenschädigung. Keine besonderen zusätzlichen Maßnahmen erforderlich.';
+      recs.push('<strong>Keine besonderen zusätzlichen Maßnahmen</strong> erforderlich');
+      recs.push('Standard-KM-Gabe nach Hausprotokoll');
+      recs.push('Mindestabstand zwischen zwei KM-Gaben (Jod oder Gd³⁺): <strong>4 h</strong>');
+      if(f.metformin) recs.push('Metformin <strong>NICHT pausieren</strong> bei eGFR ≥ 30 mL/min');
+    } else if(f.egfr >= 15){
+      risk='high';
+      label='eGFR &lt; 30 mL/min — präventive Hydrierung erforderlich';
+      desc='Bei eGFR &lt; 30 mL/min ist eine Kontrastmittel-assoziierte Nierenschädigung möglich. Bei adäquatem Volumenhaushalt (Euvolämie) besteht jedoch kein erhöhtes Risiko — Sicherstellung der Euvolämie durch präventive Hydrierung.';
+      // Escalation: NYHA 3-4 or Metformin in combination with eGFR<30 raises the risk
+      if(f.nyha || f.metformin){
+        risk='veryhigh';
+        var addOns=[];
+        if(f.nyha) addOns.push('Herzinsuffizienz NYHA 3–4');
+        if(f.metformin) addOns.push('Metformin-Therapie');
+        label='eGFR &lt; 30 mL/min + '+addOns.join(' + ')+' — erhöhtes Risiko';
+        desc='Bei eGFR &lt; 30 mL/min in Kombination mit '+addOns.join(' und ')+' ist das Risiko zusätzlich erhöht. Sorgfältige Indikationsstellung und enge Abstimmung mit den betreuenden Fachdisziplinen erforderlich.';
+      }
+      recs.push('<strong>Präventive Hydrierung obligat:</strong> NaCl 0,9% 1 mL/kg/h, 4 h vor und 4 h nach KM-Gabe');
+      recs.push('Alleinige orale Hydrierung ist <strong>nicht empfohlen</strong>');
+      recs.push('Keine weiteren Supportivmaßnahmen empfohlen (kein ACC, kein Theophyllin)');
+      recs.push('Keine prophylaktische Dialyse vor oder nach KM-Gabe');
+      recs.push('Mindestabstand zwischen zwei jodhaltigen KM-Gaben: <strong>48 h</strong>');
+      recs.push('Mindestabstand zwischen Jod- und Gd³⁺-KM: <strong>7 Tage</strong>');
+      if(f.nyha){
+        recs.push('<strong>NYHA 3–4:</strong> reduziertes Hydrierungsschema — <strong>NaCl 0,9% 0,5 mL/kg/h</strong> statt 1 mL/kg/h (4 h vor bis 4 h nach KM-Gabe) zur Vermeidung einer Flüssigkeitsüberladung; Abstimmung mit Kardiologie');
+      }
+      if(f.metformin){
+        recs.push('Bei eGFR &lt; 30 mL/min: Metformin primär kontraindiziert — nephrologisch klären');
+      }
+    } else if(f.egfr >= 0){
+      risk='veryhigh';
+      label='eGFR &lt; 15 mL/min — terminale Niereninsuffizienz';
+      desc='Bei terminaler Niereninsuffizienz (eGFR &lt; 15 mL/min) ohne Dialyse: KM-Indikation streng prüfen, nephrologische Mitbetreuung obligat.';
+      recs.push('KM-Indikation <strong>streng prüfen</strong> — alternative Bildgebung erwägen');
+      recs.push('Nephrologische Mitbetreuung obligat');
+      recs.push('Bei zwingender KM-Gabe: präventive Hydrierung NaCl 0,9% 1 mL/kg/h, 4 h vor und 4 h nach KM');
+      recs.push('Mindestabstand zwischen zwei jodhaltigen KM-Gaben: <strong>48 h</strong>');
+      if(f.nyha){
+        recs.push('<strong>NYHA 3–4:</strong> reduziertes Hydrierungsschema — <strong>NaCl 0,9% 0,5 mL/kg/h</strong> statt 1 mL/kg/h (4 h vor bis 4 h nach KM); Abstimmung mit Kardiologie');
+      }
+    } else {
+      alert('eGFR-Wert plausibel? Bitte überprüfen.');
+      return;
+    }
+  }
+
+  // Render
+  var box=document.getElementById('result');
+  box.className='result-box show '+risk;
+  var rbCls = risk==='veryhigh'?'rb-veryhigh':risk==='high'?'rb-high':risk==='medium'?'rb-medium':'rb-low';
+  document.getElementById('result-badge').innerHTML='<span class="risk-badge '+rbCls+'"><span class="risk-dot"></span>'+label+'</span>';
+
+  // Param chips
+  var chips=[];
+  if(!isNaN(f.egfr)){
+    var egfrCls = f.egfr >= 30 ? 'ok' : f.egfr >= 15 ? 'warn' : 'abnormal';
+    chips.push('<div class="param-chip '+egfrCls+'"><div class="val">'+formatDE(f.egfr,0)+'</div><div class="lbl">eGFR mL/min</div></div>');
+  }
+  if(f.dialysis){
+    chips.push('<div class="param-chip warn"><div class="val" style="font-size:13px">Dialyse</div><div class="lbl">HD/PD</div></div>');
+  }
+  if(f.nyha) chips.push('<div class="param-chip warn"><div class="val" style="font-size:13px">NYHA 3–4</div><div class="lbl">Herzinsuffizienz</div></div>');
+  if(f.metformin) chips.push('<div class="param-chip"><div class="val" style="font-size:13px">Ja</div><div class="lbl">Metformin</div></div>');
+  document.getElementById('result-params').innerHTML=chips.join('');
+
+  document.getElementById('result-title').innerHTML=label;
+  document.getElementById('result-desc').innerHTML=desc;
+  document.getElementById('result-recs').innerHTML=recs.map(function(r){return '<li>'+r+'</li>';}).join('');
+
+  // Hydration calculation (only if hydration is indicated)
+  var needsHydration = !f.dialysis && !isNaN(f.egfr) && f.egfr < 30;
+  if(needsHydration){
+    document.getElementById('hydration-block').innerHTML = buildHydrationBlock(f.nyha);
+  } else {
+    document.getElementById('hydration-block').innerHTML = '';
+  }
+
+  box.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function showSection(id, btn){
+  document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
+  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// === RAD MODE (shared with other tools via localStorage key) ===
+</script>
+</body>
+</html>

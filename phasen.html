@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CT-Phasen — interaktive Übersicht</title>
+<link rel="stylesheet" href="km.css">
+</head>
+<body class="tool-phasen">
+<script src="km.js"></script>
+<div class="page">
+  <header class="masthead">
+    <div class="mast-ruler" aria-hidden="true"></div>
+    <div class="mast-top">
+      <a href="index.html" class="home-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 5.5 8 12l6.5 6.5"/></svg>Übersicht</a>
+      <span class="header-badge">KLINISCHES ENTSCHEIDUNGSTOOL · RADIOLOGIE</span>
+      <button type="button" class="rad-mode-toggle" id="radModeToggle" aria-pressed="false" title="Lesesaal-Dunkelmodus" onclick="toggleRadMode()"><span class="mode-track" aria-hidden="true"><span class="mode-thumb"></span></span><span class="mode-label">Rad&nbsp;Mode</span></button>
+    </div>
+    <div class="mast-main">
+      <div class="tool-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.2"/><path d="M12 7.3V12l3.2 1.9"/><path d="M12 3.8v1.3M20.2 12h-1.3M12 20.2v-1.3M3.8 12h1.3"/></svg></div>
+      <div class="mast-text">
+        <h1>CT-Phasen nach KM-Gabe<span class="h1-sub">Interaktive zeitliche Übersicht der Kontrastphasen</span></h1>
+        <p class="mast-desc">Verschiebe den Schieberegler, um zu sehen welche CT-Phase zu welchem Zeitpunkt nach KM-Injektion vorliegt und wofür sie eingesetzt wird.</p>
+      </div>
+    </div>
+  </header>
+
+  <nav>
+    <button class="nav-btn active" onclick="showSection('phasen-tab',this)">Phasen-Slider</button>
+    <button class="nav-btn" onclick="showSection('zugang-tab',this)">Venöser Zugang</button>
+    <button class="nav-btn" onclick="showSection('grundlagen-tab',this)">Grundlagen</button>
+  </nav>
+
+  <!-- TAB 1: PHASEN-SLIDER -->
+  <div id="phasen-tab" class="section active">
+  <div class="info-box">Die hier dargestellten Zeitpunkte gelten für eine fixierte Verzögerung ("fixed delay") nach KM-Bolusbeginn bei intravenöser Gabe via Antecubitalvene. Bei Bolus-Tracking und individuellen Kreislaufverhältnissen können Verschiebungen von ±5–10 s auftreten.</div>
+
+  <div class="card timeline-card">
+    <div class="timeline-time-display">
+      <div>
+        <span class="timeline-time-value" id="time-value">0</span><span class="timeline-time-unit">s nach KM-Bolus</span>
+      </div>
+      <div class="timeline-current-phase" id="current-phase-badge">
+        <span class="timeline-phase-dot" id="phase-dot"></span>
+        <span id="current-phase-name">Pre-Kontrast</span>
+      </div>
+    </div>
+
+    <div class="timeline-track-wrap">
+      <div class="timeline-bands" id="timeline-bands"></div>
+      <div class="timeline-marker" id="timeline-marker" style="left:0%"></div>
+      <input type="range" class="timeline-slider" id="timeline-slider" min="0" max="600" step="1" value="0" aria-label="Zeitpunkt nach KM-Bolus">
+      <div class="timeline-tick-row" id="timeline-ticks"></div>
+    </div>
+
+    <div class="timeline-quick-jump" id="quick-jump"></div>
+  </div>
+
+  <div class="phase-detail" id="phase-detail">
+    <!-- populated by JS -->
+  </div>
+
+  <details class="collapsed-section">
+    <summary>Alle Phasen tabellarisch</summary>
+    <div class="overview-table-wrap">
+      <table class="overview-table" id="overview-table">
+        <thead><tr><th>Phase</th><th>Zeit nach KM</th><th>Hauptindikation</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </details>
+
+  <details class="collapsed-section">
+    <summary>Hinweise zur Phasentechnik und Bolus-Tracking</summary>
+    <div class="card" style="border-radius:0 0 8px 8px;border-top:none;margin-bottom:0">
+      <h3 style="margin-bottom:0.5rem;font-size:14px;color:var(--brand)">Fixed Delay vs. Bolus-Tracking</h3>
+      <p style="font-size:13.5px;color:var(--prose);margin-bottom:0.5rem"><strong>Fixed Delay:</strong> Routinetechnik für Thorax-, Abdomen- und Beckenuntersuchungen. Scan startet zu festgelegtem Zeitpunkt nach Injektionsbeginn.</p>
+      <p style="font-size:13.5px;color:var(--prose);margin-bottom:0.85rem"><strong>Bolus-Tracking:</strong> Scan startet, sobald die HU-Schwelle in der Aorta (typ. ≥100 HU für arterielle Phase, ≥150 HU für CTA) überschritten wird. Bei CTA und arteriellen Untersuchungen mit knappem Zeitfenster bevorzugt.</p>
+      <h3 style="margin-bottom:0.5rem;font-size:14px;color:var(--brand)">Typische Injektionsparameter</h3>
+      <ul style="font-size:13.5px;color:var(--prose);padding-left:1.25rem;line-height:1.7">
+        <li>KM-Volumen: 80–150 mL (gewichtsadaptiert ~1,5 mL/kg)</li>
+        <li>Flussrate: 2,5–5 mL/s (CT-Angio meist 4–5 mL/s)</li>
+        <li>NaCl-Chaser: 30–40 mL bei gleicher Flussrate</li>
+        <li>Kanülengröße: ≥20G für ≥4 mL/s empfohlen</li>
+        <li>Punktionsort bevorzugt Antecubitalvene</li>
+      </ul>
+      <p style="font-size:12px;color:var(--muted);margin-top:0.75rem;font-style:italic">Die Phasenzeiten verschieben sich bei reduziertem Herzminutenvolumen (z.B. Herzinsuffizienz) — daher Bolus-Tracking bei kritischen Untersuchungen erwägen.</p>
+    </div>
+  </details>
+  </div><!-- /phasen-tab -->
+
+  <!-- TAB 3: VENÖSER ZUGANG -->
+  <div id="zugang-tab" class="section">
+    <h2>Venöser Zugang nach Flussrate</h2>
+    <div class="info-box">Empfehlungen zur Wahl von Venflon, ZVK oder Port je nach geforderter Flussrate. Quellen: Schwab et al. RöFo 2009, Behrendt et al. CVIR 2009, UNC CT-PIV Guidelines 2025.</div>
+
+    <div class="card">
+      <div class="card-title">Periphere Venenverweilkanüle (Venflon) — nach DIN/ISO-Farbcode</div>
+      <table class="risk-table cannula-table">
+        <thead><tr><th>Größe</th><th>Farbe</th><th>Max. Flow (klinisch)</th><th>Empfohlen für</th></tr></thead>
+        <tbody>
+          <tr><td><strong>18G</strong></td><td><span class="color-pill color-green">grün</span></td><td>≤5 mL/s</td><td><strong>Standard für CTA</strong> und Hochfluss-Anwendungen</td></tr>
+          <tr><td><strong>20G</strong></td><td><span class="color-pill color-pink">rosa</span></td><td>≤4 mL/s (in vivo bis 5 mL/s nachgewiesen)</td><td><strong>Standard-Routine</strong> CT-Abdomen/Thorax</td></tr>
+          <tr><td><strong>22G</strong></td><td><span class="color-pill color-blue">blau</span></td><td>≤3 mL/s</td><td>Schmale Venen; CTPA noch möglich</td></tr>
+          <tr><td><strong>24G</strong></td><td><span class="color-pill color-yellow">gelb</span></td><td>nicht für Powerinjektion</td><td>Pädiatrie / sehr fragile Venen; KM nur als Handinjektion</td></tr>
+        </tbody>
+      </table>
+      <div class="guideline-source">Quellen: Schwab et al. RöFo 2009 · Behrendt et al. CVIR 2009 · UNC CT-PIV Guidelines 2025</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Punktionsort — bevorzugte Reihenfolge</div>
+      <ul class="rec-list">
+        <li><strong>1. Antecubitalfossa</strong> (V. mediana cubiti / V. basilica / V. cephalica) — bevorzugt für Hochfluss-Anwendungen</li>
+        <li><strong>2. Proximaler Unterarm</strong> (V. cephalica / V. basilica) — gute Alternative</li>
+        <li><strong>3. Handrücken / V. cephalica distal</strong> — höheres Paravasat-Risiko, niedrigere Flussraten</li>
+        <li><strong>4. V. jugularis externa / Halsvenen</strong> — nur als Ausnahme</li>
+        <li><strong>Untere Extremität</strong> — nur als Notfall-Ausnahme (höhere Komplikationsrate)</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Zentraler Venenkatheter (ZVK)</div>
+      <p style="font-size:13.5px;color:var(--prose);margin-bottom:0.5rem">Nur <strong>power-injektor-kompatible</strong> ZVK für Hochdruck-KM-Injektion zugelassen. Herstellerangaben (am Hub aufgedruckt) sind verbindlich.</p>
+      <table class="risk-table cannula-table">
+        <thead><tr><th>Lumen / Position</th><th>Empfehlung</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Bevorzugtes Lumen</strong></td><td><strong>Distales Lumen</strong> (größter Durchmesser, kürzester Weg, höchste Flussraten möglich)</td></tr>
+          <tr><td><strong>Standard-Flussrate</strong></td><td>≤2 mL/s wenn keine spezifische Powerinjektor-Zulassung</td></tr>
+          <tr><td><strong>Power-injektor-kompatibler ZVK</strong></td><td>Bis 5 mL/s möglich, Herstellerangabe beachten</td></tr>
+          <tr><td><strong>Position</strong></td><td>V. jugularis interna / V. subclavia bevorzugt, V. femoralis nur als Ausnahme</td></tr>
+          <tr><td><strong>Lagekontrolle vor KM</strong></td><td>Bei Unsicherheit CT-Topogramm/Röntgen-Thorax zur Bestätigung der Tipp-Position</td></tr>
+        </tbody>
+      </table>
+      <div class="warn-box" style="margin-top:0.75rem">Komplikationen bei ZVK-KM-Injektion sind selten, aber relevant: mediastinales Paravasat, Hämatom, Arrhythmie. Nach KM-Gabe ggf. CT-Topogramm zur Lagekontrolle.</div>
+      <div class="guideline-source">Quelle: Plumb &amp; Murphy, Eur Radiol 2011 · UNC CVAD Care Policy 2025</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Portkatheter (TIVAD)</div>
+      <p style="font-size:13.5px;color:var(--prose);margin-bottom:0.5rem">Port-Systeme müssen zur Hochdruckinjektion zugelassen sein (sogenannte <strong>"Power-Ports"</strong>). Beschriftung am Reservoir bzw. Patientenausweis.</p>
+      <table class="risk-table cannula-table">
+        <thead><tr><th>Element</th><th>Empfehlung</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Port-Nadel</strong></td><td>Huber-Nadel <strong>19G–22G</strong> je nach Port und Flussrate; power-kompatible Nadel zwingend</td></tr>
+          <tr><td><strong>Maximalfluss Power-Port</strong></td><td>Bis 5 mL/s (z.B. PowerPort, BardPort SmartPort) — Herstellerangabe verbindlich</td></tr>
+          <tr><td><strong>Vor Injektion</strong></td><td>Aspiration auf Rückfluss von Blut, Testspülung mit NaCl 0,9% — bestätigt korrekte Lage und Durchgängigkeit</td></tr>
+          <tr><td><strong>Bei fehlendem Rückfluss</strong></td><td>KM-Gabe vermeiden, Port-Sprechstunde/Onkologie konsultieren — Risiko Katheterruptur / Paravasat</td></tr>
+          <tr><td><strong>Nach Injektion</strong></td><td>Spülung mit NaCl 0,9% (10–20 mL), ggf. Heparinblock nach Hausstandard</td></tr>
+        </tbody>
+      </table>
+      <div class="guideline-source">Quelle: ESUR Extravasation 2022 · Hersteller-Spezifikationen (Bard, AngioDynamics u.a.)</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">PICC (Peripherally Inserted Central Catheter)</div>
+      <ul class="rec-list">
+        <li>Nur <strong>"power-injectable" PICCs</strong> für Hochdruck-KM zugelassen — Beschriftung am Hub</li>
+        <li>Typische Maximalrate Power-PICC: <strong>5 mL/s</strong>, je nach Hersteller</li>
+        <li>Bei Multilumen-PICC: <strong>distales (größtes) Lumen</strong> verwenden</li>
+        <li>Nicht-power PICCs: KM-Gabe vermeiden bzw. nur Handinjektion (≤1 mL/s)</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Test mit NaCl 0,9% vor KM-Gabe (ESUR 2022)</div>
+      <p style="font-size:13.5px;color:var(--prose)">Bei <strong>jedem</strong> Zugang vor KM-Bolus: <strong>Testspülung mit NaCl 0,9%</strong> mit gleicher Flussrate wie geplant. Schmerz, Schwellung oder fehlender Rückfluss → Zugang neu setzen.</p>
+    </div>
+  </div><!-- /zugang-tab -->
+
+  <!-- TAB 4: GRUNDLAGEN -->
+  <div id="grundlagen-tab" class="section">
+    <h2>Grundlagen</h2>
+
+    <div class="card">
+      <div class="card-title">Fixed Delay vs. Bolus-Tracking</div>
+      <p style="font-size:13.5px;color:var(--prose);margin-bottom:0.5rem"><strong>Fixed Delay:</strong> Routinetechnik für Thorax-, Abdomen- und Beckenuntersuchungen. Scan startet zu festgelegtem Zeitpunkt nach Injektionsbeginn.</p>
+      <p style="font-size:13.5px;color:var(--prose)"><strong>Bolus-Tracking:</strong> Scan startet, sobald die HU-Schwelle in der Aorta (typ. ≥100 HU für arterielle Phase, ≥150 HU für CTA) überschritten wird. Bei CTA und arteriellen Untersuchungen mit knappem Zeitfenster bevorzugt.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Typische Injektionsparameter</div>
+      <ul class="rec-list">
+        <li>KM-Volumen: 80–150 mL (gewichtsadaptiert ~1,5 mL/kg)</li>
+        <li>Flussrate: 2,5–5 mL/s (CT-Angio meist 4–5 mL/s)</li>
+        <li>NaCl-Chaser: 30–40 mL bei gleicher Flussrate</li>
+        <li>Kanülengröße: ≥20G für ≥4 mL/s empfohlen</li>
+        <li>Punktionsort bevorzugt Antecubitalvene</li>
+      </ul>
+      <p style="font-size:12px;color:var(--muted);margin-top:0.75rem;font-style:italic">Die Phasenzeiten verschieben sich bei reduziertem Herzminutenvolumen (z.B. Herzinsuffizienz) — daher Bolus-Tracking bei kritischen Untersuchungen erwägen.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">KM-Volumen gewichtsadaptiert</div>
+      <table class="risk-table">
+        <thead><tr><th>Körpergewicht</th><th>KM-Volumen (Routine)</th><th>KM-Volumen (CTA)</th></tr></thead>
+        <tbody>
+          <tr><td>&lt; 60 kg</td><td>70–80 mL</td><td>60–80 mL</td></tr>
+          <tr><td>60–80 kg</td><td>80–100 mL</td><td>80–100 mL</td></tr>
+          <tr><td>80–100 kg</td><td>100–120 mL</td><td>100–130 mL</td></tr>
+          <tr><td>&gt; 100 kg</td><td>120–150 mL</td><td>130–150 mL</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:12px;color:var(--muted);margin-top:0.5rem;font-style:italic">Faustregel: ~1,5 mL/kg bei 300 mg I/mL. Bei höher konzentrierten KM (370 mg I/mL) entsprechend weniger Volumen.</p>
+    </div>
+  </div><!-- /grundlagen-tab -->
+
+  <footer class="page-footer">
+    Dieses Tool dient der klinischen Entscheidungsunterstützung und ersetzt keine individuelle ärztliche Beurteilung. Zeitangaben sind Richtwerte für Erwachsene mit normaler Hämodynamik.<br>
+    Quellen: Radiology Assistant CT Contrast Injection Protocols · Bae et al. Radiology · LITFL Abdominal CT Phases · Stand Juli 2026
+    <span class="page-byline">Made by Dardan</span>
+  </footer>
+</div>
+
+<script>
+// ============ PHASE DEFINITIONS ============
+// startSec/endSec are inclusive ranges. Phases ordered chronologically.
+var phases = [
+  {
+    id: 'precontrast',
+    name: 'Pre-Kontrast / Nativ',
+    short: 'Nativ',
+    color: '#94a3b8',
+    startSec: 0, endSec: 4,
+    tagline: 'Nativ-Aufnahme vor KM-Gabe oder unmittelbar bei Injektionsbeginn — vor jeder Kontrastierung.',
+    indications: [
+      'Detektion von Verkalkungen (z.B. koronare Kalklast, Nierensteine, Pankreaslithiasis)',
+      'Frische Einblutungen (Hyperdensität: ICH, Subarachnoidalblutung, Hämorrhagie)',
+      'Hochdense ingestierte Substanzen (Pseudoenhancement vermeiden)',
+      'Lipom-/Fettcharakterisierung (negative HU)',
+      'Baseline-Dichtemessung für Wash-out-Berechnung'
+    ],
+    organs: ['Knochen', 'Verkalkungen', 'Blut', 'Fett']
+  },
+  {
+    id: 'pulmonary',
+    name: 'Pulmonalarterielle Phase',
+    short: 'PA-Phase',
+    color: '#7c3aed',
+    startSec: 5, endSec: 14,
+    tagline: 'Sehr frühe Phase — Kontrast befindet sich im pulmonalarteriellen System; ideal für CT-Pulmonalisangiographie (CTPA).',
+    indications: [
+      '<strong>CT-Pulmonalisangiographie (CTPA)</strong> bei Verdacht auf Lungenarterienembolie',
+      'Bolus-Tracking-Triggerschwelle in der Pulmonalarterie typisch bei ≥100 HU',
+      'Optimale Kontrastierung der zentralen und peripheren Pulmonalarterien'
+    ],
+    organs: ['Pulmonalarterien', 'Truncus pulmonalis']
+  },
+  {
+    id: 'early-arterial',
+    name: 'Frühe arterielle Phase',
+    short: 'Frühe Arterielle',
+    color: '#dc2626',
+    startSec: 15, endSec: 24,
+    tagline: 'KM in den großen Arterien — Aorta thoracoabdominal hellst kontrastiert. Parenchym noch nicht angereichert.',
+    indications: [
+      '<strong>CT-Angiographie (CTA)</strong> der Aorta, supraaortalen Gefäße, Karotiden',
+      'Akute Aortendissektion, Aneurysma, Aortenruptur',
+      'Mesenteriale Ischämie / akuter Gefäßverschluss',
+      'Triple-rule-out (Thoraxschmerz: KHK + LE + Aortendissektion)',
+      'Bolus-Tracking-Trigger an Aorta descendens, Schwelle ≥100 HU'
+    ],
+    organs: ['Aorta', 'Karotis', 'Mesenterialgefäße', 'Becken-Beinarterien']
+  },
+  {
+    id: 'late-arterial',
+    name: 'Späte arterielle Phase (Pankreas-Parenchym)',
+    short: 'Späte Arterielle',
+    color: '#ea580c',
+    startSec: 25, endSec: 44,
+    tagline: 'Maximale arteriell-versorgte Parenchym-Kontrastierung — wichtigste Phase für hypervaskuläre Tumore.',
+    indications: [
+      '<strong>Hypervaskuläre Lebertumore:</strong> HCC, FNH, Adenom, Hämangiom (Knotenfüllung)',
+      '<strong>Pankreas-Parenchymphase:</strong> hypoenhancing Pankreas-Karzinom besser abgrenzbar',
+      'Hypervaskuläre Metastasen (z.B. NET, Schilddrüse, Niere, Mamma)',
+      'Akute aktive arterielle Blutung (KM-Extravasat)',
+      'Bowel-Wall-Enhancement bei akuter Ischämie',
+      'Nierenkortex: kortiko-medulläre Phase mit Markpyramiden-Aussparung'
+    ],
+    organs: ['Leber-Hypervask. Läsionen', 'Pankreas-Parenchym', 'Nierenkortex', 'Milz heterogen']
+  },
+  {
+    id: 'portal-venous',
+    name: 'Portalvenöse Phase',
+    short: 'Portalvenös',
+    color: '#0891b2',
+    startSec: 60, endSec: 79,
+    tagline: 'Häufigste Routine-Phase. KM erreicht über Pfortader die Leber — beste Gesamt-Organbeurteilung.',
+    indications: [
+      '<strong>Standard-Routine</strong> für CT-Abdomen / Thorax-Abdomen-Becken (TAB)',
+      '<strong>Hypovaskuläre Lebermetastasen</strong> (Kolon, Magen, Pankreas) — höchste Sensitivität (85–91,5%)',
+      'Beste Beurteilung der parenchymatösen Bauchorgane (Leber, Milz, Pankreas)',
+      'Darmwandbeurteilung (Kolitis, Ileus, Perforation)',
+      'Detektion langsamer venöser Blutungen',
+      'Nieren: nephrographische Phase beginnt (Markpyramiden-Anreicherung)',
+      'Leberparenchym hellst kontrastiert, Lebervenen miterfasst'
+    ],
+    organs: ['Leber-Parenchym', 'Milz homogen', 'Pankreas', 'Darmwand', 'Pfortader']
+  },
+  {
+    id: 'nephrographic',
+    name: 'Nephrographische Phase',
+    short: 'Nephrographisch',
+    color: '#2563eb',
+    startSec: 80, endSec: 119,
+    tagline: 'Nierenrinde und -mark homogen angereichert — beste Phase für Nierenläsionen.',
+    indications: [
+      '<strong>Detektion und Charakterisierung von Nierenläsionen</strong> (RCC, Zysten Bosniak)',
+      'Höchste Sensitivität für kleine Nierentumore',
+      'Markpyramiden zeigen homogene Anreicherung',
+      'Frühe ausscheidende Phase teils sichtbar',
+      'Pfortaderkontrast nimmt ab, Equilibrium beginnt'
+    ],
+    organs: ['Nierenrinde + Mark', 'Nebennieren', 'Leber im Übergang zu Equilibrium']
+  },
+  {
+    id: 'delayed',
+    name: 'Spätphase / Equilibrium',
+    short: 'Spätphase',
+    color: '#9333ea',
+    startSec: 120, endSec: 299,
+    tagline: 'KM-Wash-out in den meisten Organen — fibrotisches/zysten-haltiges Gewebe behält Kontrast.',
+    indications: [
+      '<strong>Cholangiokarzinom</strong> — verzögertes Enhancement durch fibroses Stroma',
+      '<strong>Hämangiom-Charakterisierung</strong> — periphere Anreicherung mit zentripetaler Auffüllung',
+      '<strong>Wash-out-Bewertung HCC</strong> (3-Phasen-Protokoll: arteriell-Hyperenhancement + portalvenöses Wash-out)',
+      'Fibröses/desmoplastisches Gewebe (chronische Pankreatitis, narbiges Gewebe)',
+      'Nebennieren-Adenom-Charakterisierung (rasches Wash-out)',
+      'Beurteilung der Harnableitenden Wege beginnt'
+    ],
+    organs: ['Cholangien', 'Hämangiome', 'Fibrotisches Gewebe', 'Adrenal Wash-out']
+  },
+  {
+    id: 'excretory',
+    name: 'Exkretorische / Urographische Phase',
+    short: 'Urographisch',
+    color: '#facc15',
+    startSec: 300, endSec: 600,
+    tagline: 'KM ausgeschieden — Nierenbecken, Ureter und Harnblase opak. Ideal für ableitende Harnwege.',
+    indications: [
+      '<strong>CT-Urographie (IVU-CT)</strong> bei Hämaturie-Abklärung',
+      '<strong>Urothelkarzinom-Suche</strong> (Nierenbecken, Ureter, Harnblase)',
+      'Beurteilung von Harnabflussstörungen / Strikturen',
+      'Anatomie der ableitenden Harnwege bei OP-Planung',
+      'Posttraumatische Urinome / Urinleckagen'
+    ],
+    organs: ['Nierenbecken', 'Ureter', 'Harnblase']
+  }
+];
+
+// Helper: find phase at time t
+function getPhaseAt(t){
+  // If between phases (in a "gap"), pick the closest phase
+  for(var i=0;i<phases.length;i++){
+    if(t >= phases[i].startSec && t <= phases[i].endSec) return phases[i];
+  }
+  // If in a gap, return transitional info
+  for(var i=0;i<phases.length-1;i++){
+    if(t > phases[i].endSec && t < phases[i+1].startSec){
+      return {
+        id:'transition',
+        name:'Übergangsphase',
+        short:'Übergang',
+        color:'var(--band-gap)',
+        startSec:phases[i].endSec+1,
+        endSec:phases[i+1].startSec-1,
+        tagline:'Übergangsbereich zwischen '+phases[i].short+' und '+phases[i+1].short+' — wird in der Routine nicht gezielt akquiriert.',
+        indications:['Keine spezifische Indikation','In der Routine kein gezielter Scan-Zeitpunkt'],
+        organs:[]
+      };
+    }
+  }
+  // Beyond max
+  if(t > phases[phases.length-1].endSec){
+    return phases[phases.length-1];
+  }
+  return phases[0];
+}
+
+// ============ TIMELINE BUILD ============
+var MAX_SEC = 600;
+function buildBands(){
+  var container = document.getElementById('timeline-bands');
+  container.innerHTML = '';
+  // We render each phase + gaps as colored bands proportional to duration
+  var segments = [];
+  for(var i=0;i<phases.length;i++){
+    var p = phases[i];
+    if(i===0 && p.startSec > 0){
+      segments.push({color:'var(--band-gap)',start:0,end:p.startSec-1,label:'',isGap:true});
+    }
+    segments.push({color:p.color,start:p.startSec,end:p.endSec,label:p.short,isGap:false});
+    if(i<phases.length-1 && phases[i+1].startSec > p.endSec+1){
+      segments.push({color:'var(--band-gap)',start:p.endSec+1,end:phases[i+1].startSec-1,label:'',isGap:true});
+    }
+  }
+  // Tail (after last phase) up to MAX_SEC
+  var last = phases[phases.length-1];
+  if(last.endSec < MAX_SEC){
+    segments.push({color:last.color,start:last.endSec+1,end:MAX_SEC,label:'',isGap:false});
+  }
+  for(var i=0;i<segments.length;i++){
+    var s = segments[i];
+    var width = ((s.end-s.start+1)/(MAX_SEC+1))*100;
+    var div = document.createElement('div');
+    div.className = 'timeline-band';
+    div.style.width = width+'%';
+    div.style.background = s.color;
+    if(s.isGap){div.style.opacity='0.45';}
+    if(width >= 8 && s.label){
+      var span = document.createElement('span');
+      span.textContent = s.label;
+      if(s.color==='#facc15'){span.className='dark-label';}
+      div.appendChild(span);
+    }
+    div.title = s.label ? s.label+' ('+s.start+'–'+s.end+' s)' : 'Übergang ('+s.start+'–'+s.end+' s)';
+    div.onclick = (function(start,end){return function(){
+      var mid = Math.round((start+end)/2);
+      document.getElementById('timeline-slider').value = mid;
+      updateMarker(mid);
+    };})(s.start,s.end);
+    container.appendChild(div);
+  }
+}
+
+function buildTicks(){
+  var ticks = [0, 30, 60, 90, 120, 180, 300, 600];
+  var container = document.getElementById('timeline-ticks');
+  container.innerHTML = '';
+  ticks.forEach(function(t){
+    var span = document.createElement('span');
+    span.textContent = t < 60 ? t+' s' : Math.floor(t/60)+' min';
+    container.appendChild(span);
+  });
+}
+
+function buildQuickJump(){
+  var container = document.getElementById('quick-jump');
+  phases.forEach(function(p){
+    var btn = document.createElement('button');
+    btn.className = 'quick-jump-btn';
+    btn.textContent = p.short;
+    btn.dataset.phaseId = p.id;
+    btn.onclick = function(){
+      var mid = Math.round((p.startSec+p.endSec)/2);
+      document.getElementById('timeline-slider').value = mid;
+      updateMarker(mid);
+    };
+    container.appendChild(btn);
+  });
+}
+
+function buildOverviewTable(){
+  var tbody = document.querySelector('#overview-table tbody');
+  tbody.innerHTML = '';
+  phases.forEach(function(p){
+    var tr = document.createElement('tr');
+    tr.dataset.phaseId = p.id;
+    var rangeText = p.startSec < 60 && p.endSec < 60
+      ? p.startSec+'–'+p.endSec+' s'
+      : (p.endSec >= 60 ? p.startSec+' s – '+(p.endSec<60?p.endSec+' s':Math.round(p.endSec/60*10)/10+' min') : p.startSec+'–'+p.endSec+' s');
+    tr.innerHTML = '<td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+p.color+';margin-right:6px;vertical-align:middle"></span>'+p.name+'</td>'+
+      '<td><span style="font-family:\'IBM Plex Mono\',monospace">'+rangeText+'</span></td>'+
+      '<td>'+p.tagline+'</td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function updateMarker(t){
+  t = Math.max(0, Math.min(MAX_SEC, t));
+  var marker = document.getElementById('timeline-marker');
+  var pct = (t/MAX_SEC)*100;
+  marker.style.left = pct+'%';
+
+  var timeValue = document.getElementById('time-value');
+  var timeUnit = document.querySelector('.timeline-time-unit');
+  if(t < 60){
+    timeValue.textContent = t;
+    timeUnit.textContent = 's nach KM-Bolus';
+  } else {
+    timeValue.textContent = (Math.round(t/6)/10).toString().replace('.',',');
+    timeUnit.textContent = 'min nach KM-Bolus';
+  }
+
+  var phase = getPhaseAt(t);
+  document.getElementById('current-phase-name').textContent = phase.name;
+  var dot = document.getElementById('phase-dot');
+  dot.style.background = phase.color;
+  dot.style.boxShadow = '0 0 0 3px '+phase.color+'40';
+
+  // Update detail card
+  var rangeText;
+  if(phase.endSec < 60) rangeText = phase.startSec+'–'+phase.endSec+' s';
+  else if(phase.startSec < 60) rangeText = phase.startSec+' s – '+(phase.endSec<60?phase.endSec+' s':Math.round(phase.endSec/6)/10+' min').toString().replace('.',',');
+  else rangeText = (Math.round(phase.startSec/6)/10).toString().replace('.',',')+'–'+(Math.round(phase.endSec/6)/10).toString().replace('.',',')+' min';
+
+  var detail = document.getElementById('phase-detail');
+  detail.style.borderLeftColor = phase.color;
+  var orgChips = phase.organs && phase.organs.length
+    ? '<div class="organ-chips">'+phase.organs.map(function(o){return '<span class="organ-chip">'+o+'</span>';}).join('')+'</div>'
+    : '';
+  detail.innerHTML =
+    '<div class="phase-detail-header">'+
+      '<div class="phase-detail-name">'+phase.name+'</div>'+
+      '<div class="phase-detail-range">'+rangeText+'</div>'+
+    '</div>'+
+    '<div class="phase-detail-tagline">'+phase.tagline+'</div>'+
+    (phase.indications && phase.indications.length ? 
+      '<div class="phase-detail-section">'+
+        '<div class="phase-detail-section-title">Indikationen / Verwendung</div>'+
+        '<ul>'+phase.indications.map(function(i){return '<li>'+i+'</li>';}).join('')+'</ul>'+
+      '</div>' : '') +
+    (orgChips ?
+      '<div class="phase-detail-section">'+
+        '<div class="phase-detail-section-title">Optimale Beurteilung</div>'+
+        orgChips+
+      '</div>' : '');
+
+  // Highlight in overview table
+  document.querySelectorAll('#overview-table tbody tr').forEach(function(tr){
+    tr.classList.toggle('is-current', tr.dataset.phaseId === phase.id);
+  });
+  // Highlight quick-jump
+  document.querySelectorAll('.quick-jump-btn').forEach(function(b){
+    b.classList.toggle('active', b.dataset.phaseId === phase.id);
+  });
+}
+
+function showSection(id, btn){
+  document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
+  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ============ INIT ============
+buildBands();
+buildTicks();
+buildQuickJump();
+buildOverviewTable();
+
+var slider = document.getElementById('timeline-slider');
+slider.addEventListener('input', function(){ updateMarker(parseInt(this.value,10)); });
+slider.addEventListener('change', function(){ updateMarker(parseInt(this.value,10)); });
+
+// Initial state: portal venous (most common routine phase)
+slider.value = 70;
+updateMarker(70);
+
+// === RAD MODE (shared with other tools via localStorage key) ===
+</script>
+</body>
+</html>
