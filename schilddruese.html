@@ -8,6 +8,29 @@
 <meta name="mobile-web-app-capable" content="yes">
 <title>KM-induzierte Hyperthyreose — Entscheidungshilfe</title>
 <link rel="stylesheet" href="km.css">
+<style>
+/* Follow-ups sind standardmäßig ausgeblendet und erscheinen erst nach Anklicken
+   der zugehörigen Erkrankung (unabhängig davon, was km.css definiert). */
+.followup{display:none}
+.followup.show{display:block;animation:fu-in .2s ease}
+@keyframes fu-in{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.followup.show{animation:none}}
+
+/* Aufklappbare Detail-Buttons (erscheinen nach Anklicken der Erkrankung) */
+.followup .opt-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
+.opt-btn{
+  appearance:none;cursor:pointer;text-align:left;font-family:var(--font-body);
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);
+  color:var(--prose);font-size:12.5px;font-weight:600;line-height:1.25;
+  padding:7px 12px;transition:border-color .15s,background .15s,color .15s,box-shadow .15s;
+}
+.opt-btn small{display:block;font-weight:400;font-size:10.5px;color:var(--muted);margin-top:1px}
+.opt-btn:hover{border-color:var(--accent);color:var(--ink)}
+.opt-btn.sel{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:var(--shadow-1)}
+.opt-btn.sel small{color:rgba(255,255,255,.85)}
+body.rad-mode .opt-btn.sel{color:#06272E}
+body.rad-mode .opt-btn.sel small{color:rgba(6,39,46,.75)}
+</style>
 </head>
 <body class="tool-schilddruese">
 <script src="km.js"></script>
@@ -77,6 +100,10 @@
                 <input type="checkbox" id="d-basedow" onchange="onDiseaseChange()">
                 <span class="dchk-label">M. Basedow<small>Autoimmun-Hyperthyreose</small></span>
               </label>
+              <label class="dchk" id="d-hyperthyreose-wrap">
+                <input type="checkbox" id="d-hyperthyreose" onchange="onDiseaseChange()">
+                <span class="dchk-label">Bekannte Hyperthyreose<small>Überfunktion, jegliche Ursache</small></span>
+              </label>
               <label class="dchk" id="d-karzinom-wrap">
                 <input type="checkbox" id="d-karzinom" onchange="onDiseaseChange()">
                 <span class="dchk-label">Schilddrüsenkarzinom<small>diff./medullär/anaplastisch</small></span>
@@ -123,45 +150,54 @@
               </label>
             </div>
 
+            <!-- Conditional follow-up: Bekannte Hyperthyreose -->
+            <div class="followup" id="fu-hyperthyreose">
+              <label>Aktuelle Therapie der Hyperthyreose?</label>
+              <div class="opt-row" data-group="hyper-atd">
+                <button type="button" class="opt-btn" data-value="atd-ja" onclick="pickOpt(this)">Unter Thyreostatika<small>Thiamazol / Carbimazol</small></button>
+                <button type="button" class="opt-btn" data-value="atd-nein" onclick="pickOpt(this)">Keine Thyreostatika<small>unbehandelt</small></button>
+              </div>
+            </div>
+
             <!-- Conditional follow-up: Karzinom -->
             <div class="followup" id="fu-karzinom">
-              <label>Bei Schilddrüsenkarzinom — Status:</label>
-              <div class="radio-row">
-                <label><input type="radio" name="karzinom-status" value="rit-geplant"> Radioiodtherapie geplant</label>
-                <label><input type="radio" name="karzinom-status" value="rit-vergangen"> Z.n. RIT (in Nachsorge)</label>
-                <label><input type="radio" name="karzinom-status" value="dtc-keine-rit"> DTC, keine RIT geplant</label>
-                <label><input type="radio" name="karzinom-status" value="mtc-atc"> MTC / ATC / nicht-jodspeichernd</label>
-                <label><input type="radio" name="karzinom-status" value="unklar" checked> Unklar / Verdacht</label>
+              <label>Schilddrüsenkarzinom — Status?</label>
+              <div class="opt-row" data-group="karzinom-status">
+                <button type="button" class="opt-btn" data-value="rit-geplant" onclick="pickOpt(this)">Radioiodtherapie geplant</button>
+                <button type="button" class="opt-btn" data-value="rit-vergangen" onclick="pickOpt(this)">Z.n. RIT<small>in Nachsorge</small></button>
+                <button type="button" class="opt-btn" data-value="dtc-keine-rit" onclick="pickOpt(this)">DTC, keine RIT geplant</button>
+                <button type="button" class="opt-btn" data-value="mtc-atc" onclick="pickOpt(this)">MTC / ATC<small>nicht-jodspeichernd</small></button>
+                <button type="button" class="opt-btn" data-value="unklar" onclick="pickOpt(this)">Unklar / Verdacht</button>
               </div>
             </div>
 
             <!-- Conditional follow-up: Thyreoidektomie -->
             <div class="followup" id="fu-thyreoidektomie">
-              <label>Operationsumfang:</label>
-              <div class="radio-row">
-                <label><input type="radio" name="tx-umfang" value="total"> Totale Thyreoidektomie</label>
-                <label><input type="radio" name="tx-umfang" value="subtotal"> Subtotal / Hemi</label>
-                <label><input type="radio" name="tx-umfang" value="lthyroxin" checked> Unter L-Thyroxin</label>
+              <label>Operationsumfang?</label>
+              <div class="opt-row" data-group="tx-umfang">
+                <button type="button" class="opt-btn" data-value="total" onclick="pickOpt(this)">Totale Thyreoidektomie</button>
+                <button type="button" class="opt-btn" data-value="subtotal" onclick="pickOpt(this)">Subtotal / Hemi</button>
+                <button type="button" class="opt-btn" data-value="lthyroxin" onclick="pickOpt(this)">Unter L-Thyroxin</button>
               </div>
             </div>
 
             <!-- Conditional follow-up: Amiodaron -->
             <div class="followup" id="fu-amiodaron">
-              <label>Amiodaron-Status:</label>
-              <div class="radio-row">
-                <label><input type="radio" name="amio-status" value="aktiv" checked> Aktuell unter Therapie</label>
-                <label><input type="radio" name="amio-status" value="kuerzlich"> Vor &lt;6 Monaten abgesetzt</label>
-                <label><input type="radio" name="amio-status" value="alt"> Vor &gt;6 Monaten abgesetzt</label>
+              <label>Amiodaron-Status?</label>
+              <div class="opt-row" data-group="amio-status">
+                <button type="button" class="opt-btn" data-value="aktiv" onclick="pickOpt(this)">Aktuell unter Therapie</button>
+                <button type="button" class="opt-btn" data-value="kuerzlich" onclick="pickOpt(this)">&lt;6 Monate abgesetzt</button>
+                <button type="button" class="opt-btn" data-value="alt" onclick="pickOpt(this)">&gt;6 Monate abgesetzt</button>
               </div>
             </div>
 
             <!-- Conditional follow-up: Niereninsuffizienz -->
             <div class="followup" id="fu-niereninsuffizienz">
-              <label>Nierenfunktion:</label>
-              <div class="radio-row">
-                <label><input type="radio" name="kidney-status" value="dialyse"> Dialysepflichtig</label>
-                <label><input type="radio" name="kidney-status" value="schwer" checked> eGFR &lt;30 ml/min</label>
-                <label><input type="radio" name="kidney-status" value="moderat"> eGFR 30–60 ml/min</label>
+              <label>Nierenfunktion?</label>
+              <div class="opt-row" data-group="kidney-status">
+                <button type="button" class="opt-btn" data-value="dialyse" onclick="pickOpt(this)">Dialysepflichtig</button>
+                <button type="button" class="opt-btn" data-value="schwer" onclick="pickOpt(this)">eGFR &lt;30 ml/min</button>
+                <button type="button" class="opt-btn" data-value="moderat" onclick="pickOpt(this)">eGFR 30–60 ml/min</button>
               </div>
             </div>
 
@@ -751,16 +787,33 @@ function classify(tsh,ft4,ft3){
   return{key:'unclear',label:'Unklare Konstellation',risk:'medium',riskLabel:'Überprüfung empfohlen',desc:'Die eingegebenen Werte ergeben eine unklare Konstellation. Bitte Plausibilität prüfen, ggf. Assay-Fehler ausschließen und Werte wiederholen.',context_pre:['Laborwerte überprüfen und ggf. wiederholen','Endokrinologische Einschätzung einholen'],context_post:['Verlaufskontrolle empfohlen'],context_symptom:['Klinische Gesamtbeurteilung erforderlich']};
 }
 
+function optValue(group){
+  const btn=document.querySelector('.opt-row[data-group="'+group+'"] .opt-btn.sel');
+  return btn?btn.dataset.value:'';
+}
+
 function getDiseaseFlags(){
-  const ids=['basedow','karzinom','autonomie','struma','hashimoto','hypo','thyreoidektomie','subakut','amiodaron','schwangerschaft','niereninsuffizienz','jodmangel'];
+  const ids=['basedow','hyperthyreose','karzinom','autonomie','struma','hashimoto','hypo','thyreoidektomie','subakut','amiodaron','schwangerschaft','niereninsuffizienz','jodmangel'];
   const flags={};
   ids.forEach(id=>flags[id]=document.getElementById('d-'+id).checked);
-  // collect follow-up values
-  flags.karzinomStatus=document.querySelector('input[name="karzinom-status"]:checked')?.value||'';
-  flags.txUmfang=document.querySelector('input[name="tx-umfang"]:checked')?.value||'';
-  flags.amioStatus=document.querySelector('input[name="amio-status"]:checked')?.value||'';
-  flags.kidneyStatus=document.querySelector('input[name="kidney-status"]:checked')?.value||'';
+  // collect follow-up values (from selected buttons)
+  flags.karzinomStatus=optValue('karzinom-status');
+  flags.txUmfang=optValue('tx-umfang');
+  flags.amioStatus=optValue('amio-status');
+  flags.kidneyStatus=optValue('kidney-status');
+  flags.hyperAtd=optValue('hyper-atd');
   return flags;
+}
+
+function pickOpt(btn){
+  const row=btn.closest('.opt-row');
+  row.querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  onDiseaseChange();
+}
+
+function clearOptGroup(group){
+  document.querySelectorAll('.opt-row[data-group="'+group+'"] .opt-btn.sel').forEach(b=>b.classList.remove('sel'));
 }
 
 function onDiseaseChange(){
@@ -769,8 +822,15 @@ function onDiseaseChange(){
     const cb=lbl.querySelector('input[type=checkbox]');
     if(cb&&cb.checked) lbl.classList.add('active'); else lbl.classList.remove('active');
   });
+  // Clear detail selections for any parent that is now unchecked
+  if(!document.getElementById('d-hyperthyreose').checked) clearOptGroup('hyper-atd');
+  if(!document.getElementById('d-karzinom').checked) clearOptGroup('karzinom-status');
+  if(!document.getElementById('d-thyreoidektomie').checked) clearOptGroup('tx-umfang');
+  if(!document.getElementById('d-amiodaron').checked) clearOptGroup('amio-status');
+  if(!document.getElementById('d-niereninsuffizienz').checked) clearOptGroup('kidney-status');
   // Show/hide follow-ups
   const f=getDiseaseFlags();
+  document.getElementById('fu-hyperthyreose').classList.toggle('show', f.hyperthyreose);
   document.getElementById('fu-karzinom').classList.toggle('show', f.karzinom);
   document.getElementById('fu-thyreoidektomie').classList.toggle('show', f.thyreoidektomie);
   document.getElementById('fu-amiodaron').classList.toggle('show', f.amiodaron);
@@ -782,6 +842,7 @@ function onDiseaseChange(){
 function updateCtxFlags(f){
   const flags=[];
   if(f.basedow) flags.push('Basedow');
+  if(f.hyperthyreose) flags.push('Bekannte Hyperthyreose'+(f.hyperAtd==='atd-ja'?' (unter Thyreostatika)':f.hyperAtd==='atd-nein'?' (ohne Thyreostatika)':' (ATD-Status offen)'));
   if(f.karzinom){
     let k='Karzinom';
     if(f.karzinomStatus==='rit-geplant') k+=' (RIT geplant)';
@@ -796,9 +857,9 @@ function updateCtxFlags(f){
   if(f.hypo) flags.push('Hypothyreose');
   if(f.thyreoidektomie) flags.push('Z.n. TX');
   if(f.subakut) flags.push('Thyreoiditis (de Quervain)');
-  if(f.amiodaron) flags.push('Amiodaron'+(f.amioStatus==='aktiv'?' (aktiv)':f.amioStatus==='kuerzlich'?' (kürzlich abgesetzt)':' (alt)'));
+  if(f.amiodaron) flags.push('Amiodaron'+(f.amioStatus==='aktiv'?' (aktiv)':f.amioStatus==='kuerzlich'?' (kürzlich abgesetzt)':f.amioStatus==='alt'?' (>6 Mon. abgesetzt)':' (Status offen)'));
   if(f.schwangerschaft) flags.push('Schwangerschaft/Stillzeit');
-  if(f.niereninsuffizienz) flags.push('Niereninsuffizienz'+(f.kidneyStatus==='dialyse'?' (Dialyse)':f.kidneyStatus==='schwer'?' (eGFR<30)':' (eGFR 30–60)'));
+  if(f.niereninsuffizienz) flags.push('Niereninsuffizienz'+(f.kidneyStatus==='dialyse'?' (Dialyse)':f.kidneyStatus==='schwer'?' (eGFR<30)':f.kidneyStatus==='moderat'?' (eGFR 30–60)':' (Grad offen)'));
   if(f.jodmangel) flags.push('Jodmangelgebiet');
   const el=document.getElementById('ctx-flags');
   if(flags.length===0){ el.classList.remove('show'); el.textContent=''; return; }
@@ -842,6 +903,19 @@ function diseaseSpecificRecs(f, r){
     }
   }
 
+  // Bekannte Hyperthyreose (jegliche Ursache) — Thyreostatika-Status entscheidend
+  if(f.hyperthyreose){
+    if(f.hyperAtd==='atd-ja'){
+      out.push({priority:'high', text:'Bekannte Hyperthyreose <strong>unter Thyreostatika (ATD)</strong>: Jodhaltige KM sind nach ETA 2021 (Tab. 1) <strong>nicht grundsätzlich kontraindiziert</strong>, sofern die Überfunktion unter Therapie kontrolliert ist. TSH/fT4/fT3 3–4 Wochen nach KM kontrollieren; ATD-Dosiseskalation und/oder Perchlorat-Zugabe erwägen (ETA 2021 Recommendation 9). Bei aktuell noch manifest-thyreotoxischer Stoffwechsellage siehe Laborkonstellation oben.'});
+      out.push({priority:'medium', text:'ATD-Dosis (Orientierung ETA 2021 Recommendation 9): Thiamazol/Methimazol 20–40 mg/d bei höherem Risiko; peri-interventionell nicht pausieren. Steuerung durch Endokrinologie.'});
+    } else if(f.hyperAtd==='atd-nein'){
+      out.push({priority:'critical', text:'⚠ Bekannte Hyperthyreose <strong>ohne thyreostatische Therapie</strong>: Bei manifester (overter) Hyperthyreose sind jodhaltige KM generell <strong>kontraindiziert</strong> (ETA 2021 Tab. 1; ESUR 2018) — Ausnahme: lebensrettende Eingriffe. Vor elektiver KM-Gabe endokrinologische Vorstellung und Einleitung einer thyreostatischen Therapie (Thiamazol/Methimazol 20–40 mg/d ± Perchlorat) erwägen.'});
+      out.push({priority:'high', text:'Bei elektiver Indikation: Untersuchung nach Einstellung verschieben; alternativ strahlungsfreie/nativ-Bildgebung prüfen (MRT, Nativ-CT, Sonographie).'});
+    } else {
+      out.push({priority:'high', text:'Bekannte Hyperthyreose, <strong>Thyreostatika-Status nicht angegeben</strong>: Für die KM-Entscheidung ist entscheidend, ob die Überfunktion behandelt/kontrolliert ist. Unbehandelte manifeste Hyperthyreose ist eine Kontraindikation, unter kontrollierter ATD-Therapie ist KM meist möglich (ETA 2021 Tab. 1). Therapiestatus und aktuelle Laborwerte klären.'});
+    }
+  }
+
   // Autonomie
   if(f.autonomie){
     out.push({priority:'high', text:'SD-Autonomie (Knotenstruma WHO Grad 2): häufigster Risikofaktor für KM-induzierte Hyperthyreose (ETA 2021 Tab. 2). Sonographie + ggf. Szintigraphie vor elektiver KM erwägen; bei subklinischer Hyperthyreose: Prophylaxe nach ETA 2021 Recommendation 21 (Perchlorat bis 1.000 mg/d für 1–2 Wochen) bzw. deutscher Klinikstandard.'});
@@ -863,8 +937,10 @@ function diseaseSpecificRecs(f, r){
       out.push({priority:'low', text:'Z.n. totaler Thyreoidektomie: keine SD-bezogene KM-Kontraindikation. L-Thyroxin-Substitution überprüfen.'});
     } else if(f.txUmfang==='subtotal'){
       out.push({priority:'medium', text:'Z.n. subtotaler/Hemi-Thyreoidektomie: Restgewebe vorhanden — Jod-Basedow-Risiko bei vorbestehender Autonomie nicht ausgeschlossen. TSH-Kontrolle.'});
-    } else {
+    } else if(f.txUmfang==='lthyroxin'){
       out.push({priority:'low', text:'Substituierter Patient: TSH unter L-Thyroxin überprüfen; bei iatrogen supprimiertem TSH (z.B. nach DTC) kein Hinweis auf Hyperthyreose.'});
+    } else {
+      out.push({priority:'medium', text:'Z.n. Thyreoidektomie, Umfang nicht angegeben: bei erhaltenem Restgewebe (subtotal/Hemi) Jod-Basedow-Risiko möglich. Operationsumfang und aktuelle TSH-Substitution klären.'});
     }
   }
 
@@ -879,8 +955,10 @@ function diseaseSpecificRecs(f, r){
       out.push({priority:'critical', text:'⚠ Aktive Amiodaron-Therapie: jodhaltige KM bei elektiver Untersuchung kontraindiziert (Risiko Typ I/II-Hyperthyreose). Kardiologie/Endokrinologie zur Abwägung.'});
     } else if(f.amioStatus==='kuerzlich'){
       out.push({priority:'high', text:'Amiodaron <6 Monate abgesetzt: relevante Restjodbelastung. Vor elektiver KM-Gabe TSH/fT4/fT3, ggf. Urin-Jod.'});
-    } else {
+    } else if(f.amioStatus==='alt'){
       out.push({priority:'medium', text:'Amiodaron >6 Monate abgesetzt: Restrisiko geringer, aber TSH-Kontrolle vor und nach KM empfohlen.'});
+    } else {
+      out.push({priority:'high', text:'Amiodaron-Status nicht angegeben: Amiodaron hat eine lange Halbwertszeit (Wochen bis Monate) — auch nach Absetzen relevante Jodbelastung möglich. Aktuellen Therapiestatus klären; vor elektiver KM-Gabe TSH/fT4/fT3.'});
     }
   }
 
@@ -896,8 +974,10 @@ function diseaseSpecificRecs(f, r){
       out.push({priority:'medium', text:'Dialysepflichtige Niereninsuffizienz: KM-Elimination verzögert, Jodbelastung verlängert. Dialyse direkt nach KM nicht zwingend, aber prolongierte Wirkung beachten.'});
     } else if(f.kidneyStatus==='schwer'){
       out.push({priority:'high', text:'eGFR <30 ml/min: prolongierte Jodbelastung, längere Karenz vor RIT erwägen. Perchlorat relativ kontraindiziert (renale Elimination) — Dosisreduktion + Monitoring.'});
-    } else {
+    } else if(f.kidneyStatus==='moderat'){
       out.push({priority:'medium', text:'eGFR 30–60 ml/min: KM-Hydrierung sicherstellen; Perchlorat unter Monitoring möglich.'});
+    } else {
+      out.push({priority:'medium', text:'Niereninsuffizienz, Schweregrad nicht angegeben: aktuellen eGFR bestimmen. Bei eingeschränkter Funktion prolongierte Jodbelastung und eingeschränkte Perchlorat-Elimination beachten; Hydrierung sicherstellen (siehe Nieren-Tool).'});
     }
   }
 

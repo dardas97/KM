@@ -188,7 +188,7 @@ body.rad-mode .rad-mode-toggle{color:var(--accent);border-color:var(--tool-line)
 nav{
   display:flex;gap:.15rem;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;
   margin-bottom:1.35rem;border-bottom:1px solid var(--border);
-  position:sticky;top:0;z-index:40;
+  position:sticky;top:0;z-index:40;min-width:0;max-width:100%;
   background:var(--bg);
   backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
 }
@@ -770,12 +770,14 @@ body.rad-mode .color-pill::before{box-shadow:inset 0 0 0 1px rgba(255,255,255,.2
 .tool-card.paravasat{--tool:#0C86A0;--tool-tint:#E3F4F8;--tool-ink:#0A6A80;--tool-line:#AEDCE7}
 .tool-card.phasen{--tool:#177E52;--tool-tint:#E4F4EC;--tool-ink:#116340;--tool-line:#AFDCC4}
 .tool-card.preg{--tool:#BC3B76;--tool-tint:#F9EAF1;--tool-ink:#9A2F60;--tool-line:#EBB9D0}
+.tool-card.enteral{--tool:#B5741A;--tool-tint:#F6ECD9;--tool-ink:#8F5A11;--tool-line:#E3C892}
 body.rad-mode .tool-card.thyro{--tool:#9BA4F5;--tool-tint:rgba(155,164,245,.13);--tool-ink:#B8BFF8;--tool-line:rgba(255,255,255,.16)}
 body.rad-mode .tool-card.allergy{--tool:#F58C9B;--tool-tint:rgba(245,140,155,.13);--tool-ink:#F8AEB9;--tool-line:rgba(255,255,255,.16)}
 body.rad-mode .tool-card.kidney{--tool:#B79AF2;--tool-tint:rgba(183,154,242,.13);--tool-ink:#CDB8F6;--tool-line:rgba(255,255,255,.16)}
 body.rad-mode .tool-card.paravasat{--tool:#5FC9E2;--tool-tint:rgba(95,201,226,.13);--tool-ink:#8CD9EB;--tool-line:rgba(255,255,255,.16)}
 body.rad-mode .tool-card.phasen{--tool:#58C68F;--tool-tint:rgba(88,198,143,.13);--tool-ink:#84D6AC;--tool-line:rgba(255,255,255,.16)}
 body.rad-mode .tool-card.preg{--tool:#F08CBB;--tool-tint:rgba(240,140,187,.13);--tool-ink:#F5AECE;--tool-line:rgba(255,255,255,.16)}
+body.rad-mode .tool-card.enteral{--tool:#E0A445;--tool-tint:rgba(224,164,69,.13);--tool-ink:#EDBE74;--tool-line:rgba(255,255,255,.16)}
 .tool-icon{
   width:40px;height:40px;border-radius:11px;background:var(--tool-tint);color:var(--tool);
   display:flex;align-items:center;justify-content:center;margin-bottom:.65rem;
