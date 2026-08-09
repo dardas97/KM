@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KM-Paravasat - Entscheidungshilfe</title>
+<link rel="stylesheet" href="km.css">
+<style>
+/* Muster-Protokoll (Freitext-Formular, Akteneintrag-Optik) */
+.proto{
+  background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:1.1rem 1.15rem;font-family:var(--font-mono);font-size:12.5px;line-height:1.7;color:var(--prose);
+}
+.proto-h{
+  font-weight:600;letter-spacing:.06em;color:var(--ink);font-size:12px;
+  padding-bottom:.6rem;margin-bottom:.9rem;border-bottom:1px solid var(--border);
+}
+.proto-block{white-space:pre-wrap;margin-bottom:1rem}
+.proto-block:last-child{margin-bottom:0}
+.proto-lbl{font-weight:600;color:var(--ink)}
+.proto-lbl-sub{color:var(--muted)}
+.proto .fill{color:var(--tool-ink);font-weight:600}
+.proto .fill-txt{color:var(--tool-ink)}
+body.rad-mode .proto .fill, body.rad-mode .proto .fill-txt{color:var(--tool-ink)}
+</style>
+</head>
+<body class="tool-paravasat">
+<script src="km.js"></script>
+<div class="page">
+  <header class="masthead">
+    <div class="mast-ruler" aria-hidden="true"></div>
+    <div class="mast-top">
+      <a href="index.html" class="home-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 5.5 8 12l6.5 6.5"/></svg>Übersicht</a>
+      <span class="header-badge">KLINISCHES ENTSCHEIDUNGSTOOL · RADIOLOGIE</span>
+      <button type="button" class="rad-mode-toggle" id="radModeToggle" aria-pressed="false" title="Lesesaal-Dunkelmodus" onclick="toggleRadMode()"><span class="mode-track" aria-hidden="true"><span class="mode-thumb"></span></span><span class="mode-label">Rad&nbsp;Mode</span></button>
+    </div>
+    <div class="mast-main">
+      <div class="tool-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 3.5v6M8.5 14.5v6M14 3.5v17"/><path d="M4.9 9.7c1.3 1.6 2 2.7 2 3.7a2 2 0 1 1-4 0c0-1 .7-2.1 2-3.7z"/></svg></div>
+      <div class="mast-text">
+        <h1>KM-Paravasat (Extravasation)<span class="h1-sub">Erkennung · Behandlung · Prävention</span></h1>
+        <p class="mast-desc">Empfehlungen zur Erkennung, Schweregradeinteilung und Behandlung von Kontrastmittel-Paravasaten basierend auf der aktualisierten ESUR Contrast Media Safety Committee Leitlinie (Roditi et al., Eur Radiol 2022).</p>
+      </div>
+    </div>
+  </header>
+
+  <nav>
+    <button class="nav-btn active" onclick="showSection('akut',this)">Akutbehandlung</button>
+    <button class="nav-btn" onclick="showSection('erkennung',this)">Erkennung</button>
+    <button class="nav-btn" onclick="showSection('praevention',this)">Prävention</button>
+    <button class="nav-btn" onclick="showSection('dokumentation',this)">Dokumentation</button>
+    <button class="nav-btn" onclick="showSection('grundlagen',this)">Grundlagen</button>
+    <button class="nav-btn" onclick="showSection('leitlinien',this)">Leitlinien</button>
+  </nav>
+
+  <!-- AKUTBEHANDLUNG -->
+  <div id="akut" class="section active">
+    <h2>Akutbehandlung - Schweregrad bestimmen</h2>
+    <div class="info-box"><strong>ESUR 2022 Kernpunkt:</strong> Der Schweregrad bestimmt das Management. Eine chirurgische Vorstellung erfolgt auf Basis der <strong>klinischen Schwere</strong>, nicht des extravasierten Volumens.</div>
+
+    <div class="card">
+      <div class="card-title">Schweregrad nach ESUR 2022</div>
+      <p style="font-size:13.5px;color:var(--prose);margin-bottom:1rem">Höchsten zutreffenden Schweregrad anklicken:</p>
+      <div class="severity-grid">
+        <button class="sev-card mild" onclick="selectSeverity('mild',this)">
+          <div class="sev-title">Mild</div>
+          <div class="sev-sub">Geringes Erythem oder Schwellung, keine Hautveränderungen</div>
+        </button>
+        <button class="sev-card moderate" onclick="selectSeverity('moderate',this)">
+          <div class="sev-title">Moderat</div>
+          <div class="sev-sub">Hautblasen, progrediente Schwellung und/oder Ulzeration. Engmaschiges Monitoring, ärztliche Beurteilung erforderlich</div>
+        </button>
+        <button class="sev-card severe" onclick="selectSeverity('severe',this)">
+          <div class="sev-title">Schwer</div>
+          <div class="sev-sub">Neurovaskuläre Kompromittierung, Zeichen einer Gewebsnekrose oder Kompartmentsyndrom</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Treatment blocks per severity -->
+    <div id="tx-mild" class="tx-block">
+      <div class="card" style="border-left:4px solid var(--sev-mild)">
+        <h3 style="color:var(--sev-mild);margin-bottom:0.75rem">Behandlung - mildes Paravasat</h3>
+        <p style="font-size:13.5px;color:var(--prose);margin-bottom:1rem"><span class="sym-pill">Geringes Erythem</span><span class="sym-pill">Schwellung</span><span class="sym-pill">Keine Hautveränderungen</span><span class="sym-pill">Outcome i.d.R. günstig</span></p>
+      </div>
+      <div class="tx-step priority"><div class="tx-step-num">Schritt 1</div>
+        <h4>Injektion sofort stoppen, Kanüle belassen</h4>
+        <div class="tx-detail">KM-Infusion sofort stoppen. <strong>Kanüle zunächst nicht entfernen</strong> - Aspirationsversuch des Paravasats über die Kanüle (reduziert Volumen und Gewebsdruck). Erst danach Kanüle ziehen.</div>
+      </div>
+      <div class="tx-step"><div class="tx-step-num">Schritt 2</div>
+        <h4>Betroffene Extremität hochlagern</h4>
+        <div class="tx-detail">Lagerung <strong>oberhalb Herzniveau</strong> zur Verringerung des hydrostatischen Drucks und Förderung des Lymphabflusses.</div>
+      </div>
+      <div class="tx-step"><div class="tx-step-num">Schritt 3</div>
+        <h4>Kühlung</h4>
+        <div class="tx-detail"><strong>Kalte Kompressen 15–60 min, 3× täglich, für 3–4 Tage.</strong><br>
+        Wirkung: Anti-inflammatorisch über Vasokonstriktion. Hautkontakt: kein direkter Eiskontakt - immer mit Tuch.</div>
+      </div>
+      <div class="tx-step"><div class="tx-step-num">Schritt 4</div>
+        <h4>Areal markieren und Verlauf dokumentieren</h4>
+        <div class="tx-detail">Betroffenes Areal markieren (z.B. mit wasserfestem Stift), Größe und Aussehen dokumentieren. Patient instruieren bei Verschlechterung umgehend wiederzukommen.</div>
+      </div>
+      <div class="tx-step"><div class="tx-step-num">Schritt 5</div>
+        <h4>Beobachtung</h4>
+        <div class="tx-detail">Patient für mindestens <strong>2–4 Stunden in der Abteilung beobachten</strong>, bis Arzt bestätigt, dass Symptome rückläufig sind. Bei ambulanten Patienten: keine Entlassung vor Stabilisierung. Resorption typischerweise in <strong>2–4 Tagen</strong> (über das Lymphsystem).</div>
+      </div>
+      <div class="tx-step"><div class="tx-step-num">Schritt 6</div>
+        <h4>Aufklärung des Patienten</h4>
+        <div class="tx-detail">Bei <strong>jeglicher Verschlechterung</strong> innerhalb 48 h (zunehmende Schmerzen, Hautblasen, Taubheit, Pulsdefizit, Bewegungseinschränkung) <strong>sofortige Wiedervorstellung</strong>. Schriftliche Informationen mitgeben.</div>
+      </div>
+      <div class="tx-step"><div class="tx-step-num">Dokumentation</div>
+        <h4>Dokumentation</h4>
+        <div class="tx-detail">KM-Präparat, Volumen, Punktionsort, Kanülengröße, geschätztes Paravasat-Volumen, Schweregrad, Maßnahmen, Verlauf.</div>
+      </div>
+    </div>
+
+    <div id="tx-moderate" class="tx-block">
+      <div class="card" style="border-left:4px solid var(--sev-mod)">
+        <h3 style="color:var(--sev-mod);margin-bottom:0.75rem">Behandlung - moderates Paravasat</h3>
+        <p style="font-size:13.5px;color:var(--prose);margin-bottom:1rem"><span class="sym-pill">Hautblasen</span><span class="sym-pill">Progrediente Schwellung</span><span class="sym-pill">Ulzeration</span><span class="sym-pill">Engmaschiges Monitoring</span></p>
+      </div>
+      <div class="tx-step urgent"><div class="tx-step-num">Schritt 1</div>
+        <h4>Injektion stoppen · Aspiration · Arzt hinzuziehen</h4>
+        <div class="tx-detail">KM-Infusion sofort stoppen, Aspiration über liegende Kanüle versuchen, dann Kanüle entfernen. <strong>Ärztliche Beurteilung obligat.</strong></div>
+      </div>
+      <div class="tx-step priority"><div class="tx-step-num">Schritt 2</div>
+        <h4>Neurovaskulärer Status prüfen</h4>
+        <div class="tx-detail">Pulse distal der Paravasation prüfen, Sensibilität und Motorik der betroffenen Extremität testen, Hautkolorit und Kapillarfüllung dokumentieren.<br>
+        <strong>Bei Auffälligkeiten → sofort als "schwer" einstufen!</strong></div>
+      </div>
+      <div class="tx-step"><div class="tx-step-num">Schritt 3</div>
+        <h4>Hochlagerung</h4>
+        <div class="tx-detail">Betroffene Extremität <strong>über Herzniveau</strong>, möglichst lange (mindestens während der Beobachtungsphase).</div>
+      </div>
+      <div class="tx-step"><div class="tx-step-num">Schritt 4</div>
+        <h4>Kühlung</h4>
+        <div class="tx-detail">Kalte Kompressen 15–60 min, 3× täglich für 3–4 Tage (Anti-inflammatorische Vasokonstriktion).</div>
+      </div>
+      <div class="tx-step"><div class="tx-step-num">Schritt 5</div>
+        <h4>Bei Hautblasen</h4>
+        <div class="tx-detail">Blasen <strong>nicht eröffnen</strong> - steril abdecken. Bei Spannungsblasen oder offenen Hautläsionen: Wundauflage, ggf. dermatologisches/chirurgisches Konsil.</div>
+      </div>
+      <div class="tx-step"><div class="tx-step-num">Schritt 6</div>
+        <h4>Verlängerte Beobachtung</h4>
+        <div class="tx-detail">Mindestens <strong>4–6 Stunden</strong> Überwachung in der Abteilung. Bei stationären Patienten: engmaschige Kontrollen über 24–48 h. Klinische Reevaluation nach 24 h empfohlen.<br>
+        Peak der Entzündungsreaktion innerhalb <strong>48 h</strong>, anschließend chronische Inflammation über Wochen möglich.</div>
+      </div>
+      <div class="tx-step"><div class="tx-step-num">Schritt 7</div>
+        <h4>Bei großvolumigem Paravasat oder Symptompersistenz</h4>
+        <div class="tx-detail">Plastische Chirurgie konsiliarisch hinzuziehen. <strong>Vorstellung erfolgt nach klinischer Schwere, nicht nach Volumen</strong> (ESUR 2022). Verzögerung der Vorstellung >300 min ist ein wichtiger Risikofaktor für Komplikationen.</div>
+      </div>
+      <div class="tx-step"><div class="tx-step-num">Schritt 8</div>
+        <h4>Dokumentation und Fotodokumentation</h4>
+        <div class="tx-detail">Fotodokumentation der Hautläsion bei Aufnahme und Verlaufskontrollen. Bei schweren Paravasaten ggf. <strong>Röntgen in 2 Ebenen, CT-Topogramm oder CT-Schnittbilder</strong> zur Beurteilung der Ausdehnung (subkutan vs. subfaszial).</div>
+      </div>
+    </div>
+
+    <div id="tx-severe" class="tx-block">
+      <div class="card" style="border-left:4px solid var(--sev-ana)">
+        <h3 style="color:var(--sev-ana);margin-bottom:0.75rem">Behandlung - schweres Paravasat</h3>
+        <p style="font-size:13.5px;color:var(--prose);margin-bottom:1rem"><span class="sym-pill">Neurovaskuläre Kompromittierung</span><span class="sym-pill">Gewebsnekrose</span><span class="sym-pill">Kompartmentsyndrom</span><span class="sym-pill">Notfall</span></p>
+      </div>
+      <div class="tx-step urgent"><div class="tx-step-num">SOFORT</div>
+        <h4>Notfall - Plastische Chirurgie / Chirurgie sofort alarmieren</h4>
+        <div class="tx-detail"><strong>Chirurgische Vorstellung zwingend.</strong> Verzögerung >300 min ist Hauptrisikofaktor für Komplikationen (ESUR 2022). Telefonische Vorabinformation, Patient nicht warten lassen.</div>
+      </div>
+      <div class="tx-step urgent"><div class="tx-step-num">PRIO 1</div>
+        <h4>Aspiration · Hochlagerung · neurovaskuläre Verlaufskontrolle</h4>
+        <div class="tx-detail">Soweit möglich Aspiration über liegende Kanüle, danach Kanüle entfernen. <strong>Betroffene Extremität sofort hochlagern.</strong><br>
+        Engmaschige (5–10 min) Kontrollen: Pulse, Sensibilität, Motorik, Kompartmentdruck-Klinik (Schmerz auf passive Dehnung, Pulslosigkeit, Parästhesien, Parese, Pallor, Poikilothermie - "6 P").</div>
+      </div>
+      <div class="tx-step urgent"><div class="tx-step-num">PRIO 2</div>
+        <h4>Bei Kompartmentsyndrom</h4>
+        <div class="tx-detail"><strong>Notfall-Fasziotomie</strong> indiziert. Dies ist die definitive chirurgische Therapie bei neurovaskulärer Kompromittierung oder etabliertem Kompartmentsyndrom.<br>
+        Bei Verzögerung droht Gewebsverlust bis hin zu Amputation.</div>
+      </div>
+      <div class="tx-step priority"><div class="tx-step-num">Schritt 3</div>
+        <h4>Bildgebende Dokumentation vor Verlegung</h4>
+        <div class="tx-detail"><strong>Röntgen in 2 Ebenen</strong> oder <strong>CT-Topogramm</strong> bzw. <strong>CT-Schnittbilder</strong> noch auf dem CT-Tisch - vor Patientenverlegung - zur Beurteilung der Ausdehnung (subkutan vs. subfaszial) und ggf. Kompartmentbeteiligung.</div>
+      </div>
+      <div class="tx-step priority"><div class="tx-step-num">Schritt 4</div>
+        <h4>Analgesie und supportive Maßnahmen</h4>
+        <div class="tx-detail">Adäquate Analgesie. Wundbeurteilung und sterile Versorgung. Tetanusschutz prüfen bei Hautläsionen.</div>
+      </div>
+      <div class="tx-step"><div class="tx-step-num">Schritt 5</div>
+        <h4>Off-Label: Hyaluronidase und Aspiration/Spülung</h4>
+        <div class="tx-detail">Diese invasiven Optionen sind nicht Standard, können in Einzelfällen (z.B. inoperable Patienten mit Kompartmentsyndrom) erwogen werden:<br>
+        <ul>
+          <li><strong>Hyaluronidase 5–250 IE</strong> lokal subkutan injiziert (off-label, begrenzte Evidenz)</li>
+          <li><strong>Aspiration und Spülung</strong> mit physiologischer NaCl 0,9% via Stichinzisionen (innerhalb 6 h)</li>
+          <li><strong>Manuelle Auspressung</strong> via Stichinzisionen (5–10 Stiche mit 18G-Nadel) bei großvolumigem Paravasat</li>
+        </ul>
+        Diese Optionen sollten dem Chirurgen vorbehalten bleiben.</div>
+      </div>
+      <div class="tx-step"><div class="tx-step-num">Nachsorge</div>
+        <h4>Stationäre Überwachung · Komplikationsmonitoring</h4>
+        <div class="tx-detail">Stationäre Aufnahme. Engmaschige klinische Kontrollen. Fotodokumentation täglich. Bei späten Komplikationen: Hautulzeration, verzögerte Wundheilung, Narbenkontrakturen.<br>
+        Patient und Angehörige umfassend aufklären, Dokumentation der Risiken/Verläufe.</div>
+      </div>
+    </div>
+
+    <div id="tx-empty" class="card" style="border-style:dashed;text-align:center;padding:2rem;color:var(--muted)">
+      <p style="font-size:14px">Bitte einen Schweregrad oben anklicken.</p>
+    </div>
+  </div>
+
+  <!-- ERKENNUNG -->
+  <div id="erkennung" class="section">
+    <h2>Erkennung des Paravasats</h2>
+    <div class="info-box">Die Diagnose erfolgt <strong>klinisch</strong>. Routine-Bildgebung ist zur Erkennung nicht indiziert. Outcomes sind meist günstig - der größte Schaden entsteht durch <strong>verzögerte Erkennung</strong>.</div>
+
+    <div class="card">
+      <div class="card-title">Symptome eines Paravasats</div>
+      <ul class="rec-list">
+        <li><strong>Schmerz</strong> an der Einstichstelle während oder nach Injektion</li>
+        <li><strong>Schwellung</strong> oder Erythem der Punktionsstelle</li>
+        <li><strong>Brennen, Spannungsgefühl</strong></li>
+        <li>Fehlendes "Anfluten" des KM in den Monitoring-Scans (z.B. CT-Bolus-Tracking)</li>
+        <li>Fehlende Kontrastierung im durchgeführten Scan</li>
+        <li>Auslösen eines <strong>Druck-Alarms</strong> am Hochdruckinjektor</li>
+        <li>Auslösen eines <strong>Extravasations-Detektors (EDA)</strong> falls eingesetzt</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Schweregradeinteilung nach ESUR 2022</div>
+      <table class="risk-table">
+        <thead><tr><th>Grad</th><th>Klinische Zeichen</th><th>Management</th></tr></thead>
+        <tbody>
+          <tr><td><span class="status-pill pill-green">Mild</span></td><td>Geringes Erythem oder Schwellung, keine Hautveränderungen</td><td>Konservativ, ambulant möglich</td></tr>
+          <tr><td><span class="status-pill pill-yellow">Moderat</span></td><td>Hautblasen, progrediente Schwellung und/oder Ulzeration</td><td>Engmaschige Überwachung, ärztliche Beurteilung erforderlich</td></tr>
+          <tr><td><span class="status-pill pill-red">Schwer</span></td><td>Neurovaskuläre Kompromittierung, Gewebsnekrose, Kompartmentsyndrom</td><td><strong>Sofortige chirurgische Vorstellung</strong> (Fasziotomie ggf. notwendig)</td></tr>
+        </tbody>
+      </table>
+      <div class="guideline-source">Quelle: ESUR 2022 (Roditi et al., Eur Radiol 32:3056)</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Erkennungsverfahren</div>
+      <ul class="rec-list">
+        <li><strong>Direkte Patientenbeobachtung:</strong> Personal im Raum oder Video-Monitoring sowie Selbstbericht des Patienten - wichtigster Pfeiler</li>
+        <li><strong>Druckmonitoring:</strong> Moderne Hochdruckinjektoren mit grafischer Druckkurve und automatischem/semi-automatischem Stopp bei Widerstandsanstieg</li>
+        <li><strong>Extravasations-Detektor (EDA):</strong> Sensoren am Punktionsort, die Paravasation erkennen und Injektion automatisch unterbrechen. Reduzieren Paravasat-Volumen, verhindern aber nicht das Auftreten</li>
+        <li><strong>Beobachtung der Scan-Bilder:</strong> Fehlendes KM-Anfluten in Tracking-Scans bzw. fehlende Kontrastierung in der eigentlichen Untersuchung</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Bildgebung bei schweren Paravasaten</div>
+      <p style="font-size:13.5px;color:var(--prose);margin-bottom:0.5rem">Zur Abklärung von Ausdehnung und Kompartmentbeteiligung sinnvoll <strong>vor</strong> Verlegung des Patienten vom CT-Tisch:</p>
+      <ul class="rec-list">
+        <li>Röntgen in 2 orthogonalen Ebenen</li>
+        <li>CT-Topogramm in 2 Ebenen</li>
+        <li>CT-Schnittbilder im aktuellen Scan-Setting (kein zusätzlicher Transport)</li>
+      </ul>
+      <p style="font-size:13.5px;color:var(--prose);margin-top:0.5rem">Differenzierung <strong>subkutan vs. subfaszial</strong> ist klinisch relevant - subfasziale Lage erhöht Risiko eines Kompartmentsyndroms.</p>
+    </div>
+  </div>
+
+  <!-- PRÄVENTION -->
+  <div id="praevention" class="section">
+    <h2>Prävention</h2>
+    <div class="info-box">Das Risiko eines Paravasats hängt von <strong>Untersuchungstechnik</strong> und <strong>Patientenfaktoren</strong> ab. Strukturierte Präventionsmaßnahmen reduzieren Häufigkeit und Schweregrad.</div>
+
+    <div class="card">
+      <div class="card-title">Risikofaktoren - Patient</div>
+      <ul class="rec-list">
+        <li>Eingeschränkte Kommunikation (Bewusstseinsstörung, Sedierung, Demenz)</li>
+        <li>Fragile oder geschädigte Venen (Alter, Chemotherapie, mehrfache Punktionen)</li>
+        <li>Eingeschränkter lymphatischer/venöser Abfluss (Z.n. Mastektomie, Lymphödem)</li>
+        <li>Adipositas (schwierige Venenidentifikation)</li>
+        <li>Höheres Alter (&gt;60 Jahre)</li>
+        <li>Stationäre Patienten (höheres Risiko als ambulant)</li>
+        <li>Z.n. i.v. Drogenkonsum</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Risikofaktoren - Technik</div>
+      <ul class="rec-list">
+        <li>Ungünstige Punktionsorte: <strong>untere Extremität, distale Hand-/Handgelenksvenen</strong> (höhere Komplikationsrate)</li>
+        <li><strong>22G-Verweilkanülen</strong> haben höhere Paravasat-Rate als 18G/20G</li>
+        <li>Großes KM-Volumen</li>
+        <li>Hohe Osmolarität / hohe Viskosität des KM</li>
+        <li>Hohe Flussraten ohne adäquate Kanülengröße</li>
+        <li>Längere Verweilzeit der Kanüle vor Untersuchung</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Präventionsmaßnahmen (ESUR 2022)</div>
+      <table class="risk-table">
+        <thead><tr><th>Maßnahme</th><th>Empfehlungsgrad</th></tr></thead>
+        <tbody>
+          <tr><td>Sorgfältige Kanülentechnik, bevorzugt <strong>Oberarmvenen</strong> (Antecubitalfossa)</td><td><span class="status-pill pill-green">C</span></td></tr>
+          <tr><td>Angemessene Kanülengröße passend zu Vene und Flussrate</td><td><span class="status-pill pill-green">B</span></td></tr>
+          <tr><td><strong>Test-Injektion mit NaCl 0,9%</strong> vor KM-Gabe</td><td><span class="status-pill pill-yellow">D</span></td></tr>
+          <tr><td>Wärmung des KM (besonders bei viskösen Substanzen)</td><td><span class="status-pill pill-green">B</span></td></tr>
+          <tr><td>Minimierung des KM-Volumens entsprechend Indikation und Patientengröße</td><td><span class="status-pill pill-green">B</span></td></tr>
+          <tr><td>Korrekte Flussraten und Drücke entsprechend Katheterspezifikation (besonders CVC)</td><td><span class="status-pill pill-green">B</span></td></tr>
+          <tr><td>Effektives Erkennungsprotokoll inkl. Beobachtung und ggf. EDA bei Risikopatienten</td><td><span class="status-pill pill-green">B</span></td></tr>
+        </tbody>
+      </table>
+      <div class="guideline-source">Quelle: ESUR 2022 (Roditi et al., Eur Radiol 32:3056)</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Empfehlungen für die Praxis</div>
+      <ul class="rec-list">
+        <li>Bei Risikopatienten: <strong>neue Kanüle</strong> setzen statt bestehende zu nutzen - reduziert Paravasat-Volumen wenn es auftritt</li>
+        <li>Bevorzugte Punktionsorte: <strong>Antecubitalfossa &gt; Unterarm &gt; Handrücken/Handgelenk</strong></li>
+        <li>Untere Extremität nur als Ausnahme</li>
+        <li>Standardprotokoll für korrekte Vorbereitung des Hochdruckinjektors (Entlüftung, Tubussystem)</li>
+        <li>Personal-Schulung in Erkennung und Erstmaßnahmen - auch nicht-ärztliches Personal (typische Erstanwender)</li>
+        <li>Hauseigenes Protokoll mit klaren Schweregradkriterien und Eskalationswegen</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Zentrale Katheter (CVC, PICC, Port)</div>
+      <ul class="rec-list">
+        <li>Nur <strong>powerinjektor-kompatible</strong> Versionen für Hochdruckinjektion zugelassen - Herstellerangaben beachten</li>
+        <li>Spezifizierte maximale Flussrate und Druckgrenze einhalten</li>
+        <li>Bei Multilumen-CVC: <strong>distales Lumen</strong> verwenden</li>
+        <li>Empfohlene Maximalrate (CVC): typischerweise <strong>≤2 mL/s</strong> falls keine spezifische Powerinjektor-Zulassung</li>
+        <li>Nach KM-Gabe ggf. CT-Topogramm zur Lagekontrolle</li>
+        <li>Selten, aber relevant: mediastinales Paravasat, Hämatom, Arrhythmie</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- DOKUMENTATION -->
+  <div id="dokumentation" class="section">
+    <h2>Dokumentation - Zwischenfall-Protokoll</h2>
+    <div class="info-box"><strong>Warum dokumentieren?</strong> Jedes Paravasat und die getroffenen Maßnahmen gehören in die Patientenakte (ESUR 2022, ACR 2024). Da schwere Verläufe (Blasen, Ulzeration, Kompartmentsyndrom) erst nach Stunden auftreten können, ist eine lückenlose Dokumentation von Befund, Maßnahmen, Aufklärung und Nachsorge entscheidend - auch für Qualitätssicherung und Nachvollziehbarkeit.</div>
+
+    <div class="card">
+      <div class="card-title">Sofortmaßnahmen (bevor dokumentiert wird)</div>
+      <div class="tx-block show" style="margin-top:.25rem">
+        <div class="tx-step">
+          <div class="tx-step-num">Schritt 1</div>
+          <h4>Injektion sofort stoppen</h4>
+          <div class="tx-detail">KM-Zufuhr am Injektor anhalten; Patient beruhigen.</div>
+        </div>
+        <div class="tx-step">
+          <div class="tx-step-num">Schritt 2</div>
+          <h4>Restaspiration &amp; Katheter entfernen</h4>
+          <div class="tx-detail">Wenn möglich, über die liegende Kanüle Rest-KM aspirieren, dann Kanüle ziehen (kein Druck auf das Paravasat).</div>
+        </div>
+        <div class="tx-step">
+          <div class="tx-step-num">Schritt 3</div>
+          <h4>Radiolog:in verständigen &amp; Extremität hochlagern</h4>
+          <div class="tx-detail">Betroffene Extremität über Herzniveau lagern; kühle Kompressen. Schweregrad beurteilen (siehe Akutbehandlung).</div>
+        </div>
+        <div class="tx-step">
+          <div class="tx-step-num">Schritt 4</div>
+          <h4>Areal markieren &amp; ggf. fotografieren</h4>
+          <div class="tx-detail">Ausdehnung mit wasserfestem Stift umranden; Foto (mit Einwilligung) zur Verlaufsbeurteilung. Dann Protokoll ausfüllen - idealerweise innerhalb 1 Stunde.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Muster-Protokoll - ausgefülltes Beispiel (milder Verlauf)</div>
+      <p style="font-size:13px;color:var(--prose);margin-bottom:1rem">Beispiel eines Akteneintrags bei mildem Paravasat, wie ihn der/die untersuchende Ärzt:in verfassen kann. Die <span style="color:var(--tool-ink);font-weight:600">markierten</span> Angaben sind fallspezifisch anzupassen. Über die Schaltfläche als Text kopierbar.</p>
+      <div class="proto" id="proto-text">
+        <div class="proto-h">KM-PARAVASAT - ZWISCHENFALL-PROTOKOLL</div>
+
+        <div class="proto-block">
+<span class="proto-lbl">Patient:</span>
+<span class="proto-lbl-sub">Name:</span> <span class="fill">Mustermann, Max</span>
+<span class="proto-lbl-sub">geboren:</span> <span class="fill">01.01.1960</span>
+<span class="proto-lbl-sub">Überweiser:</span> <span class="fill">Dr. med. Beispiel, Innere Medizin</span></div>
+
+        <div class="proto-block">
+<span class="proto-lbl">Untersuchungsdatum:</span> <span class="fill">09.07.2026, 10:42 Uhr</span>
+<span class="proto-lbl">Art der Untersuchung:</span> <span class="fill">CT Thorax/Abdomen mit KM</span></div>
+
+        <div class="proto-block">
+<span class="proto-lbl">Untersucher:</span>
+<span class="proto-lbl-sub">Arzt:</span> <span class="fill">Dr. med. Beispielarzt</span>
+<span class="proto-lbl-sub">MTRA:</span> <span class="fill">M. Beispiel</span></div>
+
+        <div class="proto-block">
+<span class="proto-lbl">Punktionsort:</span> <span class="fill">V. cubitalis rechts, 20 G, Power-Injektor, 3 mL/s</span></div>
+
+        <div class="proto-block">
+<span class="proto-lbl">Zwischenfall/Komplikation:</span>
+<span class="fill-txt">Flexüle vor KM-Gabe mit NaCl 0,9 % angespült - initial gut durchspülbar,</span>
+<span class="fill-txt">kein Anhalt für Fehllage. Während der KM-Injektion Paravasat am Punktions-</span>
+<span class="fill-txt">ort. Geschätztes extravasiertes Volumen ca. 15 mL Solutrast 370. Lokal</span>
+<span class="fill-txt">umschriebene Schwellung und leichtes Erythem, keine Blasenbildung, keine</span>
+<span class="fill-txt">Parästhesien, periphere Durchblutung, Motorik und Sensibilität intakt.</span>
+<span class="fill-txt">Schweregrad mild (ESUR 2022).</span></div>
+
+        <div class="proto-block">
+<span class="proto-lbl">Maßnahmen:</span>
+<span class="fill-txt">Injektion sofort gestoppt, Rest-KM über die Kanüle aspiriert, Kanüle</span>
+<span class="fill-txt">entfernt. Extremität über Herzniveau gelagert, kühle Kompresse aufgelegt.</span>
+<span class="fill-txt">Patient klinisch beurteilt und über Warnzeichen (zunehmende Schmerzen,</span>
+<span class="fill-txt">Schwellung, Taubheit, Hautveränderungen) mündlich aufgeklärt. Wieder-</span>
+<span class="fill-txt">vorstellung bei Verschlechterung jederzeit möglich. Zuweiser telefonisch</span>
+<span class="fill-txt">informiert (Dr. med. Beispiel, Tel. 1234).</span></div>
+
+        <div class="proto-block">
+<span class="proto-lbl">Datum / Unterschrift:</span> <span class="fill">09.07.2026 - Dr. med. Beispielarzt</span></div>
+      </div>
+      <button type="button" class="analyze-btn" style="margin-top:1rem;width:auto;padding-left:1.5rem;padding-right:1.5rem" onclick="copyProto(this)">Protokoll als Text kopieren</button>
+    </div>
+
+    <div class="card" style="border-left:4px solid var(--warn)">
+      <div class="card-title" style="color:var(--warn-strong)">Patienten-Merkblatt - Warnzeichen</div>
+      <p style="font-size:13px;color:var(--prose);margin-bottom:.75rem">Schwere Paravasate können sich verzögert (bis Stunden nach dem Ereignis) entwickeln. Ambulante Patienten vor Entlassung mündlich und möglichst schriftlich aufklären, wann und wo sie sich vorstellen sollen:</p>
+      <ul class="rec-list">
+        <li><strong>Zunehmende Schmerzen</strong> oder zunehmende Schwellung am Injektionsort</li>
+        <li><strong>Neue Taubheit oder Kribbeln</strong> (Parästhesie) in Arm oder Hand</li>
+        <li><strong>Eingeschränkte Beweglichkeit</strong> oder Kraftverlust der betroffenen Extremität</li>
+        <li><strong>Hautveränderungen</strong> - Blasen, Verfärbung, offene Stellen (Ulzeration)</li>
+        <li><strong>Kalte, blasse Finger</strong> oder Gefühl von Spannung/Druck im Gewebe</li>
+      </ul>
+      <div class="warn-box" style="margin-top:.75rem">Bei einem dieser Zeichen: umgehende Wiedervorstellung in der Radiologie bzw. Notaufnahme. Kontakt / Erreichbarkeit auf dem Merkblatt vermerken.</div>
+    </div>
+
+    <div class="info-box"><strong>Wichtig:</strong> Die chirurgische Vorstellung richtet sich nach der <strong>klinischen Schwere</strong>, nicht nach dem extravasierten Volumen. Eine Verzögerung der OP-Vorstellung &gt;300 min gilt bei schweren Fällen als Hauptrisikofaktor für Komplikationen (ESUR 2022).</div>
+  </div>
+
+  <!-- GRUNDLAGEN -->
+  <div id="grundlagen" class="section">
+    <h2>Grundlagen</h2>
+
+    <div class="card">
+      <div class="card-title">Inzidenz</div>
+      <ul class="rec-list">
+        <li>Paravasat-Häufigkeit gesamt bei CT: <strong>0,1–1,2 %</strong> (ACR Manual 2024)</li>
+        <li>Hwang et al. (n=142.651): 0,23 %</li>
+        <li>Behzadi et al., Systematic Review (n=1.104.872): 0,2 %</li>
+        <li>MRT mit Gd³⁺: <strong>≈ 0,06 %</strong> (niedriger als CT, da geringere Volumina/Flussraten)</li>
+        <li>Schwere Paravasate sind <strong>selten</strong> (nur Fallberichte und Fallserien), jedoch wahrscheinlich unterberichtet</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Pathophysiologie</div>
+      <p style="font-size:13.5px;color:var(--prose);margin-bottom:0.5rem">Drei Mechanismen führen zum Paravasat:</p>
+      <ul class="rec-list">
+        <li><strong>Mechanismus 1:</strong> Dislokation oder Bruch der Kanülenspitze → Flüssigkeit gelangt ins perivaskuläre Gewebe</li>
+        <li><strong>Mechanismus 2:</strong> Leckage durch die Punktionsstelle bei korrekt liegender Kanüle</li>
+        <li><strong>Mechanismus 3:</strong> Scher- und Druckkräfte des Injektionsstrahls führen zur Wanddisruption</li>
+      </ul>
+      <p style="font-size:13.5px;color:var(--prose);margin-top:0.75rem">Gewebsschaden hängt ab von: KM-Eigenschaften (Osmolarität, Zytotoxizität, Volumen) und Lokalisation. <strong>Subfasziale Kompartimente</strong> sind durch enge Räume besonders gefährdet.</p>
+      <p style="font-size:13.5px;color:var(--prose);margin-top:0.5rem">Akute Entzündungsreaktion <strong>peaked bei 48 h</strong>, danach mehrwöchige chronische Inflammation möglich. Resorption typischerweise in <strong>2–4 Tagen</strong> via Lymphsystem.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Was sind die Folgen?</div>
+      <p style="font-size:13.5px;color:var(--prose);margin-bottom:0.5rem">Untreated severe CMEX:</p>
+      <ul class="rec-list">
+        <li>Erhöhter intrakompartmenteller Druck → Kompartmentsyndrom</li>
+        <li>Venöse Stauung mit reduziertem arteriellen Gradient → Ischämie</li>
+        <li>Disproportionale Nekrose, schwere neurovaskuläre Kompromittierung</li>
+        <li>In Extremfällen: Extremitätenverlust</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Hyaluronidase und andere invasive Verfahren</div>
+      <ul class="rec-list">
+        <li><strong>Hyaluronidase (HYLA) 5–250 IE:</strong> Off-Label, lokal subkutan. Spaltet enzymatisch interstitielle Strukturen → Förderung der Resorption. <strong>Begrenzte Evidenz</strong> - kein Routineeinsatz. Manche Tiermodelle zeigen sogar erhöhte Entzündung.</li>
+        <li><strong>Aspiration und Spülung ("Wash-out"):</strong> Stichinzisionen unter Lokalanästhesie, Aspiration mit stumpfen Kanülen, Spülung mit NaCl 0,9% (innerhalb 6 h). Plausibel, aber schwache Evidenz für routinemäßigen Einsatz.</li>
+        <li><strong>Manuelle Auspressung:</strong> Multiple Stichinzisionen (5–10 Stiche, 18G-Nadel), manuelle Expression. Bei großvolumigem Paravasat in kleinen Serien beschrieben.</li>
+        <li><strong>Fasziotomie und Kompartmentspaltung:</strong> Definitive chirurgische Therapie bei neurovaskulärer Kompromittierung oder Kompartmentsyndrom. <strong>Verzögerung &gt;300 min ist Hauptrisikofaktor</strong> für postoperative Komplikationen.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Wärme vs. Kälte?</div>
+      <p style="font-size:13.5px;color:var(--prose)">Aktueller Standard ist <strong>Kühlung</strong> (Vasokonstriktion, anti-inflammatorisch). Manche Studien diskutieren Wärme zur Vasodilatation und Resorptionsförderung - Hastings-Tolsma et al. fanden keinen signifikanten Unterschied. Im Zweifel: <strong>Kühlung bevorzugen</strong> nach ESUR-Empfehlung.</p>
+    </div>
+  </div>
+
+  <!-- LEITLINIEN -->
+  <div id="leitlinien" class="section">
+    <h2>Primärquellen</h2>
+    <div class="info-box">Die Empfehlungen dieses Tools basieren auf folgenden Leitlinien.</div>
+
+    <div class="card">
+      <div class="card-title">ESUR Contrast Media Safety Committee 2022 - Hauptquelle</div>
+      <p style="font-size:13.5px;color:var(--prose)"><strong>Roditi G, Khan N, van der Molen AJ, et al.</strong> Intravenous contrast medium extravasation: systematic review and updated ESUR Contrast Media Safety Committee Guidelines. <em>Eur Radiol</em> 2022;32(5):3056–3066. DOI: 10.1007/s00330-021-08433-4</p>
+      <p style="font-size:13.5px;color:var(--prose);margin-top:0.5rem">Aktualisierte ESUR-Empfehlungen zu Pathophysiologie, Diagnostik, Risikofaktoren und Behandlung von KM-Paravasaten - ersetzt die Bellin et al. 2002 Leitlinie.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Kernpunkte ESUR 2022</div>
+      <ul class="rec-list">
+        <li>Paravasat-Risiko hängt von <strong>Untersuchungstechnik und Patienten-Risikofaktoren</strong> ab</li>
+        <li>Diagnose ist <strong>überwiegend klinisch</strong> - Routine-Bildgebung nicht indiziert</li>
+        <li>Outcomes sind in der Mehrzahl <strong>günstig</strong></li>
+        <li>Chirurgische Vorstellung auf Basis der <strong>klinischen Schwere</strong>, nicht des extravasierten Volumens</li>
+        <li>Bei schweren Fällen: <strong>Verzögerung der OP-Vorstellung &gt;300 min</strong> ist Hauptrisikofaktor für Komplikationen</li>
+        <li>Kein bewährter spezifischer pharmakologischer Therapieansatz - symptomatische Behandlung im Vordergrund</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Weitere relevante Quellen</div>
+      <table class="risk-table">
+        <thead><tr><th>Quelle</th><th>Inhalt</th></tr></thead>
+        <tbody>
+          <tr><td><strong>ACR Manual on Contrast Media 2024</strong></td><td>Amerikanische Referenz, identische Schweregradlogik, Empfehlung zu Hochlagerung und Kühlung; "Keine pharmakologische Intervention als wirksam belegt"</td></tr>
+          <tr><td><strong>ESUR Guidelines on Contrast Agents v10.0 (2018)</strong></td><td>Basisleitlinie der ESUR, p. 26 zum Paravasat</td></tr>
+          <tr><td><strong>Bellin et al. 2002</strong></td><td>Vorgängerleitlinie der ESUR, Eur Radiol 12:2807 - historisch, durch Roditi 2022 ersetzt</td></tr>
+          <tr><td><strong>Hwang et al. 2019 (n=142.651)</strong></td><td>Beobachtungsstudie zu CMEX-Inzidenz und Risikofaktoren</td></tr>
+          <tr><td><strong>Behzadi et al. 2019</strong></td><td>Systematic Review (n=1.104.872) zu Paravasat-Raten</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer class="page-footer">
+    Dieses Tool dient der klinischen Entscheidungsunterstützung und ersetzt keine individuelle ärztliche Beurteilung.<br>
+    Quellen: ESUR Contrast Media Safety Committee 2022 (Roditi et al., Eur Radiol 32:3056) · ACR Manual on Contrast Media 2024 · ESUR v10.0 (2018) · Stand Juli 2026
+    <span class="page-byline">Made by Dardan Albani</span>
+  </footer>
+</div>
+
+<script>
+function selectSeverity(sev, btn){
+  document.querySelectorAll('.sev-card').forEach(function(c){c.classList.remove('active');});
+  btn.classList.add('active');
+  document.querySelectorAll('.tx-block').forEach(function(b){b.classList.remove('show');});
+  document.getElementById('tx-empty').style.display='none';
+  document.getElementById('tx-'+sev).classList.add('show');
+  document.getElementById('tx-'+sev).scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function showSection(id, btn){
+  document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
+  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function copyProto(btn){
+  var el=document.getElementById('proto-text');
+  var lines=[];
+  var h=el.querySelector('.proto-h');
+  if(h){ var ht=h.textContent.trim(); lines.push(ht); lines.push('='.repeat(Math.min(ht.length,44))); lines.push(''); }
+  el.querySelectorAll('.proto-block').forEach(function(block){
+    // textContent preserves the newlines from the pre-wrap block; trim trailing space per line
+    var t=block.textContent.replace(/^\n+|\n+$/g,'').split('\n').map(function(l){return l.replace(/\s+$/,'');}).join('\n');
+    lines.push(t);
+    lines.push('');
+  });
+  var text=lines.join('\n').replace(/\n{3,}/g,'\n\n').trim()+'\n';
+  var done=function(){
+    var orig=btn.textContent; btn.textContent='In Zwischenablage kopiert ✓';
+    setTimeout(function(){btn.textContent=orig;},1800);
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done, function(){fallbackCopy(text,done);});
+  } else { fallbackCopy(text,done); }
+}
+function fallbackCopy(text, done){
+  var ta=document.createElement('textarea');
+  ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select();
+  try{document.execCommand('copy'); done();}catch(e){}
+  document.body.removeChild(ta);
+}
+
+// === RAD MODE (shared with other tools via localStorage key) ===
+</script>
+</body>
+</html>
