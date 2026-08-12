@@ -30,6 +30,10 @@
 .opt-btn.sel small{color:rgba(255,255,255,.85)}
 body.rad-mode .opt-btn.sel{color:#06272E}
 body.rad-mode .opt-btn.sel small{color:rgba(6,39,46,.75)}
+
+/* Ergebnis-Box für exogene Hyperthyreose (Übersubstitution) - grün/unbedenklich */
+.result-box.exogen{border-left-color:var(--ok);background:linear-gradient(0deg,var(--ok-tint),var(--ok-tint)),var(--card);border-color:var(--ok-line)}
+.result-box.exogen .result-title{color:var(--ok-strong)}
 </style>
 </head>
 <body class="tool-schilddruese">
@@ -159,6 +163,15 @@ body.rad-mode .opt-btn.sel small{color:rgba(6,39,46,.75)}
               </div>
             </div>
 
+            <!-- Conditional follow-up: Hypothyreose -->
+            <div class="followup" id="fu-hypo">
+              <label>Unter Substitutionstherapie (L-Thyroxin)?</label>
+              <div class="opt-row" data-group="hypo-sub">
+                <button type="button" class="opt-btn" data-value="sub-ja" onclick="pickOpt(this)">Unter L-Thyroxin<small>substituiert</small></button>
+                <button type="button" class="opt-btn" data-value="sub-nein" onclick="pickOpt(this)">Keine Substitution<small>unbehandelt / neu</small></button>
+              </div>
+            </div>
+
             <!-- Conditional follow-up: Karzinom -->
             <div class="followup" id="fu-karzinom">
               <label>Schilddrüsenkarzinom - Status?</label>
@@ -175,9 +188,13 @@ body.rad-mode .opt-btn.sel small{color:rgba(6,39,46,.75)}
             <div class="followup" id="fu-thyreoidektomie">
               <label>Operationsumfang?</label>
               <div class="opt-row" data-group="tx-umfang">
-                <button type="button" class="opt-btn" data-value="total" onclick="pickOpt(this)">Totale Thyreoidektomie</button>
-                <button type="button" class="opt-btn" data-value="subtotal" onclick="pickOpt(this)">Subtotal / Hemi</button>
-                <button type="button" class="opt-btn" data-value="lthyroxin" onclick="pickOpt(this)">Unter L-Thyroxin</button>
+                <button type="button" class="opt-btn" data-value="total" onclick="pickOpt(this)">Totale Thyreoidektomie<small>kein Restgewebe</small></button>
+                <button type="button" class="opt-btn" data-value="subtotal" onclick="pickOpt(this)">Subtotal / Hemi<small>Restgewebe vorhanden</small></button>
+              </div>
+              <label style="margin-top:.8rem">Unter Substitutionstherapie (L-Thyroxin)?</label>
+              <div class="opt-row" data-group="tx-sub">
+                <button type="button" class="opt-btn" data-value="sub-ja" onclick="pickOpt(this)">Unter L-Thyroxin<small>substituiert</small></button>
+                <button type="button" class="opt-btn" data-value="sub-nein" onclick="pickOpt(this)">Keine Substitution</button>
               </div>
             </div>
 
@@ -799,9 +816,11 @@ function getDiseaseFlags(){
   // collect follow-up values (from selected buttons)
   flags.karzinomStatus=optValue('karzinom-status');
   flags.txUmfang=optValue('tx-umfang');
+  flags.txSub=optValue('tx-sub');
   flags.amioStatus=optValue('amio-status');
   flags.kidneyStatus=optValue('kidney-status');
   flags.hyperAtd=optValue('hyper-atd');
+  flags.hypoSub=optValue('hypo-sub');
   return flags;
 }
 
@@ -825,12 +844,14 @@ function onDiseaseChange(){
   // Clear detail selections for any parent that is now unchecked
   if(!document.getElementById('d-hyperthyreose').checked) clearOptGroup('hyper-atd');
   if(!document.getElementById('d-karzinom').checked) clearOptGroup('karzinom-status');
-  if(!document.getElementById('d-thyreoidektomie').checked) clearOptGroup('tx-umfang');
+  if(!document.getElementById('d-thyreoidektomie').checked){ clearOptGroup('tx-umfang'); clearOptGroup('tx-sub'); }
   if(!document.getElementById('d-amiodaron').checked) clearOptGroup('amio-status');
   if(!document.getElementById('d-niereninsuffizienz').checked) clearOptGroup('kidney-status');
+  if(!document.getElementById('d-hypo').checked) clearOptGroup('hypo-sub');
   // Show/hide follow-ups
   const f=getDiseaseFlags();
   document.getElementById('fu-hyperthyreose').classList.toggle('show', f.hyperthyreose);
+  document.getElementById('fu-hypo').classList.toggle('show', f.hypo);
   document.getElementById('fu-karzinom').classList.toggle('show', f.karzinom);
   document.getElementById('fu-thyreoidektomie').classList.toggle('show', f.thyreoidektomie);
   document.getElementById('fu-amiodaron').classList.toggle('show', f.amiodaron);
@@ -854,8 +875,8 @@ function updateCtxFlags(f){
   if(f.autonomie) flags.push('Autonomie');
   if(f.struma) flags.push('Struma nodosa');
   if(f.hashimoto) flags.push('Hashimoto');
-  if(f.hypo) flags.push('Hypothyreose');
-  if(f.thyreoidektomie) flags.push('Z.n. TX');
+  if(f.hypo) flags.push('Hypothyreose'+(f.hypoSub==='sub-ja'?' (substituiert)':f.hypoSub==='sub-nein'?' (unbehandelt)':' (Substitution offen)'));
+  if(f.thyreoidektomie){var tx='Z.n. TX'+(f.txUmfang==='total'?' (total)':f.txUmfang==='subtotal'?' (subtotal/Hemi)':''); if(f.txSub==='sub-ja')tx+=', L-Thyroxin'; else if(f.txSub==='sub-nein')tx+=', ohne Substitution'; flags.push(tx);}
   if(f.subakut) flags.push('Thyreoiditis (de Quervain)');
   if(f.amiodaron) flags.push('Amiodaron'+(f.amioStatus==='aktiv'?' (aktiv)':f.amioStatus==='kuerzlich'?' (kürzlich abgesetzt)':f.amioStatus==='alt'?' (>6 Mon. abgesetzt)':' (Status offen)'));
   if(f.schwangerschaft) flags.push('Schwangerschaft/Stillzeit');
@@ -903,6 +924,26 @@ function diseaseSpecificRecs(f, r){
     }
   }
 
+  // Hypothyreose - Substitutionsstatus. Der reine Übersubstitutions-Fall wird bereits
+  // in der Laborkonstellation ("Exogene Hyperthyreose") behandelt; hier nur die
+  // ergänzenden bzw. abweichenden Fälle.
+  if(f.hypo){
+    var hyperValues = (r.key==='manifest' || r.key==='latent' || r.key==='exogen');
+    var autonomesGewebe = f.autonomie || f.struma || f.basedow;
+    if(f.hypoSub==='sub-ja'){
+      if(hyperValues && autonomesGewebe){
+        out.push({priority:'high', text:'Hypothyreose unter L-Thyroxin mit hyperthyreoter Konstellation, <strong>aber gleichzeitig autonomem Gewebe</strong> (Autonomie/Knotenstruma/Basedow angekreuzt): Hier ist die Überfunktion nicht sicher rein substitutionsbedingt - an autonomem Gewebe kann Jod einen Jod-Basedow-Effekt auslösen. Nicht als harmlose Übersubstitution werten; Ätiologie endokrinologisch klären und Laborkonstellation oben beachten.'});
+      } else if(!hyperValues){
+        out.push({priority:'low', text:'Hypothyreose <strong>unter L-Thyroxin</strong>: substituierte Patienten haben kein erhöhtes Risiko für eine KM-induzierte Schilddrüsendysfunktion (ETA 2021 Tab. 1). Jodhaltiges KM nicht kontraindiziert; TSH-Einstellung nach aktuellen Leitlinien überprüfen.'});
+      }
+      // Reiner Übersubstitutions-Fall (hyperValues && !autonomesGewebe): bereits in der Konstellation abgehandelt.
+    } else if(f.hypoSub==='sub-nein'){
+      out.push({priority:'low', text:'Hypothyreose <strong>ohne Substitution</strong>: jodhaltiges KM nach ETA 2021 (Tab. 1) nicht kontraindiziert. L-Thyroxin-Therapie nach aktuellen Hypothyreose-Leitlinien einleiten/überwachen; bei Autoimmunthyreoiditis (Hashimoto) TSH-Verlauf bis zu 2 Jahre nach KM beachten.'});
+    } else {
+      out.push({priority:'low', text:'Hypothyreose, <strong>Substitutionsstatus nicht angegeben</strong>: Für die Einordnung hyperthyreoter Werte ist entscheidend, ob der Patient L-Thyroxin einnimmt (dann meist Übersubstitution ohne KM-Risiko) oder nicht. Substitutionsstatus klären.'});
+    }
+  }
+
   // Bekannte Hyperthyreose (jegliche Ursache) - Thyreostatika-Status entscheidend
   if(f.hyperthyreose){
     if(f.hyperAtd==='atd-ja'){
@@ -931,16 +972,24 @@ function diseaseSpecificRecs(f, r){
     out.push({priority:'medium', text:'Hashimoto-Thyreoiditis: <strong>Hauptrisikofaktor für KM-induzierte Hypothyreose</strong> (ETA 2021 Tab. 2). Anti-TPO-Bestimmung; TSH-Kontrolle 3–4 Wochen post KM und bei Symptomen bis 2 Jahre danach (ETA 2021).'});
   }
 
-  // Thyreoidektomie
+  // Thyreoidektomie - Umfang und Substitution getrennt bewertet
   if(f.thyreoidektomie){
+    var txHyperLab = (r.key==='manifest' || r.key==='latent' || r.key==='exogen');
+    var txAutonom = f.autonomie || f.struma || f.basedow;
+    // Umfang-Basisaussage
     if(f.txUmfang==='total'){
-      out.push({priority:'low', text:'Z.n. totaler Thyreoidektomie: keine SD-bezogene KM-Kontraindikation. L-Thyroxin-Substitution überprüfen.'});
+      out.push({priority:'low', text:'Z.n. <strong>totaler Thyreoidektomie</strong>: kein Schilddrüsengewebe mehr vorhanden - ein Jod-Basedow-Effekt durch jodhaltiges KM ist ausgeschlossen. Keine SD-bezogene KM-Kontraindikation.'});
     } else if(f.txUmfang==='subtotal'){
-      out.push({priority:'medium', text:'Z.n. subtotaler/Hemi-Thyreoidektomie: Restgewebe vorhanden - Jod-Basedow-Risiko bei vorbestehender Autonomie nicht ausgeschlossen. TSH-Kontrolle.'});
-    } else if(f.txUmfang==='lthyroxin'){
-      out.push({priority:'low', text:'Substituierter Patient: TSH unter L-Thyroxin überprüfen; bei iatrogen supprimiertem TSH (z.B. nach DTC) kein Hinweis auf Hyperthyreose.'});
+      out.push({priority:'medium', text:'Z.n. <strong>subtotaler/Hemi-Thyreoidektomie</strong>: Restgewebe vorhanden - ein Jod-Basedow-Risiko bei autonomem Restgewebe ist nicht generell ausgeschlossen. Bei Autonomiehinweis Restgewebe sonographisch/szintigraphisch beurteilen; TSH-Kontrolle.'});
     } else {
-      out.push({priority:'medium', text:'Z.n. Thyreoidektomie, Umfang nicht angegeben: bei erhaltenem Restgewebe (subtotal/Hemi) Jod-Basedow-Risiko möglich. Operationsumfang und aktuelle TSH-Substitution klären.'});
+      out.push({priority:'medium', text:'Z.n. Thyreoidektomie, <strong>Umfang nicht angegeben</strong>: bei erhaltenem Restgewebe (subtotal/Hemi) Jod-Basedow-Risiko bei Autonomie möglich, nach totaler TX ausgeschlossen. Operationsumfang klären.'});
+    }
+    // Substitution + hyperthyreote Werte: der reine Übersubstitutions-Fall (total, oder subtotal ohne Autonomie)
+    // wird bereits in der Laborkonstellation ("Exogene Hyperthyreose") behandelt. Hier nur die Warnfälle.
+    if(f.txSub==='sub-ja' && txHyperLab && f.txUmfang==='subtotal' && txAutonom){
+      out.push({priority:'high', text:'Subtotale/Hemi-Thyreoidektomie unter L-Thyroxin mit hyperthyreoter Konstellation, <strong>aber autonomem (Rest-)Gewebe</strong> (Autonomie/Knotenstruma/Basedow angekreuzt): Überfunktion nicht sicher rein substitutionsbedingt - an autonomem Restgewebe kann Jod einen Jod-Basedow-Effekt auslösen. Nicht als harmlose Übersubstitution werten; Ätiologie endokrinologisch klären.'});
+    } else if(f.txSub==='sub-nein'){
+      out.push({priority:'low', text:'Ohne L-Thyroxin-Substitution: TSH-Verlauf beachten; nach totaler TX ist eine Substitution i.d.R. erforderlich - Substitutionsbedarf prüfen.'});
     }
   }
 
@@ -999,6 +1048,58 @@ function analyze(){
   if(isNaN(tshVal)){alert('Bitte mindestens den TSH-Wert eingeben (z.B. 1,2).');return;}
   const r=classify(tshVal,isNaN(ft4Val)?null:ft4Val,isNaN(ft3Val)?null:ft3Val);
   const f=getDiseaseFlags();
+
+  // Override: hyperthyreote Laborlage, die durch exogene L-Thyroxin-Zufuhr (Übersubstitution)
+  // erklärt ist und NICHT durch jodabhängiges autonomes Gewebe -> kein Jod-Basedow-Risiko,
+  // KM unbedenklich. Die reine Laborkonstellation ("Overt/subklinische Hyperthyreose") wäre
+  // hier irreführend "kontraindiziert". Gilt für substituierte Hypothyreose und für Z.n.
+  // Thyreoidektomie (bei totaler TX zwingend exogen, da kein Restgewebe).
+  const hyperLab = (r.key==='manifest' || r.key==='latent');
+  const autonomesGewebe = f.autonomie || f.struma || f.basedow;
+  const hypoExogen = f.hypo && f.hypoSub==='sub-ja' && !autonomesGewebe;
+  const txTotalExogen = f.thyreoidektomie && f.txUmfang==='total' && f.txSub==='sub-ja';           // kein Restgewebe -> sicher exogen
+  const txSubtotalExogen = f.thyreoidektomie && f.txUmfang==='subtotal' && f.txSub==='sub-ja' && !autonomesGewebe;
+
+  if(hyperLab && (hypoExogen || txTotalExogen || txSubtotalExogen)){
+    const overt = r.key==='manifest';
+    const karzinomSuppression = f.karzinom; // TSH-Suppression evtl. gewollt
+    let quelle, voraussetzung, dosisHinweis;
+    if(txTotalExogen){
+      quelle='nach <strong>totaler Thyreoidektomie unter L-Thyroxin</strong> (kein Schilddrüsen-Restgewebe)';
+      voraussetzung='Nach totaler Thyreoidektomie ist kein jodspeicherndes Gewebe vorhanden - ein Jod-Basedow-Effekt ist ausgeschlossen.';
+    } else if(txSubtotalExogen){
+      quelle='nach <strong>subtotaler/Hemi-Thyreoidektomie unter L-Thyroxin</strong> und ohne Hinweis auf autonomes Restgewebe';
+      voraussetzung='Voraussetzung: kein autonomes Restgewebe (Autonomie/Knotenstruma/Basedow) - bei Hinweis darauf gilt diese Einordnung nicht; Restgewebe ggf. sonographisch/szintigraphisch beurteilen.';
+    } else {
+      quelle='bei bekannter Hypothyreose <strong>unter L-Thyroxin</strong> und ohne Hinweis auf autonomes Gewebe';
+      voraussetzung='Voraussetzung: kein autonomes Adenom / keine Knotenstruma / kein M. Basedow - bei Hinweis darauf gilt diese Einordnung nicht.';
+    }
+    if(karzinomSuppression){
+      dosisHinweis='Nebenbefund: supprimiertes TSH kann bei Z.n. Schilddrüsenkarzinom eine <strong>gewollte TSH-Suppressionstherapie</strong> sein - dann ist die niedrige TSH-Lage beabsichtigt und die L-Thyroxin-Dosis nicht ohne Rücksprache mit der behandelnden Endokrinologie/Onkologie zu reduzieren.';
+    } else {
+      dosisHinweis='Nebenbefund (keine KM-Frage): supprimiertes TSH unter L-Thyroxin spricht für Übersubstitution - L-Thyroxin-Dosis überprüfen (kardiovaskuläres/ossäres Risiko bei Dauerübersubstitution).';
+    }
+    r.key='exogen';
+    r.label='Exogene Hyperthyreose durch L-Thyroxin (Übersubstitution)';
+    r.risk='low';
+    r.riskLabel='KM nicht kontraindiziert';
+    r.desc='TSH supprimiert'+(overt?' mit erhöhtem fT4/fT3':', periphere Hormone (noch) normal')+' '+quelle+': Befund entspricht einer <strong>exogenen Hyperthyreose durch Übersubstitution</strong>, nicht einer jodabhängigen Autonomie. Da die Hormone exogen zugeführt werden, besteht <strong>kein Jod-Basedow-Risiko</strong> - jodhaltiges KM ist diesbezüglich unbedenklich und verschlechtert die Stoffwechsellage nicht.';
+    r.context_pre=[
+      'Jodhaltiges KM nicht kontraindiziert - die Überfunktion ist exogen (L-Thyroxin), kein jodabhängiges autonomes Gewebe vorhanden',
+      'Keine Perchlorat-/Thyreostatikum-Prophylaxe erforderlich (kein Jod-Basedow-Mechanismus)',
+      dosisHinweis,
+      voraussetzung
+    ];
+    r.context_post=[
+      'Bei klinischer Thyreotoxikose-Symptomatik trotzdem endokrinologische Abklärung und Dosisanpassung',
+      'TSH/fT4-Kontrolle nach L-Thyroxin-Anpassung nach endokrinologischem Plan'
+    ];
+    r.context_symptom=[
+      'L-Thyroxin-Dosis überprüfen; endokrinologische Mitbeurteilung',
+      'Bei Zweifel an der Ätiologie: autonomes (Rest-)Gewebe sonographisch/szintigraphisch ausschließen'
+    ];
+  }
+
   const box=document.getElementById('result');
   box.className='result-box show '+r.key;
   const tshStatus=tshVal<0.4?'abnormal':tshVal>4.0?'warn':'ok';
