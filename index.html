@@ -3,8 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>KM-Tools - Kontrastmittel & CT-Planung</title>
+<title>CT-Tools - Radiologie</title>
 <link rel="stylesheet" href="km.css">
+<style>
+/* Landing: zwei große Kategorie-Kacheln */
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:.5rem}
+.cat-card{display:flex;flex-direction:column;gap:0;background:var(--card);border:1px solid var(--border);border-top:3px solid var(--tool,var(--accent));border-radius:var(--radius);padding:1.5rem 1.6rem;text-decoration:none;color:inherit;transition:border-color .15s,box-shadow .15s,transform .15s;box-shadow:var(--shadow-1)}
+.cat-card:hover{border-color:var(--tool,var(--accent));box-shadow:var(--shadow-2);transform:translateY(-2px)}
+.cat-icon{width:48px;height:48px;border-radius:12px;background:var(--tool-tint,var(--accent-tint));color:var(--tool-ink,var(--accent));display:flex;align-items:center;justify-content:center;margin-bottom:1rem}
+.cat-icon svg{width:26px;height:26px}
+.cat-card h2{font-family:var(--font-display);font-size:1.35rem;margin:0 0 .35rem;color:var(--ink)}
+.cat-card .cat-sub{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.7rem}
+.cat-card p{font-size:.95rem;color:var(--prose);line-height:1.55;margin:0 0 1rem}
+.cat-list{list-style:none;padding:0;margin:0 0 1.1rem;display:flex;flex-wrap:wrap;gap:6px}
+.cat-list li{font-size:12px;color:var(--tool-ink,var(--accent));background:var(--tool-tint,var(--accent-tint));border:1px solid var(--tool-line,var(--accent-ring));border-radius:999px;padding:3px 10px}
+.cat-cta{margin-top:auto;font-family:var(--font-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--tool-ink,var(--accent));display:inline-flex;align-items:center;gap:6px}
+.cat-cta svg{width:14px;height:14px}
+.cat-km{--tool:#0D6B7D;--tool-tint:#E4F1F4;--tool-ink:#0A5563;--tool-line:#B2D3DA}
+body.rad-mode .cat-km{--tool:#59C2D6;--tool-tint:rgba(89,194,214,.13);--tool-ink:#8ADAE9;--tool-line:rgba(89,194,214,.35)}
+.cat-bef{--tool:#196A43;--tool-tint:#E4F3EA;--tool-ink:#0F5433;--tool-line:#A9D4BC}
+body.rad-mode .cat-bef{--tool:#45BE83;--tool-tint:rgba(69,190,131,.13);--tool-ink:#7CD6A9;--tool-line:rgba(69,190,131,.45)}
+.cat-card{position:relative}
+.lock-badge{position:absolute;top:16px;right:16px;display:inline-flex;align-items:center;gap:4px;font-family:var(--font-mono);font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--tool-ink);background:var(--tool-tint);border:1px solid var(--tool-line);border-radius:999px;padding:3px 9px 3px 7px}
+.lock-badge svg{width:11px;height:11px}
+</style>
 </head>
 <body>
 <script src="km.js"></script>
@@ -12,77 +34,47 @@
   <header class="masthead">
     <div class="mast-ruler" aria-hidden="true"></div>
     <div class="mast-top">
-      <span class="header-badge">KLINISCHE ENTSCHEIDUNGSTOOLS · RADIOLOGIE</span>
+      <span class="header-badge">KLINISCHE WERKZEUGE · RADIOLOGIE</span>
       <button type="button" class="rad-mode-toggle" id="radModeToggle" aria-pressed="false" title="Lesesaal-Dunkelmodus" onclick="toggleRadMode()"><span class="mode-track" aria-hidden="true"><span class="mode-thumb"></span></span><span class="mode-label">Rad&nbsp;Mode</span></button>
     </div>
     <div class="mast-main">
       <div class="tool-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="6.5"/><path d="M12 2.5v3.5M12 18v3.5M2.5 12H6M18 12h3.5"/><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/></svg></div>
       <div class="mast-text">
-        <h1>KM-Tools<span class="h1-sub">Kontrastmittel-Anwendung · CT-Untersuchungsplanung</span></h1>
-        <p class="mast-desc">Klinische Entscheidungshilfen für KM-Anwendung und CT-Untersuchungsplanung.</p>
+        <h1>CT-Tools<span class="h1-sub">Kontrastmittel · Untersuchungsplanung · Befundung</span></h1>
+        <p class="mast-desc">Sammlung klinischer Werkzeuge für die CT-Radiologie.</p>
       </div>
     </div>
   </header>
 
-  <p class="intro">Basierend auf europäischen Leitlinien und hauseigenem Klinikstandard. Ersetzen keine ärztliche Beurteilung.</p>
+  <p class="intro">Zwei Bereiche: Werkzeuge rund um Kontrastmittel und Untersuchungsplanung sowie Werkzeuge zur strukturierten Befundung. Ersetzen keine ärztliche Beurteilung.</p>
 
-  <div class="tools-grid">
-    <a href="schilddruese.html" class="tool-card thyro">
-      <div class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v5.2"/><path d="M11 13.5h2"/><path d="M10.8 9.4C9.7 7.9 7.7 7.4 6.3 8.5c-1.8 1.5-1.9 4.7-.6 7.5 1 2.1 2.6 3.6 3.9 3.1 1.2-.4 1.6-2.1 1.4-4.2"/><path d="M13.2 9.4c1.1-1.5 3.1-2 4.5-.9 1.8 1.5 1.9 4.7.6 7.5-1 2.1-2.6 3.6-3.9 3.1-1.2-.4-1.6-2.1-1.4-4.2"/></svg></div>
-      <h2>Schilddrüse</h2>
-      <div class="tool-subtitle">Hyper- / Hypothyreose · Karzinom</div>
-      <p>Risiko und Prophylaxe bei vorbestehenden Schilddrüsenerkrankungen.</p>
-      <ul class="tool-features">
-        <li>TSH/fT3/fT4-Analyse</li>
-        <li>Prophylaxe-Schemata</li>
-        <li>Karzinom, RIT, Amiodaron</li>
+  <div class="cat-grid">
+    <a href="km-index.html" class="cat-card cat-km">
+      <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="6.5"/><path d="M12 2.5v3.5M12 18v3.5M2.5 12H6M18 12h3.5"/><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/></svg></div>
+      <h2>KM-Tools</h2>
+      <div class="cat-sub">Kontrastmittel · CT-Planung</div>
+      <p>Entscheidungshilfen zur Kontrastmittel-Anwendung: Schilddrüse, Niere, Paravasat und CT-Phasen.</p>
+      <ul class="cat-list">
+        <li>Schilddrüse</li><li>Niere</li><li>Paravasat</li><li>CT-Phasen</li>
       </ul>
-      <span class="tool-cta">Tool öffnen</span>
+      <span class="cat-cta">Öffnen<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 5.5 16 12l-6.5 6.5"/></svg></span>
     </a>
 
-    <a href="niere.html" class="tool-card kidney">
-      <div class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.9 3.6c-4.6 0-8.4 3.7-8.4 8.4s3.8 8.4 8.4 8.4c2.6 0 4.2-1.5 4.2-3.4 0-2.4-3-2.6-3-5s3-2.6 3-5c0-1.9-1.6-3.4-4.2-3.4z"/><path d="M15.6 12h3.2"/></svg></div>
-      <h2>Niere</h2>
-      <div class="tool-subtitle">eGFR · Hydrierung · Abstände</div>
-      <p>KM-Gabe bei eingeschränkter Nierenfunktion.</p>
-      <ul class="tool-features">
-        <li>eGFR-Risikobewertung</li>
-        <li>Hydrierungsrechner</li>
-        <li>Dialyse, Metformin, NYHA</li>
+    <a href="befundung.html" class="cat-card cat-bef">
+      <span class="lock-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="1.8"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>Login</span>
+      <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l3 3v15H6V3z"/><path d="M14 3v4h4"/><path d="M8.5 12h7M8.5 15h7M8.5 18h4"/></svg></div>
+      <h2>Befundung</h2>
+      <div class="cat-sub">Strukturierte Befunde · Differentialdiagnose</div>
+      <p>Klick-Baukasten für strukturierte CT-Befunde mit Live-Vorschau. Passwortgeschützt (Team-Login).</p>
+      <ul class="cat-list">
+        <li>Befundungsassistent</li><li>Login erforderlich</li>
       </ul>
-      <span class="tool-cta">Tool öffnen</span>
-    </a>
-
-    <a href="paravasat.html" class="tool-card paravasat">
-      <div class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 3.5v6M8.5 14.5v6M14 3.5v17"/><path d="M4.9 9.7c1.3 1.6 2 2.7 2 3.7a2 2 0 1 1-4 0c0-1 .7-2.1 2-3.7z"/></svg></div>
-      <h2>Paravasat</h2>
-      <div class="tool-subtitle">Erkennung · Behandlung</div>
-      <p>Akutmanagement nach ESUR 2022.</p>
-      <ul class="tool-features">
-        <li>Schweregrad mild / moderat / schwer</li>
-        <li>Stepwise Algorithmus</li>
-        <li>Prävention und Risikofaktoren</li>
-      </ul>
-      <span class="tool-cta">Tool öffnen</span>
-    </a>
-
-    <a href="phasen.html" class="tool-card phasen">
-      <div class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.2"/><path d="M12 7.3V12l3.2 1.9"/><path d="M12 3.8v1.3M20.2 12h-1.3M12 20.2v-1.3M3.8 12h1.3"/></svg></div>
-      <h2>CT-Phasen &amp; Zugang</h2>
-      <div class="tool-subtitle">Phasen · Flow · Venflon · ZVK · Port</div>
-      <p>Phasen-Slider plus Empfehlungen zu Flussraten und Zugängen.</p>
-      <ul class="tool-features">
-        <li>Interaktiver Phasen-Slider</li>
-        <li>Venflon-Größen nach Flussrate</li>
-        <li>ZVK und Port-Empfehlungen</li>
-      </ul>
-      <span class="tool-cta">Tool öffnen</span>
+      <span class="cat-cta">Öffnen<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 5.5 16 12l-6.5 6.5"/></svg></span>
     </a>
   </div>
 
   <div class="footer-note">
-    Diese Tools dienen der klinischen Entscheidungsunterstützung und ersetzen keine individuelle ärztliche Beurteilung.<br>
-    Quellen: ETA 2021 · ESUR Contrast Media Safety Committee 2018/2025 · ESUR Extravasation Guidelines 2022 · DGN S1 RIT 2022 · S3 Schilddrüsenkarzinom 2025 · ESC HF 2021
+    Diese Werkzeuge dienen der klinischen Entscheidungsunterstützung sowie der Ausbildung und ersetzen keine individuelle ärztliche Beurteilung.
     <span class="byline">Made by Dardan Albani</span>
   </div>
 </div>

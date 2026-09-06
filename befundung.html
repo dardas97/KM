@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CT-Befundungsassistent</title>
+<style>
+/* ===== Schriften wie im km.css-System (self-hosted) ===== */
+@font-face{font-family:'Schibsted Grotesk';src:url('fonts/schibsted-grotesk-latin-700-normal.woff2') format('woff2');font-weight:700;font-display:swap}
+@font-face{font-family:'Schibsted Grotesk';src:url('fonts/schibsted-grotesk-latin-600-normal.woff2') format('woff2');font-weight:600;font-display:swap}
+@font-face{font-family:'Schibsted Grotesk';src:url('fonts/schibsted-grotesk-latin-500-normal.woff2') format('woff2');font-weight:500;font-display:swap}
+@font-face{font-family:'Source Sans 3';src:url('fonts/source-sans-3-latin-400-normal.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'Source Sans 3';src:url('fonts/source-sans-3-latin-600-normal.woff2') format('woff2');font-weight:600;font-display:swap}
+@font-face{font-family:'Source Sans 3';src:url('fonts/source-sans-3-latin-700-normal.woff2') format('woff2');font-weight:700;font-display:swap}
+@font-face{font-family:'IBM Plex Mono';src:url('fonts/ibm-plex-mono-latin-400-normal.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'IBM Plex Mono';src:url('fonts/ibm-plex-mono-latin-500-normal.woff2') format('woff2');font-weight:500;font-display:swap}
+@font-face{font-family:'IBM Plex Mono';src:url('fonts/ibm-plex-mono-latin-600-normal.woff2') format('woff2');font-weight:600;font-display:swap}
+
+:root{
+  /* Grundflächen (hell, wie km.css) */
+  --bg:#F1F4F7; --bg2:#F7F9FB; --panel:#FFFFFF; --panel2:#F7F9FB; --line:#D8E0E7;
+  --ink:#15222E; --mut:#637585; --faint:#8195A6;
+  /* Akzent: km-Teal statt Amber */
+  --acc:#0D6B7D; --acc-soft:#E4F1F4; --acc-ink:#FFFFFF;
+  /* Semantische Farben (km.css) */
+  --red:#B02A37; --red-bg:#FBEAEC; --grn:#196A43; --grn-bg:#E4F3EA; --amb:#8F5A08; --amb-bg:#FBF1DD;
+  /* Report-"Papier": im Hellmodus dezent abgesetzt */
+  --paper:#FFFFFF; --paper2:#F2F0E9; --pink:#15222E; --pmut:#637585; --pline:#D8E0E7; --mark:#FBF1DD;
+  --sans:'Source Sans 3',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'SF Mono','Cascadia Mono',Consolas,monospace;
+  --disp:'Schibsted Grotesk','Source Sans 3',system-ui,sans-serif;
+  --r:10px; --rs:7px;
+  --shadow-1:0 1px 2px rgba(21,34,46,.05); --shadow-2:0 8px 24px rgba(21,34,46,.10);
+}
+body.rad-mode{
+  --bg:#0A0E13; --bg2:#0C1218; --panel:#10161D; --panel2:#141B23; --line:#26313D;
+  --ink:#E5EDF3; --mut:#8195A6; --faint:#8CA0B1;
+  --acc:#59C2D6; --acc-soft:rgba(89,194,214,.13); --acc-ink:#06272E;
+  --red:#EF7B78; --red-bg:rgba(239,123,120,.13); --grn:#45BE83; --grn-bg:rgba(69,190,131,.13); --amb:#E0A445; --amb-bg:rgba(224,164,69,.12);
+  --paper:#0C1218; --paper2:#141B23; --pink:#E5EDF3; --pmut:#8195A6; --pline:#26313D; --mark:rgba(224,164,69,.28);
+  --shadow-1:0 1px 2px rgba(0,0,0,.35); --shadow-2:0 10px 28px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5}
+button{font-family:inherit;cursor:pointer}
+input,textarea,select{font-family:inherit;font-size:14px;color:var(--ink);background:var(--bg2);border:1px solid var(--line);border-radius:var(--rs);padding:8px 10px;width:100%}
+input:focus,textarea:focus,select:focus,button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+textarea{resize:vertical;min-height:64px;line-height:1.55}
+::placeholder{color:var(--faint)}
+
+/* ---------- App header ---------- */
+.app-head{position:sticky;top:0;z-index:40;background:var(--panel);border-bottom:1px solid var(--line);padding:14px 18px 0;min-width:0;max-width:100%}
+.head-top{display:flex;align-items:center;justify-content:space-between;gap:10px;max-width:1280px;margin:0 auto 10px}
+.home-btn{display:inline-flex;align-items:center;gap:5px;background:none;border:1px solid var(--line);border-radius:999px;color:var(--mut);font-size:11px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;text-decoration:none}
+.home-btn:hover{color:var(--ink);border-color:var(--faint)}
+.rad-toggle{display:inline-flex;align-items:center;gap:7px;background:none;border:1px solid var(--line);border-radius:999px;color:var(--mut);font-size:11px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:6px 12px}
+.rad-toggle:hover{border-color:var(--faint)}
+.rad-toggle .sw{width:26px;height:15px;border-radius:999px;background:var(--line);position:relative;transition:background .18s}
+.rad-toggle .sw::after{content:'';position:absolute;top:2px;left:2px;width:11px;height:11px;border-radius:50%;background:var(--panel);transition:transform .18s}
+body.rad-mode .rad-toggle .sw{background:var(--acc)}
+body.rad-mode .rad-toggle .sw::after{transform:translateX(11px)}
+.brand{display:flex;align-items:center;gap:12px;max-width:1280px;margin:0 auto}
+.brand-mark{font-family:var(--mono);font-weight:700;font-size:15px;letter-spacing:.06em;color:var(--acc-ink);background:var(--acc);border-radius:9px;padding:8px 9px}
+.brand h1{margin:0;font-size:18px;font-weight:700;letter-spacing:.01em;font-family:var(--disp)}
+.brand p{margin:1px 0 0;font-size:12.5px;color:var(--mut)}
+.tabs{display:flex;gap:4px;max-width:1280px;margin:12px auto 0;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{background:none;border:none;color:var(--mut);font-size:13.5px;font-weight:600;padding:9px 13px 11px;border-bottom:2px solid transparent;white-space:nowrap;border-radius:6px 6px 0 0}
+.tab:hover{color:var(--ink);background:rgba(255,255,255,.03)}
+.tab.on{color:var(--acc);border-bottom-color:var(--acc)}
+main{max-width:1280px;margin:0 auto;padding:18px 18px 90px}
+.tabpane{display:none}
+.tabpane.on{display:block}
+
+/* ---------- Cards & shared ---------- */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin-bottom:12px}
+.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
+.fld{display:block;margin-top:10px}
+.fld>span{display:block;font-size:12px;color:var(--mut);margin-bottom:4px}
+.hint{font-size:12px;color:var(--mut);line-height:1.45}
+.alert{border-radius:var(--r);padding:12px 14px;font-size:13px;line-height:1.55;margin-bottom:12px;border:1px solid}
+.alert.red{background:var(--red-bg);border-color:var(--red);color:var(--red)}
+.alert.red strong{color:var(--red)}
+.alert.amber{background:var(--amb-bg);border-color:var(--amb);color:var(--amb)}
+.alert.amber strong{color:var(--amb)}
+.btn{border:1px solid var(--line);background:var(--panel2);color:var(--ink);border-radius:9px;padding:9px 14px;font-size:13.5px;font-weight:600;display:inline-flex;align-items:center;gap:7px}
+.btn:hover{border-color:var(--faint)}
+.btn.primary{background:var(--acc);border-color:transparent;color:var(--acc-ink)}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn.ghost{background:none}
+.btn.danger{color:var(--red);border-color:var(--red)}
+.btn.sm{padding:5px 10px;font-size:12.5px;border-radius:7px}
+
+/* ---------- Builder layout ---------- */
+.builder{display:grid;grid-template-columns:minmax(0,1fr) 480px;gap:16px;align-items:start}
+.exam-picker{display:flex;flex-wrap:wrap;gap:7px}
+.exam-chip{border:1px solid var(--line);background:var(--bg2);color:var(--mut);border-radius:999px;padding:7px 13px;font-size:13px;font-weight:600}
+.exam-chip:hover{color:var(--ink);border-color:var(--faint)}
+.exam-chip.on{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.phase-picker{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.phase-picker:empty{display:none}
+.phase-chip{border:1px dashed var(--line);background:none;color:var(--mut);border-radius:999px;padding:4px 11px;font-size:12px;font-family:var(--mono)}
+.phase-chip:hover{color:var(--acc);border-color:var(--acc)}
+
+/* Regions */
+.region{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);margin-bottom:10px;overflow:hidden}
+.region summary{list-style:none;display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;user-select:none}
+.region summary::-webkit-details-marker{display:none}
+.region summary:hover{background:rgba(255,255,255,.02)}
+.dot{width:11px;height:11px;border-radius:50%;flex:none;border:2px solid var(--grn);background:transparent;transition:all .15s}
+.region.path .dot{border-color:var(--red);background:var(--red)}
+.rname{font-weight:600;font-size:14px;flex:1}
+.rcount{font-family:var(--mono);font-size:11px;color:var(--red);background:var(--red-bg);border-radius:999px;padding:2px 8px;display:none}
+.region.path .rcount{display:inline-block}
+.chev{color:var(--faint);transition:transform .18s;flex:none}
+.region[open] .chev{transform:rotate(90deg)}
+.rbody{padding:2px 14px 14px;border-top:1px solid var(--line)}
+.rnormal{font-size:12.5px;color:var(--mut);font-style:italic;margin:10px 0 12px;padding-left:10px;border-left:2px solid var(--grn)}
+.rnormal b{color:var(--grn);font-style:normal;font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--bg2);color:var(--mut);border-radius:999px;padding:5px 11px;font-size:12.5px}
+.chip:hover{color:var(--red);border-color:var(--red)}
+.chip::before{content:"+ ";color:var(--faint)}
+.inst{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--red);border-radius:var(--rs);padding:10px 12px;margin-top:10px}
+.inst-head{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.inst-name{font-size:13px;font-weight:700;color:var(--red);flex:1}
+.inst textarea{background:var(--bg);font-family:var(--mono);font-size:12.5px}
+.inst .bt-label{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--faint);margin:8px 0 4px;text-transform:uppercase}
+.inst .ihint{font-size:11.5px;color:var(--amb);margin-top:7px;line-height:1.45}
+.xbtn{background:none;border:none;color:var(--faint);font-size:16px;line-height:1;padding:2px 6px;border-radius:6px}
+.xbtn:hover{color:var(--red);background:var(--red-bg)}
+
+/* ---------- Report paper ---------- */
+.right{position:sticky;top:96px;max-height:calc(100vh - 112px);display:flex;flex-direction:column}
+.paper{position:relative;background:var(--paper);color:var(--pink);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-2,0 8px 24px rgba(21,34,46,.10));overflow:auto;flex:1;min-height:340px}
+.hu{position:absolute;left:0;top:0;bottom:0;width:7px;background:linear-gradient(180deg,#0b0b0b 0%,#3d3d3d 30%,#8a8a8a 60%,#d9d9d9 85%,#ffffff 100%)}
+.paper-in{padding:20px 22px 24px 30px;font-family:var(--mono);font-size:12.8px;line-height:1.75}
+.rp-title{font-size:13.5px;font-weight:700;letter-spacing:.05em;border-bottom:1px solid var(--pline);padding-bottom:8px;margin-bottom:10px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.rp-title small{color:var(--pmut);font-weight:400;letter-spacing:0}
+.rp-eyebrow{font-size:10px;letter-spacing:.2em;color:var(--pmut);margin:16px 0 4px;font-weight:700}
+.rp-eyebrow:first-of-type{margin-top:8px}
+.rp-text{white-space:pre-wrap;word-wrap:break-word}
+.rp-text:empty::before{content:"-";color:var(--pmut)}
+.rp-text mark{background:var(--mark);border-radius:3px;padding:0 3px;font-weight:700}
+#tTechnik{background:transparent;border:none;padding:0;color:var(--pink);font-family:var(--mono);font-size:12.8px;line-height:1.75;width:100%;min-height:0;resize:none;overflow:hidden}
+#tTechnik:focus{outline:1px dashed var(--pmut);outline-offset:3px;border-radius:2px}
+#manualArea{display:none;width:100%;min-height:420px;background:transparent;border:1px dashed #bdb8aa;color:var(--pink);font-family:var(--mono);font-size:12.8px;line-height:1.7}
+.paper.manual .autoview{display:none}
+.paper.manual #manualArea{display:block}
+.rp-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.rp-note{font-size:11.5px;color:var(--faint);margin-top:8px;line-height:1.45}
+.fab{display:none;position:fixed;right:16px;bottom:16px;z-index:60;background:var(--acc);color:var(--acc-ink);border:none;border-radius:999px;padding:13px 18px;font-weight:700;font-size:14px;box-shadow:var(--shadow-2,0 6px 24px rgba(0,0,0,.2))}
+
+/* ---------- Static tabs ---------- */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.kmcard h3{margin:0 0 6px;font-size:14.5px;color:var(--acc)}
+.kmcard .kv{display:grid;grid-template-columns:110px 1fr;gap:3px 10px;font-size:13px;margin-top:8px}
+.kmcard .kv b{color:var(--mut);font-weight:600;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding-top:2px}
+.kmcard ul{margin:8px 0 0;padding-left:18px;font-size:13px;line-height:1.6}
+.kmcard li{margin-bottom:4px}
+h2.sect{font-size:16px;margin:22px 0 10px;color:var(--ink)}
+h2.sect:first-child{margin-top:0}
+h2.sect small{display:block;font-size:12.5px;color:var(--mut);font-weight:400;margin-top:2px}
+
+/* Indikation checklist */
+.step{display:flex;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;margin-bottom:10px;align-items:flex-start}
+.step input[type=checkbox]{width:19px;height:19px;flex:none;margin-top:2px;accent-color:var(--acc)}
+.step .num{font-family:var(--mono);font-weight:700;color:var(--acc);flex:none;font-size:13px;padding-top:1px}
+.step h4{margin:0 0 3px;font-size:14px}
+.step p{margin:0;font-size:12.5px;color:var(--mut);line-height:1.55}
+.step .sub{margin-top:8px;background:var(--bg2);border:1px solid var(--line);border-radius:var(--rs);padding:9px 11px;font-size:12.5px;line-height:1.55;color:var(--ink)}
+.step .sub b{color:var(--amb)}
+.progress{height:8px;background:var(--panel2);border-radius:999px;overflow:hidden;margin:6px 0 14px}
+.progress>div{height:100%;width:0;background:linear-gradient(90deg,var(--acc),var(--grn));transition:width .25s}
+#indDone{display:none}
+#indDone.show{display:block}
+
+/* Formulierung */
+.cert{border-radius:var(--r);border:1px solid var(--line);padding:12px 14px;margin-bottom:10px;background:var(--panel)}
+.cert-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.cert-num{font-family:var(--mono);font-weight:800;font-size:16px;width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#12161b;flex:none}
+.cert h3{margin:0;font-size:14px;flex:1}
+.cert h3 small{display:block;font-weight:400;color:var(--mut);font-size:12px}
+.cert .verbs{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-bottom:7px}
+.phrase{display:inline-block;border:1px solid var(--line);background:var(--bg2);color:var(--ink);border-radius:999px;padding:4px 11px;font-size:12.5px;margin:0 5px 6px 0}
+.phrase:hover{border-color:var(--acc);color:var(--acc)}
+
+/* LOKALD */
+.lok-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px 14px}
+.lok-step{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--acc);text-transform:uppercase;margin-bottom:4px}
+#lokOut{background:var(--paper);color:var(--pink);font-family:var(--mono);font-size:12.8px;line-height:1.7;border-radius:var(--rs);padding:14px 16px;margin-top:12px;white-space:pre-wrap;min-height:60px}
+#lokOut:empty::before{content:"Die generierte Beschreibung erscheint hier.";color:var(--pmut)}
+
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:var(--ink);border:1px solid var(--line);color:var(--panel);padding:10px 18px;border-radius:999px;font-size:13.5px;opacity:0;pointer-events:none;transition:all .22s;z-index:100;box-shadow:var(--shadow-2,0 8px 30px rgba(0,0,0,.2))}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+footer{max-width:1280px;margin:30px auto 0;padding:0 18px;font-size:11.5px;color:var(--faint);line-height:1.6}
+
+@media (max-width:980px){
+  .builder{grid-template-columns:1fr}
+  .right{position:fixed;inset:0;z-index:70;background:rgba(21,34,46,.45);backdrop-filter:blur(3px);padding:14px;max-height:none;display:none}
+  body.show-report .right{display:flex}
+  body.show-report{overflow:hidden}
+  .fab{display:inline-flex}
+  .rp-close{display:inline-flex !important}
+}
+.rp-close{display:none}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+@media print{
+  body{background:#fff}
+  .app-head,.left,.fab,.rp-actions,.rp-note,footer,.toast{display:none !important}
+  .builder{display:block}
+  .right{position:static;max-height:none}
+  .paper{box-shadow:none;border-radius:0}
+}
+</style>
+</head>
+<body>
+<header class="app-head">
+  <div class="head-top">
+    <a href="index.html" class="home-btn"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 5.5 8 12l6.5 6.5"/></svg>CT-Tools</a>
+    <button class="rad-toggle" id="radToggle" type="button" aria-label="Rad Mode umschalten"><span class="sw"></span>Rad Mode</button>
+  </div>
+  <div class="brand">
+    <div class="brand-mark">CT</div>
+    <div>
+      <h1>CT-Befundungsassistent</h1>
+      <p>Klick-Baukasten für strukturierte Befunde · nach hausinternem CT-Leitfaden von OA Maawd (Stand 09/2026)</p>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs">
+    <button class="tab on" data-tab="befundung">Befundung</button>
+    <button class="tab" data-tab="lokald">LOKALD-U</button>
+    <button class="tab" data-tab="km">KM-Protokolle &amp; Delays</button>
+    <button class="tab" data-tab="indikation">Indikationsprüfung</button>
+    <button class="tab" data-tab="formulierung">Formulierungshilfen</button>
+  </nav>
+</header>
+<main>
+
+<!-- ============ TAB: BEFUNDUNG ============ -->
+<section class="tabpane on" id="pane-befundung">
+  <div class="builder">
+    <div class="left">
+      <div class="card">
+        <div class="eyebrow">1 · Untersuchung wählen</div>
+        <div class="exam-picker" id="examPicker"></div>
+        <div class="phase-picker" id="phasePicker"></div>
+        <label class="fld"><span>Fragestellung / Indikation (optional, erscheint im Berichtskopf)</span>
+          <input id="fragestellung" placeholder="z. B. Sturz auf den Kopf, Ausschluss ICB / Fraktur?">
+        </label>
+      </div>
+      <div class="eyebrow" style="margin:14px 2px 8px">2 · Regionen durchgehen - pathologische Befunde anklicken</div>
+      <div id="regions"></div>
+      <div class="card">
+        <div class="eyebrow">Weitere Befunde (Freitext, wird ans Ende des Befunds gesetzt)</div>
+        <textarea id="freiBefund" placeholder="z. B. Nebenbefunde, Fremdmaterial, Voraufnahmenvergleich …"></textarea>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Beurteilung - Abschluss / Freitext (wird ans Ende der Beurteilung gesetzt)</div>
+        <textarea id="freiBeurt"></textarea>
+        <div class="hint" style="margin-top:6px">Tipp: Immer die klinische Fragestellung explizit beantworten („Kein Hinweis auf …“). Empfehlungen (Verlaufskontrolle, Konsil, weitere Bildgebung) hier ergänzen.</div>
+      </div>
+      <div class="alert red"><strong>⚠ Notfall-Befunde - sofort handeln:</strong> Pneumoperitoneum (freie Luft) · Lungenembolie · intrakranielle Blutung · Aortendissektion / -ruptur · starke aktive Blutung → <em>sofort den Kliniker anrufen - nicht auf den schriftlichen Bericht warten!</em></div>
+      <div class="alert amber"><strong>Unsichere Befunde → Rücksprache mit dem OA:</strong> unklare Raumforderungen · diskrete Befunde · komplexe Anatomie · unklare Therapieplanung.</div>
+    </div>
+
+    <aside class="right" id="reportPanel">
+      <div class="paper" id="paper">
+        <div class="hu" aria-hidden="true"></div>
+        <div class="paper-in">
+          <div class="rp-title"><span id="rpExam">CT-Befund</span><small id="rpDate"></small></div>
+          <div class="autoview">
+            <div class="rp-eyebrow" id="rpFrageLbl" style="display:none">FRAGESTELLUNG</div>
+            <div class="rp-text" id="rpFrage" style="display:none"></div>
+            <div class="rp-eyebrow">TECHNIK</div>
+            <textarea id="tTechnik" rows="3" spellcheck="false"></textarea>
+            <div class="rp-eyebrow">BEFUND</div>
+            <div class="rp-text" id="rpBefund"></div>
+            <div class="rp-eyebrow">BEURTEILUNG</div>
+            <div class="rp-text" id="rpBeurt"></div>
+          </div>
+          <textarea id="manualArea" spellcheck="false"></textarea>
+        </div>
+      </div>
+      <div class="rp-actions">
+        <button class="btn primary" id="btnCopy">Befund kopieren</button>
+        <button class="btn" id="btnTxt">Als .txt speichern</button>
+        <button class="btn ghost" id="btnManual">Manuell bearbeiten</button>
+        <button class="btn ghost danger" id="btnReset">Zurücksetzen</button>
+        <button class="btn ghost rp-close" id="btnCloseReport">Schließen</button>
+      </div>
+      <div class="rp-note">Gelb markierte <b>…</b> = Platzhalter, bitte ausfüllen (Größe, Seite, Lokalisation). Alles läuft lokal im Browser - es werden keine Daten gespeichert oder übertragen.</div>
+    </aside>
+  </div>
+  <button class="fab" id="fabReport">📄 Befund</button>
+</section>
+
+<!-- ============ TAB: LOKALD-U ============ -->
+<section class="tabpane" id="pane-lokald">
+  <div class="card">
+    <h2 class="sect">Raumforderung beschreiben - die 6-Schritt-Methode (LOKALD-U)<small>Lokalisation · Konfiguration · Ausdehnung · Linearität/Dichte · Dynamik/Enhancement · Umgebung</small></h2>
+    <div class="lok-grid">
+      <div><div class="lok-step">1 · LO - Lokalisation</div>
+        <input id="lokLo" placeholder="z. B. Lebersegment IVb / unterer Nierenpol links">
+      </div>
+      <div><div class="lok-step">2 · K - Form</div>
+        <select id="lokForm"><option>rundliche</option><option>ovaläre</option><option>lobulierte</option><option>sternförmig-spikulierte</option><option>irregulär konfigurierte</option></select>
+      </div>
+      <div><div class="lok-step">2 · K - Rand</div>
+        <select id="lokRand"><option>scharf begrenzte</option><option>unscharf begrenzte</option><option>infiltrativ in das Nachbargewebe einwachsende</option></select>
+      </div>
+      <div><div class="lok-step">3 · A - Ausdehnung (mm)</div>
+        <div style="display:flex;gap:6px"><input id="lokA1" placeholder="L"><input id="lokA2" placeholder="B"><input id="lokA3" placeholder="H"></div>
+      </div>
+      <div><div class="lok-step">3 · A - Schicht / Serie</div>
+        <input id="lokSchicht" placeholder="z. B. axial, Schicht 45">
+      </div>
+      <div><div class="lok-step">4 · L - Dichte (nativ)</div>
+        <select id="lokDichte"><option>hypodense</option><option>isodense</option><option>hyperdense</option><option>heterogene, überwiegend hypodense</option></select>
+      </div>
+      <div><div class="lok-step">4 · L - HU (nativ, optional)</div>
+        <input id="lokHU" placeholder="z. B. 35">
+      </div>
+      <div><div class="lok-step">4 · L - Binnenstruktur</div>
+        <select id="lokBinnen"><option>homogener Binnenstruktur</option><option>heterogener Binnenstruktur mit Nekrosen</option><option>heterogener Binnenstruktur mit Verkalkungen</option><option>heterogener Binnenstruktur mit Nekrose- und Kalkanteilen</option></select>
+      </div>
+      <div><div class="lok-step">5 · D - KM-Verhalten</div>
+        <select id="lokDyn"><option>kein wesentliches Kontrastmittelenhancement</option><option>ein marginales, ringförmiges Kontrastmittelenhancement</option><option>ein progressives Kontrastmittelenhancement von außen nach innen</option><option>eine kräftige arterielle Kontrastmittelaufnahme mit Wash-out in der venösen Phase</option><option>eine kräftige, homogene Kontrastmittelaufnahme</option></select>
+      </div>
+      <div><div class="lok-step">6 · U - Umgebung</div>
+        <select id="lokUmg"><option>ohne relevante Umgebungsreaktion</option><option>mit Verdrängung / Kompression der angrenzenden Gefäße und Organe</option><option>mit Infiltration der Nachbarstrukturen</option><option>mit perifokalem Ödem bzw. Fettgewebsimbibierung</option></select>
+      </div>
+      <div><div class="lok-step">6 · U - Details (optional)</div>
+        <input id="lokUmgTxt" placeholder="z. B. Infiltration der V. portae, Masseneffekt nach ventral">
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+      <button class="btn primary" id="lokGen">Beschreibung generieren</button>
+      <button class="btn" id="lokCopy">Kopieren</button>
+      <button class="btn" id="lokInsert">In aktuellen Befund einfügen</button>
+    </div>
+    <div id="lokOut"></div>
+    <div class="hint" style="margin-top:10px">Eine strukturierte Beschreibung (LOKALD-U) sorgt für vollständige, klare und reproduzierbare Befunde und erleichtert Diagnosefindung und Verlaufskontrolle.</div>
+  </div>
+</section>
+
+<!-- ============ TAB: KM-PROTOKOLLE ============ -->
+<section class="tabpane" id="pane-km">
+  <h2 class="sect">Allgemeine Faustregeln (i. v. Kontrastmittel)</h2>
+  <div class="grid2">
+    <div class="card kmcard"><h3>KM-Menge</h3><ul>
+      <li>Richtet sich nach dem Körpergewicht: <b>1–1,5 ml/kg KG</b>.</li>
+      <li>Normaler Erwachsener standardisiert meist <b>80–120 ml</b>.</li></ul></div>
+    <div class="card kmcard"><h3>Flussrate (Flow)</h3><ul>
+      <li>Routine / Gewebe: <b>2,5–3,0 ml/s</b>.</li>
+      <li>Gefäße (CTA): <b>4,0–5,0 ml/s</b> - hier ist eine dicke grüne Kanüle in der Ellenbeuge Pflicht!</li></ul></div>
+    <div class="card kmcard"><h3>NaCl-Nachspülung</h3><ul>
+      <li>Immer <b>30–50 ml</b> Kochsalz direkt nach dem KM.</li>
+      <li>Spart KM und verhindert Artefakte in den großen Venen.</li></ul></div>
+  </div>
+
+  <h2 class="sect">Protokolle im Detail<small>Menge · Flow · Delay / Bolus-Tracking</small></h2>
+  <div class="grid2">
+    <div class="card kmcard"><h3>CTA Kopf / Hals (z. B. Schlaganfall)</h3><div class="kv">
+      <b>Menge/Flow</b><span>ca. 50–60 ml mit 4,5–5,0 ml/s</span>
+      <b>Delay</b><span>Bolus-Tracking in der Aorta ascendens oder den Karotiden; Start bei ca. 100–120 HU (ca. 10–12 s nach Spritzenstart)</span></div></div>
+    <div class="card kmcard"><h3>CTA Lungenarterien (LAE-Protokoll)</h3><div class="kv">
+      <b>Menge/Flow</b><span>ca. 50–60 ml mit 4,5–5,0 ml/s</span>
+      <b>Delay</b><span>Bolus-Tracking direkt im Truncus pulmonalis; Start sofort bei 100 HU (oft schon nach 8–10 s)</span></div></div>
+    <div class="card kmcard"><h3>CTA Aorta (Dissektion / Aneurysma)</h3><div class="kv">
+      <b>Menge/Flow</b><span>ca. 80–100 ml mit 4,0–4,5 ml/s</span>
+      <b>Delay</b><span>Bolus-Tracking in der Aorta descendens (Höhe Zwerchfell); Start bei 120 HU</span>
+      <b>Extras</b><span>EKG-getriggert insbesondere bei Dissektionssuche. Zusätzliche portalvenöse Phase über das Abdomen inkl. Nieren, um eine Mitbeteiligung der A. renalis bzw. Minderperfusion der Niere frühzeitig zu detektieren (Schutz vor Organverlust = Goldstandard in domo)</span></div></div>
+    <div class="card kmcard"><h3>CT Hals (Weichteile / Tumor)</h3><div class="kv">
+      <b>Menge/Flow</b><span>ca. 80 ml mit 2,5–3,0 ml/s</span>
+      <b>Delay</b><span>65–70 s (spät-portalvenöse Phase) - so färben sich Lymphknoten und Abszessränder perfekt an</span></div></div>
+    <div class="card kmcard"><h3>CT Thorax (Routine / Tumor / Infekt)</h3><div class="kv">
+      <b>Menge/Flow</b><span>ca. 70–85 ml mit 3,0 ml/s</span>
+      <b>Delay</b><span>45–50 s (früh-venöse Phase): Lungengefäße und Gewebe gleichzeitig gut beurteilbar</span></div></div>
+    <div class="card kmcard"><h3>CT / CTA Abdomen &amp; Becken - Phasen-Delays</h3><div class="kv">
+      <b>Menge/Flow</b><span>ca. 120 ml mit 3,0 ml/s</span>
+      <b>Arteriell</b><span>Oberbauch: 20–30 s nach Spritzenstart oder Bolus-Tracking → hypervaskularisierte Tumoren (HCC, pNET, NET-Lebermetastasen), Shunts, Angiodysplasien, Gefäßverschluss</span>
+      <b>Pankreatogen</b><span>spät-arteriell, ca. 35–45 s → Pankreas-Adenokarzinom demarkiert sich hypovaskularisiert gegen maximal kontrastiertes Parenchym und pankreasnahe Arterien (Tr. coeliacus, AMS)</span>
+      <b>Portalvenös</b><span>Standard: Split-Bolus oder festes Delay 70–80 s → für alle möglichen Pathologien</span>
+      <b>Nephrographisch</b><span>90–120 s</span>
+      <b>Spätphase</b><span>3–5 min → Leberläsionen (atypische Zysten, fragliches Hämangiom, Wash-out eines HCC)</span>
+      <b>Ausscheidung</b><span>10–15 min (urologische Phase) → Harntrakttumoren, Urinom, Leckage, Harnblasenverletzung</span>
+      <b>Wash-out</b><span>≥ 15 min → Nebennierenadenome (Wash-out-Berechnung)</span></div></div>
+  </div>
+  <div class="alert amber" style="margin-top:12px"><strong>Merke:</strong> Bei aktiver Blutung darf der Scanbereich angepasst werden - die Spätphase nicht später als 3 min fahren. · Staging-Intervall standardmäßig höchstens alle 8 Wochen (Ausnahme: hochaggressive Keimzelltumoren / Lymphome), sonst gibt es Probleme mit der örtlichen Stelle.</div>
+
+  <h2 class="sect">Orale Kontrastmittelgabe - Gastrografin®<small>iodhaltiges, wasserlösliches, positives orales KM · wird bei Perforation im Gegensatz zu Bariumsulfat problemlos resorbiert (keine Barium-Peritonitis)</small></h2>
+  <div class="grid2">
+    <div class="card kmcard"><h3>Normale Darmkontrastierung</h3><ul>
+      <li>Indikationen: z. B. Pankreastumoren, Uterusraumforderung.</li>
+      <li>Verdünnung: <b>2–3 %</b> (20–30 bzw. 30–50 ml Gastrografin auf 1 l Wasser).</li>
+      <li>Einnahme über <b>45–90 min</b> vor der Untersuchung.</li></ul></div>
+    <div class="card kmcard"><h3>V. a. Anastomoseninsuffizienz</h3><ul>
+      <li>Postoperative Kontrolle nach Magen- / Darmresektion.</li>
+      <li><b>50–100 ml Gastrografin 1:1</b> mit Wasser verdünnt, oral oder über Sonde, kurz vor / während des CT.</li></ul></div>
+    <div class="card kmcard"><h3>V. a. Ösophagusperforation / Boerhaave</h3><ul>
+      <li><b>20–50 ml unverdünnt</b> „auf dem Tisch“.</li></ul></div>
+    <div class="card kmcard"><h3>Suspekte PEG-Sondenleckage</h3><ul>
+      <li><b>100 ml über die PEG-Sonde</b> (50 ml Gastrografin + 50 ml Wasser), danach Bildakquisition.</li></ul></div>
+    <div class="card kmcard"><h3>V. a. Organperforation</h3><ul>
+      <li>Orale KM-Gabe laut ESGAR routinemäßig indiziert? <b>Nein!</b></li>
+      <li>Optional (1:1 verdünnt) nur in Einzelfällen: initiales CT ohne orale Kontrastierung unklar · Patient hämodynamisch stabil · Leckage-Nachweis würde das therapeutische Vorgehen beeinflussen.</li></ul></div>
+    <div class="card kmcard"><h3>Darmstörungen &amp; Abgrenzung</h3><ul>
+      <li>Subileus: Gastrografin-MDP als Verlaufskontrolle diskutabel.</li>
+      <li><b>Ileus mit Erbrechen / Schluckstörung: kein orales Gastrografin!</b> (Aspirationsrisiko → akutes toxisches Lungenödem, Pneumonie, Lungenabszess)</li>
+      <li>Abgrenzung Raumforderung vs. Darmschlinge bei kachektischen Patienten: hochverdünnt (2–3 %).</li></ul></div>
+  </div>
+  <div class="alert red" style="margin-top:12px"><strong>⚠ Warnhinweise:</strong> Orales Gastrografin ist iodhaltig → wegen der geringen systemischen Resorption über das Peritoneum bei <em>manifester Hyperthyreose</em> und <em>Niereninsuffizienz</em> kontraindiziert. · Erbrechen ohne Magensonde + normales Abdomen-CT geplant → <em>kein orales KM!</em> · Ist die orale Kontrastierung unumgänglich (Perforationsverdacht) und der Patient erbricht → Magensonde legen, Magen entleeren und nichtionisches KM (z. B. Omnipaque) verwenden.</div>
+</section>
+
+<!-- ============ TAB: INDIKATIONSPRÜFUNG ============ -->
+<section class="tabpane" id="pane-indikation">
+  <h2 class="sect">Rechtfertigende Indikation - 7 Schritte von der Fragestellung bis zum Protokoll<small>Ziel: die richtige Untersuchung für den richtigen Patienten - sicher, gerechtfertigt und optimiert.</small></h2>
+  <div class="progress"><div id="indBar"></div></div>
+  <div class="alert amber" id="indDone"><strong>✓ Alle Punkte geprüft.</strong> Die Untersuchung ist laut rechtfertigender Indikation indiziert - Protokoll schreiben und Indikation dokumentieren.</div>
+
+  <label class="step"><input type="checkbox" class="ind"><span class="num">1</span><div>
+    <h4>Fragestellung prüfen</h4><p>Die Fragestellung genau lesen. Was soll bewiesen oder ausgeschlossen werden?</p></div></label>
+  <label class="step"><input type="checkbox" class="ind"><span class="num">2</span><div>
+    <h4>Fehlende Angaben prüfen</h4><p>Fehlen relevante Angaben? Falls ja → Rücksprache mit dem Kliniker: unklare Angaben klären und die Fragestellung präzisieren.</p></div></label>
+  <label class="step"><input type="checkbox" class="ind"><span class="num">3</span><div>
+    <h4>Lohnt sich die CT-Untersuchung?</h4><p>Gibt es aktuelle Untersuchungen, die die Frage bereits beantworten? Könnte eine andere Modalität (Röntgen, Ultraschall) genügen? Patientenzustand und Alter berücksichtigen.</p>
+    <div class="sub"><b>ALARA-Prinzip:</b> so wenig Strahlung wie möglich, so viel wie nötig. Falls nicht gerechtfertigt → CT nicht indiziert: andere Modalität wählen oder auf vorhandene Ergebnisse zurückgreifen.</div></div></label>
+  <label class="step"><input type="checkbox" class="ind"><span class="num">4a</span><div>
+    <h4>Laborwerte: Nierenfunktion (GFR, Kreatinin)</h4><p>GFR niedrig - was tun?</p>
+    <div class="sub">Risiko der KM-induzierten Nephropathie beachten · Hydratation sicherstellen · niedrig-osmolares KM verwenden · ggf. alternative Methoden prüfen · Nutzen-Risiko-Abwägung.</div></div></label>
+  <label class="step"><input type="checkbox" class="ind"><span class="num">4b</span><div>
+    <h4>Laborwerte: Schilddrüsenfunktion (TSH, T3, T4)</h4><p>TSH niedrig - was tun?</p>
+    <div class="sub">Auf Hyperthyreose achten · iodhaltiges KM kann eine kontrastmittelinduzierte Thyreotoxikose auslösen · Nutzen-Risiko-Abwägung · bei Bedarf endokrinologische Rücksprache.</div></div></label>
+  <label class="step"><input type="checkbox" class="ind"><span class="num">5</span><div>
+    <h4>KM-Allergie prüfen</h4><p>Liegt eine bekannte KM-Allergie vor? Welcher Grad (leicht / mäßig / schwer)?</p>
+    <div class="sub"><b>Falls ja → Prämedikation und Vorbereitung:</b> Allergieprophylaxe je nach Allergiegrad, z. B. Kortikosteroide + Antihistaminika · Notfallmedikation bereithalten.</div></div></label>
+  <label class="step"><input type="checkbox" class="ind"><span class="num">6</span><div>
+    <h4>CT-Untersuchung indiziert</h4><p>Die Untersuchung ist laut rechtfertigender Indikation indiziert.</p></div></label>
+  <label class="step"><input type="checkbox" class="ind"><span class="num">7</span><div>
+    <h4>Protokoll schreiben</h4><p>Passendes CT-Protokoll wählen · Parameter an Fragestellung und Patient anpassen (nativ / KM / Phasen · späte Phase? · Kontrastmittel? · Schichtdicke? · FOV / Rekonstruktion?) · Indikation und rechtfertigende Gründe dokumentieren.</p></div></label>
+
+  <div class="alert amber"><strong>Wichtige Prinzipien:</strong> Strahlenschutz - nur indizieren, wenn wirklich nötig · Patientenfokus - immer an die klinische Frage denken, nicht an Standardprotokolle · Kommunikation - lieber einmal zu viel anrufen als einmal zu wenig · Qualität geht vor - eine gute Untersuchung beim ersten Mal spart Zeit und schont den Patienten.</div>
+</section>
+
+<!-- ============ TAB: FORMULIERUNGSHILFEN ============ -->
+<section class="tabpane" id="pane-formulierung">
+  <h2 class="sect">Diagnostische Sicherheit - Formulierungshilfen für die Beurteilung<small>Formulierung entsprechend der eigenen diagnostischen Sicherheit wählen · Phrase antippen = kopieren. Im Zweifel konservativ formulieren, immer an Fragestellung und Gesamtbild anpassen.</small></h2>
+  <div id="certList"></div>
+  <h2 class="sect">Aufbau der Beurteilung<small>Merkhilfe: BEURTEILUNG = Interpretation → Differenzialdiagnosen → wahrscheinlichste Diagnose → Ätiologie → Empfehlung</small></h2>
+  <div class="grid2">
+    <div class="card kmcard"><h3>1 · Interpretationsbeschreibung</h3><ul><li>Zusammenfassung der wichtigsten Bildbefunde und deren Bedeutung (z. B. Wandverdickung des Sigmas, perisigmoidale Fettgewebsinfiltration, Divertikel, keine freie Luft).</li></ul></div>
+    <div class="card kmcard"><h3>2 · Differenzialdiagnosen</h3><ul><li>Mögliche Diagnosen nach Wahrscheinlichkeit geordnet (z. B. Divertikulitis > Kolonkarzinom > epiploische Appendagitis > Kolitis).</li></ul></div>
+    <div class="card kmcard"><h3>3 · Wahrscheinlichste Diagnose</h3><ul><li>Klare Diagnose, wenn möglich; sonst: „am ehesten vereinbar mit …“.</li></ul></div>
+    <div class="card kmcard"><h3>4 · Ätiologie der DD</h3><ul><li>Mögliche Ursache(n): entzündlich, infektiös, neoplastisch, traumatisch, vaskulär, degenerativ …</li></ul></div>
+    <div class="card kmcard"><h3>5 · Empfehlungen</h3><ul><li>Weitere Diagnostik oder Therapie, abhängig von Befund und Klinik (klinische Korrelation, Labor, Sonographie, Verlaufskontrolle, Koloskopie nach der Akutphase …).</li></ul></div>
+  </div>
+</section>
+
+</main>
+<footer>Ausbildungs- und Formulierungshilfe auf Basis des hausinternen CT-Leitfadens von OA Maawd (Stand 09/2026). Ersetzt weder die klinische Beurteilung noch die oberärztliche Supervision. Alle Eingaben verbleiben lokal im Browser - keine Speicherung, keine Übertragung. Keine Patientendaten eingeben, die nicht ohnehin ins RIS übernommen werden.<br><span style="opacity:.7">Made by Dardan Albani</span></footer>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+
+/* ================= RAD MODE (shared key mit den übrigen Tools) ================= */
+(function(){
+  var KEY='km_tool_rad_mode';
+  function apply(on){ document.body.classList.toggle('rad-mode', on); }
+  try{ apply(localStorage.getItem(KEY)==='1'); }catch(e){}
+  document.addEventListener('DOMContentLoaded', function(){
+    var btn=document.getElementById('radToggle');
+    if(!btn) return;
+    btn.addEventListener('click', function(){
+      var on=!document.body.classList.contains('rad-mode');
+      apply(on);
+      try{ localStorage.setItem(KEY, on?'1':'0'); }catch(e){}
+    });
+  });
+})();
+/* ================= DATEN: Untersuchungen, Regionen, Textbausteine ================= */
+const EXAMS = {
+
+cct: {
+  id:"cct", name:"CCT (nativ)",
+  technik:"Natives Spiral-CT des Schädels, KSD 0,6 mm, axiale Rekonstruktionen mit koronaren und sagittalen MPR.",
+  beurteilungNormal:"Kein Hinweis auf eine intrakranielle Blutung oder einen akut demarkierten Territorialinfarkt. Keine Kalottenfraktur.",
+  regions:[
+   {id:"mittellinie", n:"Mittellinie & Raumforderung", normal:"Keine Mittellinienverlagerung.", items:[
+     {id:"rf", n:"Intraaxiale Raumforderung", b:"Große intraaxiale, irregulär konfigurierte Raumforderung … mit zentral hypodenser Nekrose und peripherem, unregelmäßigem ringförmigem Kontrastmittelenhancement, Größenausdehnung … × … × … mm. Ausgedehntes perifokales Ödem mit deutlichem Masseneffekt, Kompression des rechten Seitenventrikels und Mittellinienverlagerung um … mm nach links. Keine intratumorale Blutung.", u:"Malignomsuspekte intraaxiale Raumforderung … mit konsekutivem Masseneffekt wie im Befund beschrieben, z. B. Glioblastom (cMRT empfohlen) / Metastase (bekannter Primarius?).", hint:"KM-Verhalten nur bei KM-CT beschreiben. Struktur nach LOKALD-U."},
+     {id:"met", n:"Hirnmetastase(n)", b:"Mehrere / solitäre intraaxiale Läsion(en) rechts frontal mit ringförmigem Kontrastmittelenhancement bei bekanntem …, Größe … × … mm. Perifokales Ödem.", u:"Metastasensuspekte intraaxiale Läsion(en) bei bekanntem Primarius (…). cMRT zur weiteren Abklärung empfohlen."},
+     {id:"mediarf", n:"Raumfordernder Mediainfarkt", b:"Ausgedehnte Hypodensität im gesamten rechten Mediastromgebiet mit deutlichem zytotoxischem Hirnödem, Kompression des rechten Seitenventrikels und Mittellinienverlagerung um … mm nach links.", u:"Ausgedehnter, raumfordernder Mediainfarkt rechts mit Mittellinienverlagerung - sofortige Befundmitteilung an den Kliniker."}
+   ]},
+   {id:"liquor", n:"Liquorräume & Ventrikelsystem", normal:"Altersentsprechend konfigurierte innere und äußere Liquorräume. Basale Zisternen frei einsehbar.", items:[
+     {id:"atrophie", n:"Hirnatrophie", b:"Erweiterung der inneren und äußeren Liquorräume mit verbreiterten kortikalen Sulci sowie symmetrisch erweiterten Seitenventrikeln, einer Hirnvolumenminderung entsprechend. Kein Hinweis auf einen raumfordernden Prozess oder Hydrozephalus.", u:"Globale / bifrontale / bitemporale zerebrale Atrophie."},
+     {id:"svasym", n:"Seitenventrikel-Asymmetrie", b:"Asymmetrische Darstellung der Seitenventrikel ohne dekompensierte Liquorabflussstörung."},
+     {id:"hydro", n:"Hydrozephalus (dekompensiert)", b:"Erweiterung des gesamten Ventrikelsystems mit Dilatation der Seitenventrikel, des III. sowie des IV. Ventrikels. Periventrikuläre hypodense Saumbildung als Ausdruck einer transependymalen Liquordiapedese. Verstrichene kortikale Sulci.", u:"Zeichen eines dekompensierten Hydrozephalus - umgehende Rücksprache mit der Neurochirurgie."},
+     {id:"hydroobs", n:"Obstruktiver Hydrozephalus", b:"Erweiterung der Seitenventrikel und des III. Ventrikels bei normal weitem IV. Ventrikel. Verlegung der Liquorpassage auf Höhe des Aquädukts durch … .", u:"Zeichen eines obstruktiven Hydrozephalus bei … ."},
+     {id:"nph", n:"Normaldruckhydrozephalus", b:"Erweiterung des Ventrikelsystems mit disproportional geringer Erweiterung der hochparietalen kortikalen Sulci und vermindertem Corpus-callosum-Winkel unter 90°.", u:"Zeichen eines Normaldruckhydrozephalus (klinische Trias?)."},
+     {id:"hygrom", n:"Hygrom(e)", b:"Sichelförmige, hypodense, extraaxiale Flüssigkeitsansammlungen rechtshemisphärisch / beidseits mit maximaler Saumbreite von … mm. Kein relevanter Masseneffekt.", u:"Hygrome wie beschrieben, DD traumatisch. Verlaufskontrolle bzw. neurochirurgische Vorstellung empfohlen."},
+     {id:"shunt", n:"VP-Shunt / Drainage", b:"Regelrecht einliegender VP-Shunt, die Katheterspitze im Vorderhorn des rechten Seitenventrikels nahe dem Foramen Monroi lokalisiert. Progrediente / regrediente / schlitzförmige Weite des Ventrikelsystems im Vergleich zur Voruntersuchung vom … .", u:"Progrediente / regrediente Weite der Seitenventrikel sowie des III. und/oder IV. Ventrikels bei regelrecht einliegendem VP-Shunt."}
+   ]},
+   {id:"marklager", n:"Rinden-Marklager & Stammganglien", normal:"Erhaltene Mark-Rinden-Differenzierung. Stammganglien und Thalami regelrecht abgrenzbar.", items:[
+     {id:"mikro", n:"Mikroangiopathie", b:"Konfluierende Hypodensitäten der supratentoriellen Marklagerstrukturen mit postischämischen lakunären Marklagerdefekten i. R. einer mittelgradigen / fortgeschrittenen Mikroangiopathie.", u:"Zeichen einer mittelgradigen / ausgeprägten supratentoriellen Mikroangiopathie."},
+     {id:"meningeom", n:"Meningeom", b:"Extraaxiale, breitbasig der Dura anliegende, scharf begrenzte, teils verkalkte Läsion rechts frontal, Größe … × … × … cm. Kein relevantes perifokales Ödem.", u:"Extraaxiale, teils verkalkte Läsion rechts frontal, hochwahrscheinlich einem Konvexitäts- / Falx- / Felsenbeinmeningeom entsprechend.", hint:"Homogenes kräftiges KM-Enhancement nur bei KM-CT beschreiben."}
+   ]},
+   {id:"stamm", n:"Hirnstamm & Kleinhirn", normal:"Hirnstamm und Kleinhirnhemisphären regelrecht konfiguriert. Kein Tonsillentiefstand.", items:[
+     {id:"pons", n:"Ponsdefekt", b:"Hypodenser Ponsdefekt, a. e. postischämisch."},
+     {id:"zatroph", n:"Zerebelläre Atrophie", b:"Symmetrische Volumenminderung der Kleinhirnhemisphären beidseits.", u:"Zerebelläre Atrophie."}
+   ]},
+   {id:"infarkt", n:"Ischämie / Infarkt", normal:"Keine territorialen Infarktfrühzeichen oder -demarkierung.", items:[
+     {id:"frueh", n:"Infarktfrühzeichen", b:"Verminderte Mark-Rinden-Differenzierung mit Verlust des Insular Ribbon und unscharf abgrenzbarem Nucleus lentiformis rechts. „Dense artery sign“ im Verlauf des M1-Segments rechts.", u:"Frühe ischämische Infarktzeichen im rechten Mediastromgebiet ohne demarkierten Territorialinfarkt. Nach interdisziplinärer Fallbesprechung mit Neuroradiologie und Neurologie ggf. Indikation zur endovaskulären mechanischen Thrombektomie."},
+     {id:"akut", n:"Akut demarkierter Infarkt", b:"Umschriebene Hypodensität mit aufgehobener Mark-Rinden-Differenzierung sowie leichter Verstreichung der Sulci im Mediastromgebiet rechts parietal. Keine intrakranielle Blutung.", u:"Akut demarkierter Media(teil)infarkt rechts bei proximalem M1-Verschluss. Nach interdisziplinärer Fallbesprechung mit Neuroradiologie und Neurologie besteht die Indikation zur endovaskulären mechanischen Thrombektomie."},
+     {id:"subakut", n:"Subakuter Infarkt", b:"Keilförmige, demarkierte Hypodensität im PICA-Stromgebiet links zerebellär mit leichter Parenchymvolumenzunahme und konsekutivem Masseneffekt (…). Begleitende hämorrhagische Imbibierung als Korrelat einer hämorrhagischen Transformation.", u:"Subakut demarkierter …-Infarkt links ohne / mit hämorrhagischer Transformation. Konsekutiver Masseneffekt wie im Befund beschrieben."},
+     {id:"fogging", n:"Fogging-Effekt", b:"Das vorbeschriebene Infarktareal im …-Stromgebiet ist aktuell nicht mehr sicher abgrenzbar, a. e. einem Fogging-Effekt entsprechend (2.–3. Woche).", u:"Fogging-Effekt des bekannten demarkierten Infarkts im …-Stromgebiet."},
+     {id:"chron", n:"Chronischer Defekt", b:"Umschriebene, keilförmige Enzephalomalazie links okzipital mit Volumenverlust, Erweiterung der angrenzenden Liquorräume ex vacuo und Ausziehung des angrenzenden Seitenventrikelhinterhorns.", u:"A. e. postischämischer / posthämorrhagischer Defekt im …-Stromgebiet links."}
+   ]},
+   {id:"blutung", n:"Intrakranielle Blutung", normal:"Keine intrakranielle Blutung.", items:[
+     {id:"icb", n:"Parenchymblutung (ICB)", b:"Hyperdense intraparenchymale Blutung lobär rechts parietal / in den Stammganglien rechts / im Thalamus links, Größe … × … × … cm. Blutungseinbruch in das Ventrikelsystem mit intraventrikulärer Blutung in den Seitenventrikeln sowie im III. und IV. Ventrikel. Konsekutiver Masseneffekt bei perifokalem hypodensem Ödem: Kompression des … Seitenventrikels, Mittellinienverlagerung um … mm nach … .", u:"Akute Stammganglienblutung in loco typico mit Blutungseinbruch ins Ventrikelsystem / frische atypische lobäre Blutung, mit konsekutivem Masseneffekt wie im Befund beschrieben. Sofortige Befundmitteilung an den Kliniker.", hint:"Struktur: WAS (Dichte/Alter) · WO (Lappen, loco typico?) · GRÖSSE (3 Ebenen) · EINBRUCH (Ventrikel?) · MASSENEFFEKT (MLV, Herniation)."},
+     {id:"sdh", n:"Subduralhämatom", b:"Sichelförmige hyperdense / hypodense / gemischt hypo- und hyperdense extraaxiale Blutansammlung rechts frontoparietal mit maximaler Saumbreite von … mm. Kompression der angrenzenden Sulci, Mittellinienverlagerung um … mm nach links.", u:"Akutes / chronisches / akut auf chronisches („mehrzeitiges“) traumatisches Subduralhämatom rechts mit Masseneffekt wie beschrieben. Sofortige Befundmitteilung."},
+     {id:"sab", n:"Subarachnoidalblutung", b:"Subarachnoidalblutung in den basalen Zisternen / den Sylvischen Fissuren beidseits / diskret rechts parafalzin frontal (tSAB).", u:"Akute SAB, DD aneurysmatisch (CTA empfohlen) / traumatisch. Sofortige Befundmitteilung an den Kliniker."},
+     {id:"kontusion", n:"Kontusionsblutung", b:"Kortiko-subkortikale hyperdense Kontusionsblutungen bifrontal / temporopolar links mit perifokalem Ödem.", u:"Akute traumatische Kontusionsblutungen wie beschrieben."}
+   ]},
+   {id:"nnh", n:"NNH & Mastoid", normal:"Gute Pneumatisation der Nasennebenhöhlen und Mastoidzellen beidseits.", items:[
+     {id:"sinakut", n:"Akute Sinusitis", b:"Flüssigkeitsspiegel im Sinus maxillaris rechts / links mit begleitender Schleimhautschwellung.", u:"Zeichen einer akuten Sinusitis."},
+     {id:"sinchron", n:"Chronische Sinusitis", b:"Zirkuläre Schleimhautschwellung der Sinus maxillares beidseits sowie des Sinus ethmoidalis mit teils sklerosierten Wänden.", u:"Zeichen einer chronischen (Pan-)Sinusitis."},
+     {id:"retzyste", n:"Retentionszyste", b:"Glatt begrenzte, breitbasige, hypodense Verschattung am Boden des Sinus maxillaris links, a. e. einer Retentionszyste entsprechend."},
+     {id:"polyp", n:"Polyp(en)", b:"Polypöse Schleimhautschwellungen im Sinus maxillaris beidseits mit Beteiligung des ostiomeatalen Komplexes."},
+     {id:"mukozele", n:"Mukozele", b:"Vollständig verschatteter, expandierter Sinus frontalis links mit Ausdünnung und Vorwölbung der knöchernen Begrenzungen, einer Mukozele entsprechend."},
+     {id:"osteom", n:"Osteom", b:"Kompakte, scharf begrenzte, knochendichte Läsion im Sinus frontalis rechts, einem Osteom entsprechend."},
+     {id:"nnhtumor", n:"NNH-Tumor", b:"Weichteildichte Raumforderung im Sinus maxillaris rechts mit Osteodestruktion der Kieferhöhlenwände und Infiltration von … .", u:"Malignomsuspekte Raumforderung des Sinus maxillaris rechts mit Osteodestruktion - HNO-Vorstellung im Verlauf empfohlen."},
+     {id:"nnhfraktur", n:"NNH- / Mittelgesichtsfraktur", b:"Fraktur der lateralen Kieferhöhlenwand rechts mit hämorrhagischer Verschattung des Sinus maxillaris (Hämatosinus).", u:"Mittelgesichtsfraktur wie beschrieben."},
+     {id:"mastoiditis", n:"Mastoiditis", b:"Verschattung der Mastoidzellen rechts mit unscharfen knöchernen Septen.", u:"V. a. Mastoiditis rechts - klinische Korrelation, HNO-Vorstellung."}
+   ]},
+   {id:"orbita", n:"Orbita", normal:"Symmetrischer Orbitainhalt.", items:[
+     {id:"retro", n:"Retrobulbäres Hämatom", b:"Retrobulbäres Hämatom rechts mit Protrusio bulbi bei Fraktur der lateralen Orbitawand.", u:"Retrobulbäres Hämatom rechts bei Orbitawandfraktur - notfallmäßige augenärztliche Vorstellung."},
+     {id:"blowout", n:"Blow-out-Fraktur", b:"Fraktur des Orbitabodens rechts mit Herniation von Orbitafett / Anteilen des M. rectus inferior in den Sinus maxillaris.", u:"Blow-out-Fraktur rechts - Cave Muskeleinklemmung, augenärztliche / MKG-Vorstellung."}
+   ]},
+   {id:"kalotte", n:"Schädelkalotte & Schädelbasis", normal:"Keine knöcherne Läsion im dargestellten Schädel.", items:[
+     {id:"hyperost", n:"Hyperostosis frontalis interna", b:"Beidseitige, symmetrische Verdickung der Tabula interna des Os frontale, einer Hyperostosis frontalis interna entsprechend (Normvariante)."},
+     {id:"osteolyse", n:"Osteolyse(n)", b:"Osteolytische Läsion der Kalotte rechts parietal, … mm, bei bekanntem … .", u:"Metastasensuspekte Osteolyse der Kalotte bei bekanntem … ."},
+     {id:"myelom", n:"Multiples Myelom", b:"Multiple, disseminierte, wie ausgestanzt wirkende Osteolysen der gesamten Kalotte.", u:"Osteolysen passend zu bekanntem multiplem Myelom."},
+     {id:"kfraktur", n:"Kalottenfraktur", b:"Fraktur des Os temporale rechts mit Ausstrahlung in … , ohne relevante Dislokation.", u:"Kalottenfraktur des Os temporale rechts. Sofortige Befundmitteilung, insbesondere bei begleitender Blutung."}
+   ]},
+   {id:"weichteile", n:"Extrakranielle Weichteile", normal:"", items:[
+     {id:"galea", n:"Galeahämatom", b:"Extrakranielles, subgaleales Hämatom rechts parietal."},
+     {id:"wttumor", n:"Weichteilraumforderung", b:"Extrakranielle Weichteilraumforderung … (Größe, Dichte, Knochenarrosion nach LOKALD-U beschreiben).", u:"Extrakranielle Weichteilraumforderung - weitere Abklärung empfohlen."}
+   ]}
+  ]
+},
+
+cta: {
+  id:"cta", name:"CTA Kopf / Hals",
+  technik:"Kontrastmittelgestütztes Spiral-CT-Angiogramm der intra- und extrakraniellen hirnversorgenden Gefäße in arterieller Phase (Delay ca. 25 s nach i. v. Imeron-Applikation bzw. Bolus-Tracking), KSD 0,6 mm, axiale Rekonstruktionen mit koronaren und sagittalen MPR.",
+  beurteilungNormal:"Keine hämodynamisch relevanten Stenosen, kein Gefäßverschluss, keine Dissektion der hirnversorgenden Gefäße.",
+  regions:[
+   {id:"gefaesse", n:"Gefäße (intra- & extrakraniell)", normal:"Regelrechte Kontrastierung des Aortenbogens und der supraaortalen Gefäßabgänge. Durchgehende Kontrastierung der intra- und extrakraniell hirnversorgenden Gefäße beidseits ohne Nachweis hämodynamisch relevanter Stenosen, Gefäßverschlüsse oder Dissektionen. Durchgehende Kontrastierung der intrakraniellen venösen Strukturen.", items:[
+     {id:"normvar", n:"Normvariante", b:"Normvariante: Hypoplasie / Aplasie der Vertebralarterie links, PICA-Ending der rechten Vertebralarterie, embryonaler Abgang der A. cerebri posterior rechts.", u:"Anlagevariante ohne Krankheitswert."},
+     {id:"stenose", n:"Stenose (NASCET)", b:"Atherosklerotische Vaskulopathie mit exzentrischen / semizirkulären / zirkulären, nicht verkalkten / teils verkalkten / überwiegend verkalkten Plaques der Karotisbifurkation rechts mit konsekutiver hochgradiger Lumeneinengung der proximalen ACI von ca. … % nach NASCET. Die Plaqueoberfläche imponiert glatt / unregelmäßig / ulzeriert, kein Nachweis adhärenter Thromben.", u:"Atherosklerotische hochgradige ACI-Abgangsstenose rechts (Stenosegrad ca. … % nach NASCET) - gefäßchirurgische / neurologische Mitbeurteilung."},
+     {id:"verschluss", n:"Gefäßverschluss", b:"Abrupter Kontrastmittelabbruch der linken ACI auf Höhe der Pars … ohne distale Rekonstitution.", u:"Verschluss der linken ACI (Pars …), DD chronisch, DD akut thromboembolisch - sofortige interdisziplinäre Abstimmung."},
+     {id:"dissektion", n:"Dissektion", b:"Langstreckige, exzentrische Lumeneinengung der rechten Vertebralarterie im V2-Segment mit Dissektionsmembran und sichelförmigem wandständigem Hämatom.", u:"Dissektion der rechten Vertebralarterie - sofortige Befundmitteilung an den Kliniker."}
+   ]},
+   {id:"begleit", n:"Begleitstrukturen (HWS, Schilddrüse, Lungenapex)", normal:"Regelrechtes Alignement der HWS. Keine frakturbedingte Wirbelkörperhöhenminderung. Keine Osteodestruktion. Homogene Schilddrüse. Regelrechte Belüftung der apikalen Lungenabschnitte.", items:[
+     {id:"wkfraktur", n:"Wirbelkörperfraktur", b:"Frakturbedingte Höhenminderung des Wirbelkörpers … (Frakturverlauf beschreiben, Klassifikation z. B. nach AO, Hinterkantenbeteiligung?).", u:"Wirbelkörperfraktur … - unfallchirurgische Mitbeurteilung."},
+     {id:"osteodest", n:"Osteodestruktion / ossäre Metastasen", b:"Osteolytische / osteoplastische Läsionen der HWS, u. a. in … , bei bekanntem … .", u:"Metastasensuspekte ossäre Läsionen der HWS."},
+     {id:"sdknoten", n:"Schilddrüsenknoten / Struma", b:"Vergrößerte, inhomogene Schilddrüse mit hypodensen Knoten beidseits, führend im … Lappen (… mm).", u:"Struma (multi)nodosa - sonographische Abklärung empfohlen."}
+   ]}
+  ]
+},
+
+hals: {
+  id:"hals", name:"CT Hals",
+  technik:"Kontrastmittelgestütztes Spiral-CT des Halses in venöser Phase bei einem Delay von ca. 75 s nach intravenöser Imeron-Applikation, KSD 0,6 mm, axiale Rekonstruktionen mit koronaren und sagittalen MPR.",
+  beurteilungNormal:"Kein Hämatom- oder Frakturnachweis der HWS. Keine Raumforderung oder abszessverdächtige Formation zervikal.",
+  regions:[
+   {id:"hgefaesse", n:"Halsgefäße", normal:"Regelrechte Kontrastierung der großen Halsgefäße ohne Hinweis auf höhergradige Stenosen oder Verschlüsse.", items:[
+     {id:"hstenose", n:"Stenose / Plaques", b:"Atherosklerotische, teils verkalkte Plaques der Karotisbifurkationen beidseits mit Lumeneinengung der proximalen ACI rechts von ca. … %.", u:"Atherosklerotische ACI-Abgangsstenose rechts (ca. … %)."},
+     {id:"hdissektion", n:"Dissektion", b:"Exzentrische Lumeneinengung der … mit Dissektionsmembran und wandständigem Hämatom.", u:"Gefäßdissektion - sofortige Befundmitteilung."}
+   ]},
+   {id:"speichel", n:"Speicheldrüsen", normal:"Symmetrische, homogen kontrastierte Glandulae parotideae und submandibulares.", items:[
+     {id:"sialo", n:"Sialolithiasis + Sialadenitis", b:"Konkrement im Ductus submandibularis links (… mm) mit vergrößerter, vermehrt kontrastmittelaufnehmender Glandula submandibularis und periglandulärer Fettgewebsimbibierung.", u:"Bild a. e. passend zu einer Sialolithiasis mit sekundärer Sialadenitis der Glandula submandibularis links."}
+   ]},
+   {id:"hsd", n:"Schilddrüse", normal:"Homogene Schilddrüse.", items:[
+     {id:"hstruma", n:"Struma (multi)nodosa", b:"Vergrößerte, inhomogene Schilddrüse mit multiplen, teils verkalkten hypodensen Knoten beidseits, führender Knoten im … Lappen (… mm). Verlagerung / Kompression der Trachea nach … .", u:"Multinodöse Struma mit Trachealverlagerung / -kompression (Dysphagie? Sonographische bzw. nuklearmedizinische Abklärung)."},
+     {id:"hsdca", n:"Malignomsuspekte SD-Raumforderung", b:"Unscharf begrenzte, inhomogene Raumforderung des rechten Schilddrüsenlappens (… mm) mit Infiltration von … und pathologischen zervikalen Lymphknoten.", u:"Hochgradiger V. a. ein Schilddrüsenkarzinom - zeitnahe endokrinologische / chirurgische Vorstellung."}
+   ]},
+   {id:"pharynx", n:"Pharynx, Larynx & Mundhöhle", normal:"Kehlkopf und Rachenraum frei. Oropharynx, Hypopharynx und Mundhöhle unauffällig. Keine tumorsuspekte Weichteilmasse zervikal.", items:[
+     {id:"pharynxca", n:"Pharynxkarzinom", b:"Asymmetrische, vermehrt kontrastmittelaufnehmende Weichteilvermehrung im Oropharynx / Hypopharynx rechts (… mm) mit Infiltration von … .", u:"Malignomsuspekte Raumforderung des Pharynx, hochwahrscheinlich einem Pharynxkarzinom zuzuordnen - HNO-Vorstellung, Panendoskopie mit Biopsie.", hint:"Ausbreitung prüfen: Zungengrund · Glossotonsillarsulcus · Vallecula · Weichgaumen · Parapharyngealraum · präepiglottischer Raum · Epiglottis · Mandibula · Pterygoidmuskulatur · Schädelbasis."},
+     {id:"zungenca", n:"Zungen(grund)karzinom", b:"Unscharf begrenzte, vermehrt kontrastmittelaufnehmende Raumforderung des Zungengrunds links (… mm) mit Überschreiten der Mittellinie / Infiltration des Glossotonsillarsulcus / der Vallecula.", u:"Malignomsuspekte Raumforderung des Zungengrunds, hochwahrscheinlich einem Zungengrundkarzinom zuzuordnen - HNO-Vorstellung.", hint:"Ausbreitung prüfen: Zungengrund · Glossotonsillarsulcus · Vallecula · Weichgaumen · Parapharyngealraum · Mandibula · Schädelbasis."},
+     {id:"larynxca", n:"Larynxkarzinom", b:"Vermehrt kontrastmittelaufnehmende Weichteilvermehrung glottisch / supraglottisch rechts mit Infiltration des präepiglottischen / paraglottischen Raums und Arrosion des Schildknorpels.", u:"Malignomsuspekte Raumforderung des Larynx, hochwahrscheinlich einem Larynxkarzinom zuzuordnen - HNO-Vorstellung."},
+     {id:"abszess", n:"Halsabszess", b:"Abgekapselte, randständig kontrastmittelaufnehmende, zentral hypodense Flüssigkeitskollektion parapharyngeal rechts (… × … mm) mit ausgeprägter Imbibierung des umgebenden Fettgewebes. Verlagerung / Einengung des Atemwegs: … .", u:"Parapharyngealer Abszess rechts bis zum Beweis des Gegenteils - sofortige Befundmitteilung (Atemweg!), HNO-Vorstellung."}
+   ]},
+   {id:"hlk", n:"Zervikale Lymphknoten", normal:"Keine pathologisch vergrößerten oder nekrotisch imponierenden Lymphknoten zervikal.", items:[
+     {id:"hlkpath", n:"Pathologische Lymphknoten", b:"Pathologisch vergrößerte, teils zentral nekrotische Lymphknoten zervikal, führend in Level … rechts (… mm Kurzachse).", u:"Metastasentypische zervikale Lymphadenopathie (Level …)."}
+   ]},
+   {id:"hknochen", n:"HWS & Knochen", normal:"Regelrechtes Alignement der HWS. Keine frakturbedingte Wirbelkörperhöhenminderung. Keine metastasensuspekten lytischen oder plastischen Knochenläsionen.", items:[
+     {id:"hdegen", n:"Degenerative Veränderungen", b:"Mäßige degenerative Veränderungen der HWS mit Osteochondrosen und Spondylarthrosen, führend HWK …/… ."},
+     {id:"hwkfraktur", n:"Wirbelkörperfraktur", b:"Frakturbedingte Höhenminderung des HWK … (Frakturverlauf, Klassifikation, Hinterkante beschreiben).", u:"HWK-Fraktur - sofortige Befundmitteilung, unfallchirurgische Mitbeurteilung."},
+     {id:"hossmet", n:"Ossäre Metastasen", b:"Disseminierte osteolytische / osteoplastische Läsionen der HWS und der miterfassten Skelettabschnitte bei bekanntem … .", u:"Metastasensuspekte ossäre Läsionen entlang der HWS."}
+   ]}
+  ]
+},
+
+thorax: {
+  id:"thorax", name:"CT Thorax",
+  technik:"Kontrastmittelgestütztes Spiral-CT des Thorax in venöser Phase bei einem Delay von ca. 75 s nach intravenöser Imeron-Applikation, KSD 0,6 mm, Lungen- und Mediastinalfenster, axiale Rekonstruktionen mit koronaren und sagittalen MPR.",
+  phases:[
+    {n:"LAE-Protokoll (pulmonalart., ~10 s)", t:"Kontrastmittelgestütztes Spiral-CT des Thorax in pulmonalarterieller Phase (Bolus-Tracking im Truncus pulmonalis, Delay ca. 10 s) nach intravenöser Imeron-Applikation, KSD 0,6 mm, Lungen- und Mediastinalfenster, axiale Rekonstruktionen mit koronaren und sagittalen MPR."},
+    {n:"arteriell (~25 s)", t:"Kontrastmittelgestütztes Spiral-CT des Thorax in arterieller Phase bei einem Delay von ca. 25 s nach intravenöser Imeron-Applikation, KSD 0,6 mm, Lungen- und Mediastinalfenster, axiale Rekonstruktionen mit koronaren und sagittalen MPR."},
+    {n:"venös (~75 s)", t:"Kontrastmittelgestütztes Spiral-CT des Thorax in venöser Phase bei einem Delay von ca. 75 s nach intravenöser Imeron-Applikation, KSD 0,6 mm, Lungen- und Mediastinalfenster, axiale Rekonstruktionen mit koronaren und sagittalen MPR."},
+    {n:"nativ", t:"Natives Spiral-CT des Thorax, KSD 0,6 mm, Lungen- und Mediastinalfenster, axiale Rekonstruktionen mit koronaren und sagittalen MPR."}
+  ],
+  beurteilungNormal:"Keine zentrale oder periphere Lungenarterienembolie. Kein Nachweis pneumonischer Infiltrate.",
+  regions:[
+   {id:"tsd", n:"Schilddrüse", normal:"Homogene Schilddrüse.", items:[
+     {id:"tstruma", n:"Struma multinodosa (retrosternal)", b:"Vergrößerte, inhomogene Schilddrüse mit multiplen hypodensen, teils verkalkten Knoten beidseits und retrosternaler Ausdehnung bis … . Verlagerung / Kompression der Trachea nach … .", u:"Multinodöse, teils retrosternale Struma mit Trachealverlagerung (Dysphagie / Dyspnoe? Weitere Abklärung empfohlen)."},
+     {id:"tsdca", n:"Malignomsuspekte SD-Raumforderung", b:"Unscharf begrenzte, inhomogene Raumforderung des rechten Schilddrüsenlappens mit Infiltration von … und pathologischen zervikalen / mediastinalen Lymphknoten.", u:"Hochgradiger V. a. ein Schilddrüsenkarzinom - zeitnahe weiterführende Abklärung."}
+   ]},
+   {id:"tlk", n:"Mediastinale & hiläre Lymphknoten", normal:"Keine pathologisch vergrößerten oder nekrotisch imponierenden Lymphknoten mediastinal und hilär beidseits.", items:[
+     {id:"tlkakz", n:"Akzentuierte Lymphknoten", b:"Einzelne grenzwertig große, a. e. reaktive Lymphknoten mediastinal (Station …, … mm Kurzachse)."},
+     {id:"tlkpath", n:"Pathologische Lymphknoten", b:"Pathologisch vergrößerte Lymphknoten mediastinal und hilär beidseits, führend in Station … (… mm Kurzachse), teils zentral nekrotisch.", u:"Metastasentypische mediastinale / hiläre Lymphadenopathie, DD Lymphom, DD Sarkoidose."}
+   ]},
+   {id:"therz", n:"Herz & Gefäße", normal:"Herz und große Gefäße regelrecht kalibriert. Keine Kontrastmittelaussparungen der pulmonalarteriellen Strombahn beidseits. Keine Rechtsherzbelastungszeichen. Kein Perikarderguss.", items:[
+     {id:"lae", n:"Lungenarterienembolie", b:"Zentrale / lobäre / segmentale Kontrastmittelaussparungen der Pulmonalarterien rechts und links, u. a. in den Unterlappensegmentarterien beidseits. / Sattelförmige Embolie über der Bifurkation des Truncus pulmonalis mit Ausdehnung in beide Hauptpulmonalarterien.", u:"Zentrale / lobäre / segmentale Lungenarterienembolien beidseits mit / ohne Rechtsherzbelastungszeichen. Sofortige Befundmitteilung an den Kliniker (erfolgt am … um … Uhr an …)."},
+     {id:"rhb", n:"Rechtsherzbelastung", b:"Dilatierter rechter Ventrikel mit einem RV/LV-Quotienten über 1, Abflachung / paradoxe Bewegung des interventrikulären Septums, Reflux von Kontrastmittel in die V. cava inferior und die Lebervenen.", u:"Zeichen der akuten Rechtsherzbelastung (Echokardiographie empfohlen)."},
+     {id:"pulmhyp", n:"Pulmonale Hypertonie", b:"Erweiterter Truncus pulmonalis (… mm, größer als die Aorta ascendens auf gleicher Höhe).", u:"Zeichen einer pulmonalarteriellen Hypertonie."},
+     {id:"perikard", n:"Perikarderguss", b:"Zirkulärer Perikarderguss mit einer maximalen Breite von … mm.", u:"Perikarderguss (… mm) - je nach Ausmaß und Klinik echokardiographische Kontrolle."},
+     {id:"koronar", n:"Koronarsklerose", b:"Ausgeprägte Verkalkungen der Koronararterien.", u:"Nebenbefundlich ausgeprägte Koronarsklerose."},
+     {id:"taorta", n:"Thorakales Aortenaneurysma / -pathologie", b:"Ektasie / Aneurysma der Aorta ascendens mit einem maximalen Durchmesser von … mm. Kein Nachweis einer Dissektionsmembran, soweit ohne EKG-Triggerung beurteilbar.", u:"Aneurysma der Aorta ascendens (… mm) - Verlaufskontrolle / gefäßchirurgische Vorstellung; bei V. a. Dissektion EKG-getriggerte CTA."}
+   ]},
+   {id:"tlunge", n:"Lungenparenchym", normal:"Regelrechte Belüftung beider Lungenflügel. Keine pulmonalen Rundherde, keine pneumonischen Infiltrate. Kein Nachweis eines Emphysems oder einer Fibrose.", items:[
+     {id:"infiltrat", n:"Pneumonisches Infiltrat / Konsolidierung", b:"Flächige Konsolidierung im … Lappen mit positivem Aerobronchogramm sowie angrenzenden Milchglastrübungen.", u:"Pneumonietypisches Infiltrat im … Lappen."},
+     {id:"treeinbud", n:"Tree-in-bud / Bronchiolitis", b:"Zentrilobuläre noduläre Verdichtungen mit Tree-in-bud-Muster im … Lappen.", u:"Bild einer infektiösen Bronchiolitis (Tree-in-bud), DD atypische Erreger."},
+     {id:"stauung", n:"Lungenstauung / Ödem", b:"Verdickte Interlobulärsepten, perihiläre Milchglastrübungen und beidseitige Pleuraergüsse.", u:"Zeichen einer pulmonalvenösen Stauung mit interstitiellem Ödem."},
+     {id:"emphysem", n:"Emphysem", b:"Zentrilobuläres / panlobuläres Lungenemphysem, oberlappenbetont.", u:"Fortgeschrittenes Lungenemphysem."},
+     {id:"bronchiek", n:"Bronchiektasen", b:"Zylindrische Bronchiektasen im … Lappen mit Wandverdickung und Sekretverhalt.", u:"Bronchiektasen im … Lappen, DD chronisch-entzündlich."},
+     {id:"kaverne", n:"Kaverne", b:"Dickwandige, luftgefüllte Kaverne im … Oberlappen (… mm) mit umgebenden nodulären Verdichtungen.", u:"Kavernöse Läsion im Oberlappen - u. a. an eine Tuberkulose denken (Isolation? Mikrobiologie), DD einschmelzendes Karzinom."},
+     {id:"rundherd", n:"Rundherd(e)", b:"Solider / subsolider Rundherd im … Lappen (Segment …, … mm), glatt / spikuliert begrenzt. Weitere kleine Noduli: … .", u:"Pulmonale(r) Rundherd(e) wie beschrieben - Einordnung und Verlaufskontrolle z. B. nach Fleischner-Kriterien, bei Malignomverdacht weiterführende Abklärung."},
+     {id:"lungenrf", n:"Malignomsuspekte Raumforderung", b:"Spikulierte, pleuraständige Raumforderung im … Lappen (… × … × … mm) mit Infiltration von … , begleitender Atelektase und pathologischen hilären / mediastinalen Lymphknoten.", u:"Malignomsuspekte pulmonale Raumforderung, hochwahrscheinlich einem Bronchialkarzinom entsprechend - Staging-Vervollständigung und pneumologische / thoraxchirurgische Vorstellung (Tumorboard)."}
+   ]},
+   {id:"tpleura", n:"Pleura", normal:"Kein Pleuraerguss.", items:[
+     {id:"erguss", n:"Pleuraerguss", b:"Pleuraerguss rechts / links / beidseits mit einer maximalen Saumbreite von … mm und angrenzenden Kompressionsatelektasen.", u:"Pleuraerguss wie beschrieben - je nach Klinik Punktion / Drainage erwägen."},
+     {id:"pneu", n:"Pneumothorax", b:"Pneumothorax rechts mit einem maximalen Pleuraspalt von … mm apikal. Kein Spannungspneumothorax, kein Mediastinalshift.", u:"Pneumothorax rechts - sofortige Befundmitteilung an den Kliniker."},
+     {id:"haematothorax", n:"Hämatothorax", b:"Hyperdenser Pleuraerguss rechts (… HU) mit einer maximalen Saumbreite von … mm, einem Hämatothorax entsprechend.", u:"Hämatothorax rechts - sofortige Befundmitteilung."},
+     {id:"empyem", n:"Pleuraempyem", b:"Abgekapselte, linsenförmige Flüssigkeitskollektion pleural rechts mit verdickter, vermehrt kontrastmittelaufnehmender Pleura (Split-Pleura-Zeichen) und Gaseinschlüssen.", u:"Bild eines Pleuraempyems rechts - Drainage / thoraxchirurgische Vorstellung."},
+     {id:"pleuramet", n:"Pleurametastasen / -karzinose", b:"Noduläre, teils zirkuläre Pleuraverdickungen rechts mit begleitendem Erguss bei bekanntem … .", u:"Pleurakarzinose bei bekanntem … ."},
+     {id:"pleurosis", n:"Pleurosis calcarea", b:"Plaqueartige, teils verkalkte Pleuraverdickungen beidseits, a. e. asbestassoziiert (Pleurosis calcarea)."}
+   ]},
+   {id:"twand", n:"Thoraxwand & Skelett", normal:"Keine suspekten osteolytischen oder osteoplastischen Läsionen der miterfassten Skelettabschnitte.", items:[
+     {id:"wtemphysem", n:"Weichteilemphysem", b:"Ausgedehntes Weichteilemphysem der rechten Thoraxwand mit Ausdehnung nach zervikal / mediastinal.", u:"Weichteil- / Mediastinalemphysem - Ursache klären (Pneumothorax? Verletzung der Atemwege?)."},
+     {id:"rippen", n:"Rippen(serien)fraktur", b:"Frakturen der Rippen … bis … rechts lateral, teils disloziert. Keine begleitende Verletzung der Interkostalgefäße abgrenzbar.", u:"Rippenserienfraktur rechts - auf begleitenden Pneumo- / Hämatothorax achten."},
+     {id:"tossmet", n:"Ossäre Metastasen", b:"Disseminierte osteolytische / osteoplastische Läsionen der BWS, der Rippen und des Sternums bei bekanntem … .", u:"Multiple metastasensuspekte ossäre Läsionen."},
+     {id:"fremdmat", n:"Fremdmaterial (ZVK, SM, Drainage)", b:"Regelrecht einliegender ZVK über die V. jugularis interna rechts, Spitze in Projektion auf die VCI-Mündung / Schrittmacheraggregat pektoral links mit Sonden in Projektion auf … / Thoraxdrainage rechts, Spitze … ."}
+   ]}
+  ]
+},
+
+abdomen: {
+  id:"abdomen", name:"CT Abdomen / Becken",
+  technik:"Kontrastmittelgestütztes Spiral-CT des Abdomens und Beckens in portalvenöser Phase bei einem Delay von ca. 75 s nach intravenöser Imeron-Applikation, KSD 0,6 mm, Weichteil- und Knochenfenster, axiale Rekonstruktionen mit koronaren und sagittalen MPR.",
+  phases:[
+    {n:"portalvenös (70–80 s)", t:"Kontrastmittelgestütztes Spiral-CT des Abdomens und Beckens in portalvenöser Phase bei einem Delay von ca. 75 s nach intravenöser Imeron-Applikation, KSD 0,6 mm, Weichteil- und Knochenfenster, axiale Rekonstruktionen mit koronaren und sagittalen MPR."},
+    {n:"arteriell (20–30 s)", t:"Kontrastmittelgestütztes Spiral-CT des Abdomens in arterieller Phase (Delay ca. 20–30 s bzw. Bolus-Tracking) nach intravenöser Imeron-Applikation, KSD 0,6 mm, Weichteil- und Knochenfenster, axiale Rekonstruktionen mit koronaren und sagittalen MPR."},
+    {n:"pankreatogen (35–45 s)", t:"Kontrastmittelgestütztes Spiral-CT des Abdomens in spät-arterieller (pankreatogener) Phase bei einem Delay von ca. 40 s nach intravenöser Imeron-Applikation, KSD 0,6 mm, Weichteil- und Knochenfenster, axiale Rekonstruktionen mit koronaren und sagittalen MPR."},
+    {n:"mehrphasig art.+pv.", t:"Kontrastmittelgestütztes Spiral-CT des Abdomens und Beckens in arterieller und portalvenöser Phase (Delays ca. 25 s und 75 s) nach intravenöser Imeron-Applikation, KSD 0,6 mm, Weichteil- und Knochenfenster, axiale Rekonstruktionen mit koronaren und sagittalen MPR."},
+    {n:"+ Spätphase (3–5 min)", t:"Kontrastmittelgestütztes Spiral-CT des Abdomens und Beckens in portalvenöser Phase (Delay ca. 75 s) sowie ergänzender Spätphase nach 3–5 min nach intravenöser Imeron-Applikation, KSD 0,6 mm, Weichteil- und Knochenfenster, axiale Rekonstruktionen mit koronaren und sagittalen MPR."},
+    {n:"+ Ausscheidungsphase (10–15 min)", t:"Kontrastmittelgestütztes Spiral-CT des Abdomens und Beckens in portalvenöser Phase (Delay ca. 75 s) sowie urographischer Ausscheidungsphase nach 10–15 min nach intravenöser Imeron-Applikation, KSD 0,6 mm, Weichteil- und Knochenfenster, axiale Rekonstruktionen mit koronaren und sagittalen MPR."},
+    {n:"nativ (Steinsuche)", t:"Natives Spiral-CT des Abdomens und Beckens in Low-Dose-Technik, KSD 0,6 mm, Weichteil- und Knochenfenster, axiale Rekonstruktionen mit koronaren und sagittalen MPR."}
+  ],
+  beurteilungNormal:"Unauffälliges CT des Abdomens und Beckens.",
+  regions:[
+   {id:"leber", n:"Leber", normal:"Homogenes Leberparenchym ohne suspekte fokale Läsionen.", items:[
+     {id:"lzyste", n:"Leberzyste(n)", b:"Mehrere scharf begrenzte, homogen hypodense, wasseräquivalente Läsionen ohne Kontrastmittelaufnahme, führend in Segment … (… mm), blanden Leberzysten entsprechend.", u:"Blande Leberzysten ohne Krankheitswert."},
+     {id:"haemangiom", n:"Hämangiom", b:"Scharf begrenzte Läsion in Segment … (… mm) mit peripher-nodulärem, diskontinuierlichem Enhancement und zentripetaler Auffüllung im Verlauf (Irisblendenphänomen).", u:"A. e. Leberhämangiom - bei typischem Verhalten keine weitere Abklärung erforderlich."},
+     {id:"lmet", n:"Lebermetastasen", b:"Multiple, unscharf begrenzte, hypodense Läsionen in beiden Leberlappen, führend in Segment … (… mm), mit randständigem Enhancement, bei bekanntem … .", u:"Metastasensuspekte Leberläsionen bei bekanntem … . Bei unklaren Läsionen CEUS oder MRT der Leber empfohlen."},
+     {id:"zirrhose", n:"Leberzirrhose", b:"Höckerige Leberoberfläche, verplumpter Lobus caudatus, Hypertrophie des linken Leberlappens und verschmälerter rechter Leberlappen als Zeichen des zirrhotischen Umbaus.", u:"Zeichen einer Leberzirrhose."},
+     {id:"porthyp", n:"Portale Hypertension", b:"Erweiterte V. portae (… mm), splenomegale Milz, portosystemische Kollateralen (u. a. ösophageale / gastrische Varizen, rekanalisierte Umbilikalvene) und Aszites.", u:"Zeichen der portalen Hypertension bei Leberzirrhose."},
+     {id:"hcc", n:"HCC / CCC-suspekte Läsion", b:"Läsion in Segment … (… mm) mit kräftiger arterieller Hyperperfusion und Wash-out in der portalvenösen / Spätphase, in zirrhotisch umgebauter Leber. / Unscharf begrenzte, hypodense Läsion mit peripherem Enhancement und Kapselretraktion, DD CCC.", u:"HCC-suspekte Läsion in zirrhotischer Leber (LI-RADS …) / CCC-suspekte Läsion - Vorstellung im interdisziplinären Leberboard, ggf. MRT mit leberspezifischem KM."},
+     {id:"pfortader", n:"Pfortaderthrombose", b:"Kontrastmittelaussparung in der V. portae mit fehlender Kontrastierung des Hauptstamms / des rechten / linken Astes.", u:"Pfortaderthrombose - Befundmitteilung, Antikoagulation nach klinischer Maßgabe, DD Tumorthrombus."},
+     {id:"ltrauma", n:"Leberlazeration / -hämatom (Trauma)", b:"Hypodense, unregelmäßig konfigurierte Parenchymlazeration in den Segmenten …/… mit subkapsulärem Hämatom (… mm Saumbreite). Keine aktive Kontrastmittelextravasation. Klassifikation nach AAST: Grad … .", u:"Leberverletzung AAST Grad … ohne / mit aktiver Blutung - sofortige Befundmitteilung an den behandelnden Chirurgen."}
+   ]},
+   {id:"galle", n:"Gallenblase & Gallenwege", normal:"Glattwandige Gallenblase. Keine intra- oder extrahepatische Cholestase.", items:[
+     {id:"cholezystitis", n:"Akute Cholezystitis", b:"Hydropisch vergrößerte Gallenblase mit verdickter, dreigeschichteter Wand (… mm), pericholezystischer Flüssigkeit und Imbibierung des angrenzenden Fettgewebes. Hyperdense Konkremente im Infundibulum.", u:"Akute kalkulöse Cholezystitis - zeitnahe chirurgische Vorstellung."},
+     {id:"cholestase", n:"Cholestase", b:"Erweiterte intra- und extrahepatische Gallenwege mit einem DHC von … mm bis auf Höhe … , dort Kalibersprung durch … .", u:"Intra- und extrahepatische Cholestase mit Aufstau bis … - Ursache: DD Konkrement, DD Raumforderung; ERCP / MRCP zur weiteren Abklärung."},
+     {id:"cholangitis", n:"Cholangitis", b:"Erweiterte, wandbetonte, vermehrt kontrastmittelaufnehmende Gallenwege mit periduktalem Ödem bei Cholestase wie beschrieben.", u:"Bild einer Cholangitis bei Cholestase - dringliche Befundmitteilung, ERCP-Indikation prüfen.", hint:"⚠ VOR der Befundmitteilung mit dem OA sprechen!"},
+     {id:"dhcstent", n:"DHC-Stent", b:"Regelrecht einliegender DHC-Stent mit orthograder Belüftung der Gallenwege (Aerobilie). Keine erneute Cholestase."}
+   ]},
+   {id:"pankreas", n:"Pankreas", normal:"Unauffälliges Pankreas ohne fokale Läsion, schlanker Ductus pancreaticus.", items:[
+     {id:"pankca", n:"Pankreas(kopf)karzinom", b:"Hypodense, unscharf begrenzte Raumforderung des Pankreaskopfes (… × … mm) mit Kalibersprung und prästenotischer Erweiterung des Ductus pancreaticus (… mm) sowie begleitender Cholestase (Double-Duct-Zeichen). Kontakt zur AMS / zum Truncus coeliacus / zur V. mesenterica superior über …° . Keine Lebermetastasen abgrenzbar.", u:"Malignomsuspekte Pankreaskopfraumforderung, hochwahrscheinlich einem duktalen Adenokarzinom entsprechend - gastroenterologisches Konsil, MRT/MRCP bzw. Endosonographie mit Biopsie, Vorstellung im Tumorboard."},
+     {id:"ipmn", n:"Zystische Neoplasie (IPMN / MCN)", b:"Zystische Läsion des Pankreas… (… mm) mit Verbindung zum Ductus pancreaticus / septierter Binnenstruktur, ohne solide Anteile oder Gangdilatation.", u:"Zystische Pankreasläsion, DD Seitengang-IPMN, DD muzinöse Neoplasie - weitere Abklärung mittels MRT/MRCP, Verlaufskontrolle nach Leitlinie."},
+     {id:"pankakut", n:"Akute Pankreatitis", b:"Ödematös aufgetriebenes Pankreas mit peripankreatischer Fettgewebsimbibierung und freier Flüssigkeit entlang der Gerota-Faszie links, einer akuten interstitiell-ödematösen Pankreatitis entsprechend. Keine Minderperfusion des Parenchyms im Sinne von Nekrosen. Keine abgekapselten Verhalte.", u:"Akute interstitiell-ödematöse Pankreatitis ohne Nachweis von Nekrosen (CT-Frühbefund kann Nekrosen unterschätzen - ggf. Verlaufs-CT nach 72 h)."},
+     {id:"panknekrose", n:"Nekrotisierende Pankreatitis / Verhalte", b:"Ausgedehnte Minderperfusion des Pankreaskorpus und -schwanzes im Sinne von Parenchymnekrosen (ca. … %). Peripankreatische Flüssigkeitskollektionen (APFC) / abgekapselte, teils gashaltige Kollektion (… × … mm), V. a. infizierte Nekrose.", u:"Nekrotisierende Pankreatitis mit … - sofortige Befundmitteilung, interdisziplinäre Therapieplanung."},
+     {id:"pankchron", n:"Chronische Pankreatitis", b:"Atrophes Pankreas mit multiplen intraduktalen und parenchymalen Verkalkungen sowie unregelmäßig erweitertem Ductus pancreaticus.", u:"Zeichen einer chronischen kalzifizierenden Pankreatitis."}
+   ]},
+   {id:"milz", n:"Milz", normal:"Homogene, normal große Milz.", items:[
+     {id:"splenomegalie", n:"Splenomegalie", b:"Vergrößerte Milz mit einem Pol-zu-Pol-Durchmesser von … cm.", u:"Splenomegalie - DD portale Hypertension, hämatologische Systemerkrankung, Infekt."},
+     {id:"milzlaesion", n:"Fokale Milzläsion", b:"Scharf begrenzte, hypodense Läsion der Milz (… mm), DD Zyste, DD Hämangiom; keine sicheren Malignitätszeichen.", u:"Fokale Milzläsion, a. e. benigne - ggf. sonographische Kontrolle."},
+     {id:"milztrauma", n:"Milzlazeration / -hämatom (Trauma)", b:"Parenchymlazeration der Milz mit subkapsulärem Hämatom (… mm). Aktive Kontrastmittelextravasation: nein / ja (… ). Klassifikation nach AAST: Grad … .", u:"Milzverletzung AAST Grad … - sofortige Befundmitteilung an den behandelnden Chirurgen."}
+   ]},
+   {id:"nn", n:"Nebennieren", normal:"Schlanke Nebennieren beidseits.", items:[
+     {id:"nnadenom", n:"NN-Adenom", b:"Glatt begrenzte, homogene Läsion der linken Nebenniere (… mm) mit nativer Dichte unter 10 HU, einem lipidreichen Adenom entsprechend.", u:"Lipidreiches Nebennierenadenom links ohne Krankheitswert."},
+     {id:"nninzident", n:"Unklare NN-Raumforderung", b:"Läsion der rechten Nebenniere (… mm) mit nativer Dichte über 10 HU / inhomogener Binnenstruktur.", u:"Unklare Nebennierenraumforderung rechts - weitere Abklärung mittels Wash-out-CT (Spätphase ≥ 15 min) oder MRT, endokrinologische Vorstellung (Hormonaktivität?)."},
+     {id:"nnhaematom", n:"NN-Hämatom", b:"Hyperdense, nicht kontrastmittelaufnehmende Raumforderung der rechten Nebenniere (… mm), a. e. einem Hämatom entsprechend.", u:"A. e. Nebennierenhämatom rechts - Verlaufskontrolle zum Ausschluss einer zugrunde liegenden Läsion."}
+   ]},
+   {id:"nieren", n:"Nieren", normal:"Orthotope Lage beider Nieren mit seitengleicher Kontrastierung, ohne Harnstau oder suspekte Raumforderung.", items:[
+     {id:"nzyste", n:"Nierenzyste(n)", b:"Mehrere kortikale, wasseräquivalente, scharf begrenzte Zysten beidseits ohne Septen, Verkalkungen oder Kontrastmittelaufnahme, führend am … Nierenpol (… mm), Bosniak I.", u:"Blande Nierenzysten (Bosniak I) ohne Krankheitswert."},
+     {id:"aml", n:"Angiomyolipom", b:"Fetthaltige, scharf begrenzte Läsion der … Niere (… mm, Dichte bis … HU), einem Angiomyolipom entsprechend.", u:"Angiomyolipom der … Niere - ab 4 cm erhöhtes Blutungsrisiko, dann urologische Vorstellung."},
+     {id:"ncc", n:"Nierenzellkarzinom-suspekte RF", b:"Inhomogene, kontrastmittelaufnehmende Raumforderung der … Niere (… × … mm) mit Ausdehnung bis … . Kein Tumorzapfen in der V. renalis / VCI. Keine pathologischen retroperitonealen Lymphknoten.", u:"Malignomsuspekte Nierenraumforderung, hochwahrscheinlich einem Nierenzellkarzinom entsprechend - urologische Vorstellung, Staging-Vervollständigung."},
+     {id:"pyelo", n:"Pyelonephritis", b:"Streifige, keilförmige Minderperfusionen des Parenchyms der … Niere mit perirenaler Fettgewebsimbibierung und verdickter Gerota-Faszie. Kein abgekapselter Verhalt im Sinne eines Abszesses.", u:"Bild einer akuten Pyelonephritis … ohne Abszessnachweis - klinische und laborchemische Korrelation."},
+     {id:"nhaematom", n:"Subkapsuläres Hämatom (z. B. nach PCNL)", b:"Subkapsuläres, hyperdenses Hämatom der … Niere (Saumbreite … mm) mit Kompression des Parenchyms. Aktive Kontrastmittelextravasation: nein / ja.", u:"Subkapsuläres Nierenhämatom nach … - bei aktiver Blutung sofortige Befundmitteilung, ggf. angiographische Embolisation."}
+   ]},
+   {id:"harnwege", n:"Ureteren & Harnblase", normal:"Schlanke Harnleiter beidseits. Mäßig gefüllte, glattwandige Harnblase.", items:[
+     {id:"urolith", n:"Urolithiasis", b:"Hyperdenses Konkrement im … Ureterdrittel rechts (… × … mm, … HU) mit prästenotischer Erweiterung von Ureter und Nierenbeckenkelchsystem (Hydronephrose Grad …) und perirenaler / periureteraler Flüssigkeitsimbibierung.", u:"Symptomatische Urolithiasis rechts mit Harnstau Grad … - urologische Vorstellung; auf Zeichen der Fornixruptur achten."},
+     {id:"nbastenose", n:"Nierenbeckenabgangsstenose", b:"Erweitertes Nierenbeckenkelchsystem links bei schlankem Ureter ohne Konkrementnachweis, V. a. subpelvine Stenose.", u:"V. a. Nierenbeckenabgangsstenose links - urologische Abklärung, ggf. retrograde Pyelographie / Funktionsszintigraphie."},
+     {id:"zystitis", n:"Zystitis", b:"Diffus wandverdickte, vermehrt kontrastmittelaufnehmende Harnblase mit perivesikaler Imbibierung.", u:"Bild einer Zystitis - klinische Korrelation, Urinstatus."},
+     {id:"urothelca", n:"Urothelkarzinom-suspekte RF", b:"Breitbasige, kontrastmittelaufnehmende Wandverdickung / polypoide Raumforderung der Harnblase … (… mm).", u:"Malignomsuspekte Harnblasenraumforderung, DD Urothelkarzinom - urologische Vorstellung zur Zystoskopie und Biopsie."},
+     {id:"divertikelhb", n:"Harnblasendivertikel", b:"Breitbasiges Harnblasendivertikel rechts dorsolateral (… mm)."}
+   ]},
+   {id:"magen", n:"Magen & Duodenum", normal:"", items:[
+     {id:"magentumor", n:"Magentumor", b:"Zirkuläre / fokale, kontrastmittelaufnehmende Wandverdickung des Magens im Bereich … (Wanddicke … mm) mit Infiltration von … und lokoregionären pathologischen Lymphknoten.", u:"Malignomsuspekte Magenwandverdickung - gastroenterologische Vorstellung zur Gastroskopie mit Biopsie.", hint:"Cave: Beurteilbarkeit stark vom Füllungszustand abhängig."},
+     {id:"ulkus", n:"Ulkus / gedeckte Perforation", b:"Wandverdickung des Magens / Duodenums mit umschriebener Wandunterbrechung, lokalisierten extraluminalen Gasbläschen und Imbibierung des angrenzenden Fettgewebes.", u:"V. a. (gedeckt) perforiertes Ulkus - sofortige Befundmitteilung an den Chirurgen."},
+     {id:"retention", n:"Retentionsmagen", b:"Massiv distendierter, flüssigkeits- und speisegefüllter Magen bis in das kleine Becken reichend.", u:"Retentionsmagen - Magensonde vor weiterer Diagnostik / Intervention empfohlen (Aspirationsgefahr!)."},
+     {id:"peg", n:"PEG-Sonde", b:"Regelrecht einliegende PEG-Sonde mit Halteplatte an der Magenvorderwand. / Dislokation der PEG-Sonde mit Spitze in … / Kontrastmittelaustritt entlang des Stichkanals als Zeichen einer Leckage.", u:"Regelrechte PEG-Lage. / PEG-Dislokation bzw. -Leckage - sofortige Befundmitteilung."},
+     {id:"hiatus", n:"Hiatushernie", b:"Axiale Hiatushernie mit Verlagerung der Kardia und von Magenanteilen nach intrathorakal."},
+     {id:"duodenaldiv", n:"Duodenaldivertikel", b:"Juxtapapilläres Duodenaldivertikel (… mm) mit Luft-Flüssigkeits-Spiegel, ohne Entzündungszeichen."}
+   ]},
+   {id:"duenndarm", n:"Dünndarm", normal:"Regelrechte Kontrastierung und Kalibrierung der Dünndarmschlingen.", items:[
+     {id:"mechileus", n:"Mechanischer Ileus", b:"Distendierte, flüssigkeitsgefüllte Dünndarmschlingen bis … mm mit Spiegelbildung und Kalibersprung im … , a. e. bridenbedingt bei Z. n. … . Nachgeschaltete Darmabschnitte kollabiert. Keine Zeichen der Durchblutungsstörung: regelrechtes Wand-Enhancement, keine Pneumatosis, keine freie Flüssigkeit.", u:"Mechanischer Dünndarmileus mit Kalibersprung im … , a. e. Bridenileus - sofortige Befundmitteilung an den Chirurgen."},
+     {id:"paralytisch", n:"Paralytischer Ileus", b:"Diffus distendierte Dünn- und Dickdarmschlingen ohne Kalibersprung, einem paralytischen Ileus entsprechend.", u:"Bild eines paralytischen Ileus - klinische Korrelation (Elektrolyte, Medikation, postoperativ?)."},
+     {id:"enteritis", n:"Enteritis", b:"Segmentale Wandverdickung mehrerer Dünndarmschlingen mit vermehrtem Wand-Enhancement und geringer freier Flüssigkeit.", u:"Bild einer Enteritis - klinische und mikrobiologische Korrelation."},
+     {id:"mesischaemie", n:"Mesenterialischämie", b:"Abrupter Kontrastmittelabbruch der A. mesenterica superior … cm nach Abgang. Wandverdickte, hypoperfundierte Dünndarmschlingen mit fehlendem Enhancement, Pneumatosis intestinalis und Gas in den Mesenterialvenen / der Pfortader.", u:"Akute Mesenterialischämie bei AMS-Verschluss - sofortige Befundmitteilung an den Chirurgen (Notfall!)."},
+     {id:"crohn", n:"M. Crohn", b:"Langstreckige Wandverdickung des terminalen Ileums mit Wandschichtung, Comb Sign des angrenzenden Mesenteriums und fibrofatty proliferation. Keine Fistel oder Abszess abgrenzbar.", u:"Befund vereinbar mit einem entzündlichen Schub eines M. Crohn - gastroenterologische Korrelation."},
+     {id:"ddtumor", n:"Dünndarmtumor", b:"Umschriebene, kontrastmittelaufnehmende Wandverdickung / Raumforderung des Jejunums / Ileums (… mm) mit … .", u:"Malignomsuspekte Dünndarmraumforderung - weitere Abklärung (DD GIST, DD NET, DD Lymphom)."}
+   ]},
+   {id:"dickdarm", n:"Dickdarm & Appendix", normal:"Regelrechte Darstellung des Kolonrahmens. Keine Darmwandverdickung, kein Hinweis auf einen Ileus. Unauffällige Appendix.", items:[
+     {id:"appendizitis", n:"Appendizitis", b:"Verdickte, wandvermehrt kontrastmittelaufnehmende Appendix (… mm Durchmesser) mit periappendizealer Fettgewebsimbibierung und geringer freier Flüssigkeit. Appendikolith: ja / nein. Keine freie Luft, kein Abszess.", u:"Akute, phlegmonöse / gedeckt perforierte Appendizitis (mit perityphlitischem Abszess: …) - sofortige Befundmitteilung an den Chirurgen."},
+     {id:"divertikulitis", n:"Divertikulitis", b:"Multiple Divertikel des Sigmas mit segmentaler Wandverdickung und ausgeprägter perisigmoidaler Fettgewebsimbibierung. Gedeckte Perforation mit lokalisierten extraluminalen Gasbläschen: ja / nein. Abszess: … mm. Keine freie Luft subphrenisch.", u:"Akute Sigmadivertikulitis, klassifiziert nach CDD Typ … , ohne / mit gedeckter Perforation bzw. Abszess - Befundmitteilung an den Kliniker; Koloskopie nach Abklingen der Akutphase empfohlen."},
+     {id:"colitis", n:"Colitis", b:"Langstreckige Wandverdickung des Kolons (… bis …) mit Wandschichtung und Imbibierung des angrenzenden Fettgewebes.", u:"Bild einer Colitis - DD infektiös, DD chronisch-entzündlich, DD pseudomembranös (Clostridien?); klinische und mikrobiologische Korrelation."},
+     {id:"ischcolitis", n:"Ischämische Colitis", b:"Segmentale Wandverdickung des Kolons im Bereich der Rechts-Links-Wasserscheide (linke Flexur / Sigma) mit vermindertem Wand-Enhancement.", u:"V. a. ischämische Colitis - Befundmitteilung, endoskopische Korrelation."},
+     {id:"kolonileus", n:"Dickdarmileus bei Tumor", b:"Distendierter Kolonrahmen bis … mm mit Kalibersprung im … durch eine zirkuläre, stenosierende Wandverdickung (Apple-Core-Läsion). Zökum bis … mm distendiert (Perforationsgefahr ab ca. 10–12 cm).", u:"Mechanischer Dickdarmileus bei malignomsuspekter Kolonstenose - sofortige Befundmitteilung an den Chirurgen."},
+     {id:"kolontumor", n:"Kolontumor (ohne Ileus)", b:"Umschriebene, zirkuläre, kontrastmittelaufnehmende Wandverdickung des … (Länge … mm) mit Infiltration von … und lokoregionären Lymphknoten.", u:"Malignomsuspekte Kolonwandverdickung - Koloskopie mit Biopsie, Staging-Vervollständigung."}
+   ]},
+   {id:"alk", n:"Lymphknoten", normal:"Keine pathologisch vergrößerten Lymphknoten abdominell und retroperitoneal.", items:[
+     {id:"alkpath", n:"Lymphadenopathie", b:"Pathologisch vergrößerte Lymphknoten mesenterial / retroperitoneal / iliakal, führend … (… mm Kurzachse).", u:"Abdominelle Lymphadenopathie - DD metastatisch bei bekanntem …, DD Lymphom."},
+     {id:"lymphom", n:"Lymphom-Bulk", b:"Ausgedehnte, konfluierende retroperitoneale Lymphknotenkonglomerate mit Ummauerung der Aorta und der Mesenterialgefäße (Sandwich Sign).", u:"Ausgedehnte Lymphadenopathie, hochgradig lymphomsuspekt - hämatoonkologische Vorstellung, Histologiegewinnung."},
+     {id:"lymphozele", n:"Lymphozele", b:"Scharf begrenzte, wasseräquivalente Flüssigkeitskollektion iliakal links (… mm) bei Z. n. Lymphadenektomie, a. e. einer Lymphozele entsprechend.", u:"Lymphozele iliakal links; bei Kompression des Ureters mit Harnstau urologische Vorstellung."}
+   ]},
+   {id:"agefaesse", n:"Gefäße", normal:"Regelrechte Kontrastierung der abdominellen Gefäße. Kein Aneurysma.", items:[
+     {id:"baa", n:"Bauchaortenaneurysma", b:"Infrarenales Bauchaortenaneurysma mit einem maximalen Querdurchmesser von … mm und wandständiger, teils verkalkter Thrombosierung (perfundiertes Lumen … mm). Abstand zu den Nierenarterien … mm, Beteiligung der Iliakalgefäße: … . Keine Ruptur- oder Instabilitätszeichen.", u:"Infrarenales Bauchaortenaneurysma (… mm) ohne Rupturzeichen - gefäßchirurgische Vorstellung / Verlaufskontrolle."},
+     {id:"baaruptur", n:"Rupturiertes BAA", b:"Bekanntes infrarenales Bauchaortenaneurysma (… mm) mit ausgedehntem retroperitonealem Hämatom links und aktiver Kontrastmittelextravasation.", u:"Rupturiertes Bauchaortenaneurysma mit aktiver Blutung - sofortige Befundmitteilung an den behandelnden Chirurgen (erfolgt am … um … Uhr an …)."},
+     {id:"astenose", n:"Stenose / Verschluss viszeral", b:"Höhergradige, abgangsnahe Stenose / Verschluss der A. … mit / ohne poststenotische Rekonstitution über Kollateralen.", u:"Höhergradige Stenose / Verschluss der A. … - Korrelation mit Klinik, ggf. gefäßchirurgische / angiologische Vorstellung."},
+     {id:"spurium", n:"Aneurysma spurium", b:"Umschriebene, kontrastmittelperfundierte Aussackung außerhalb der Gefäßwand der A. … (… mm) mit Halskommunikation, einem Aneurysma spurium entsprechend.", u:"Aneurysma spurium der A. … - Befundmitteilung, interventionelle / chirurgische Versorgung prüfen."}
+   ]},
+   {id:"peritoneum", n:"Peritoneum & Retroperitoneum", normal:"Keine freie Flüssigkeit, keine freie Luft.", items:[
+     {id:"aszites", n:"Aszites", b:"Freie Flüssigkeit perihepatisch, perisplenisch und im kleinen Becken (… Saumbreite).", u:"Aszites - Ursache klären (portal? kardial? maligne? entzündlich?), ggf. diagnostische Punktion."},
+     {id:"pneumoperitoneum", n:"Pneumoperitoneum", b:"Freie intraabdominelle Luft subphrenisch beidseits und ventral der Leber.", u:"Pneumoperitoneum als Zeichen einer Hohlorganperforation - sofortige Befundmitteilung an den Chirurgen (erfolgt am … um … Uhr an …)."},
+     {id:"haematoperitoneum", n:"Hämatoperitoneum / retroperitoneales Hämatom", b:"Hyperdense freie Flüssigkeit (… HU) perihepatisch und parakolisch / ausgedehntes retroperitoneales Hämatom links mit Verdrängung von … . Aktive Kontrastmittelextravasation: nein / ja (…).", u:"Hämatoperitoneum / retroperitoneales Hämatom - bei aktiver Blutung sofortige Befundmitteilung."},
+     {id:"karzinose", n:"Peritonealkarzinose", b:"Noduläre Verdickungen des Peritoneums, Omental Cake des großen Netzes und Aszites bei bekanntem … .", u:"Peritonealkarzinose bei bekanntem … ."},
+     {id:"pannikulitis", n:"Mesenteriale Pannikulitis", b:"Umschriebene erhöhte Dichte des mesenterialen Fettgewebes mit Fat-Ring-Sign um die Mesenterialgefäße und zarter Pseudokapsel, ohne Raumforderung.", u:"Mesenteriale Pannikulitis, in der Regel ohne Krankheitswert - bei atypischem Bild Verlaufskontrolle (DD Lymphom)."},
+     {id:"postop", n:"Postoperativer Situs", b:"Z. n. … : regelrecht einliegende Zieldrainage mit Spitze in … . Umschriebene Flüssigkeitskollektion im OP-Gebiet (… mm), DD Serom, DD Hämatom; kein Nachweis von Gaseinschlüssen als Hinweis auf einen Infekt (cave: postoperativ unspezifisch)."}
+   ]},
+   {id:"becken", n:"Becken (Organe)", normal:"", items:[
+     {id:"ovarialzyste", n:"Ovarialzyste", b:"Glatt begrenzte, wasseräquivalente zystische Läsion des … Ovars (… mm) ohne solide Anteile oder Septen.", u:"A. e. funktionelle Ovarialzyste - gynäkologische / sonographische Korrelation."},
+     {id:"ovarialtumor", n:"Ovarialtumor", b:"Komplexe zystisch-solide Raumforderung im Bereich der … Adnexe (… × … mm) mit kontrastmittelaufnehmenden soliden Anteilen, Aszites und peritonealen Auflagerungen.", u:"Malignomsuspekte Adnexraumforderung - gynäkologische Vorstellung (Tumormarker, ggf. MRT)."},
+     {id:"myome", n:"Uterus myomatosus", b:"Vergrößerter Uterus mit mehreren scharf begrenzten, teils verkalkten intramuralen Raumforderungen, führend … (… mm), Myomen entsprechend.", u:"Uterus myomatosus."},
+     {id:"toa", n:"Tuboovarialabszess", b:"Komplexe, randständig kontrastmittelaufnehmende, septierte Flüssigkeitskollektion der … Adnexe (… mm) mit Imbibierung des umgebenden Fettgewebes.", u:"V. a. Tuboovarialabszess - sofortige Befundmitteilung, gynäkologische Vorstellung."},
+     {id:"bph", n:"Prostatahyperplasie", b:"Vergrößerte Prostata (… ml) mit Impression des Harnblasenbodens und Balkenblase.", u:"Benigne Prostatahyperplasie mit Zeichen der chronischen Blasenauslassobstruktion."}
+   ]},
+   {id:"askelett", n:"Skelett", normal:"Keine suspekten osteolytischen oder osteoplastischen Läsionen der miterfassten Skelettabschnitte.", items:[
+     {id:"aossmet", n:"Ossäre Metastasen", b:"Disseminierte osteolytische / osteoplastische Läsionen der LWS und des Beckenskeletts bei bekanntem … , u. a. in … . Keine pathologische Fraktur, keine Spinalkanaleinengung.", u:"Multiple metastasensuspekte ossäre Läsionen - bei neuer Symptomatik ergänzende MRT."},
+     {id:"awkfraktur", n:"Wirbelkörperfraktur", b:"Höhenminderung des LWK … mit Frakturlinie durch die Grund- / Deckplatte, ohne relevante Hinterkantenbeteiligung (Klassifikation z. B. nach AO / OF).", u:"Wirbelkörperfraktur LWK … - Korrelation mit Klinik, ggf. unfallchirurgische Vorstellung."},
+     {id:"adegen", n:"Degenerative Veränderungen", b:"Mäßige degenerative Veränderungen des Achsenskeletts mit Osteochondrosen, Spondylarthrosen und ISG-Arthrose beidseits."}
+   ]}
+  ]
+},
+
+poly: {
+  id:"poly", name:"Polytrauma (Ganzkörper)",
+  technik:"Ganzkörper-CT nach Polytrauma-Protokoll: natives Spiral-CT des Schädels, anschließend kontrastmittelgestützte Spirale von Hals, Thorax, Abdomen und Becken in kombinierter arteriell-portalvenöser Mischphase nach intravenöser Imeron-Applikation, KSD 0,6 mm, multiplanare Rekonstruktionen, Knochen-, Weichteil- und Lungenfenster.",
+  beurteilungNormal:"Keine intrakranielle Blutung, keine Kalottenfraktur. Keine Dissektion oder Verletzung der großen Gefäße. Kein Nachweis lebensbedrohlicher Verletzungen thorakal und abdominell. Kein Pneumoperitoneum. Keine frische ossäre Verletzung.",
+  regions:[
+   {id:"pkopf", n:"Neurokranium & Gesichtsschädel", normal:"Keine intrakranielle Blutung. Keine Schädel- oder Gesichtsschädelfrakturen. Erhaltene Mark-Rinden-Differenzierung, keine Mittellinienverlagerung, basale Zisternen frei.", items:[
+     {id:"picb", n:"Intrakranielle Blutung", b:"Hyperdense intrakranielle Blutung: … (Kontusionsblutung / tSAB / tSDH / Epiduralhämatom - Lokalisation, Größe, Saumbreite, Masseneffekt beschreiben).", u:"Akute traumatische intrakranielle Blutung wie beschrieben - sofortige Befundmitteilung an den Schockraum-Leader."},
+     {id:"pkalotte", n:"Kalotten- / Schädelbasisfraktur", b:"Fraktur des … mit Verlauf … , ohne / mit Beteiligung des Karotiskanals bzw. des Felsenbeins.", u:"Schädelfraktur wie beschrieben - bei Schädelbasis- / Felsenbeinbeteiligung HNO- bzw. neurochirurgische Mitbeurteilung."},
+     {id:"pmittelgesicht", n:"Mittelgesichtsfraktur", b:"Mittelgesichtsfrakturen: … (z. B. laterale Kieferhöhlenwand, Jochbogen, Orbitaboden) mit Hämatosinus.", u:"Mittelgesichtsfrakturen wie beschrieben - MKG-Vorstellung."}
+   ]},
+   {id:"phals", n:"Hals & HWS", normal:"Freie Atemwege. Keine Dissektion der hirnversorgenden Gefäße. Regelrechtes Alignement der HWS ohne Frakturnachweis.", items:[
+     {id:"phwsfraktur", n:"HWS-Fraktur", b:"Fraktur des HWK … (Frakturverlauf, Klassifikation nach AO, Hinterkantenbeteiligung, Spinalkanaleinengung beschreiben).", u:"HWS-Fraktur - sofortige Befundmitteilung; Immobilisation belassen, wirbelsäulenchirurgische Mitbeurteilung."},
+     {id:"pdissektion", n:"Gefäßdissektion", b:"Exzentrische Lumeneinengung der A. carotis interna / A. vertebralis … mit Dissektionsmembran und wandständigem Hämatom.", u:"Traumatische Gefäßdissektion - sofortige Befundmitteilung, neurologische / gefäßchirurgische Abstimmung."}
+   ]},
+   {id:"pthorax", n:"Thorax", normal:"Symmetrische Lungenbelüftung. Kein Pneumothorax, kein Hämatothorax. Keine Lungenkontusionen oder -lazerationen. Keine Verletzung der thorakalen Aorta. Keine Rippenserien- oder Sternumfraktur.", items:[
+     {id:"ppneu", n:"Pneumothorax", b:"Pneumothorax rechts (maximaler Pleuraspalt … mm) mit / ohne Spannungskomponente (Mediastinalshift, abgeflachtes Zwerchfell). Weichteilemphysem der Thoraxwand.", u:"(Spannungs-)Pneumothorax rechts - sofortige Befundmitteilung, Drainagenindikation."},
+     {id:"phaemato", n:"Hämatothorax", b:"Hyperdenser Pleuraerguss links (… HU, Saumbreite … mm), einem Hämatothorax entsprechend.", u:"Hämatothorax links - sofortige Befundmitteilung."},
+     {id:"pkontusion", n:"Lungenkontusion / -lazeration", b:"Flächige Milchglastrübungen und Konsolidierungen im … Lappen, Lungenkontusionen entsprechend; zentrale Lazeration mit Pneumatozele (… mm).", u:"Lungenkontusionen / -lazeration wie beschrieben."},
+     {id:"paorta", n:"Aortenverletzung", b:"Konturirregularität / intimale Läsion / Pseudoaneurysma der Aorta am Isthmus mit periaortalem Hämatom.", u:"Traumatische Aortenverletzung - sofortige Befundmitteilung (Notfall!), gefäßchirurgische Versorgung."},
+     {id:"prippen", n:"Rippenserienfraktur / Sternum", b:"Frakturen der Rippen … bis … rechts, teils disloziert; Sternumfraktur auf Höhe … . Instabiler Thorax: ja / nein.", u:"Rippenserienfraktur rechts - auf begleitenden Pneumo- / Hämatothorax achten."}
+   ]},
+   {id:"pabdomen", n:"Abdomen & Becken", normal:"Regelrechte Abbildung der parenchymatösen Oberbauchorgane ohne Kontusion, Lazeration oder aktive Blutung. Keine subkapsulären Hämatome von Leber, Milz oder Nieren. Keine freie Flüssigkeit, keine freie Luft, kein Anhalt für eine Hohlorganverletzung.", items:[
+     {id:"pleber", n:"Leberverletzung", b:"Parenchymlazeration der Leber in den Segmenten …/… mit subkapsulärem Hämatom (… mm). Aktive Kontrastmittelextravasation: nein / ja. AAST Grad … .", u:"Leberverletzung AAST Grad … - sofortige Befundmitteilung an den behandelnden Chirurgen."},
+     {id:"pmilz", n:"Milzverletzung", b:"Parenchymlazeration der Milz mit subkapsulärem Hämatom (… mm) und perisplenischer freier Flüssigkeit. Aktive Kontrastmittelextravasation: nein / ja. AAST Grad … .", u:"Milzverletzung AAST Grad … - sofortige Befundmitteilung; bei aktiver Blutung Embolisation / OP prüfen."},
+     {id:"pniere", n:"Nierenverletzung", b:"Lazeration der … Niere mit perirenalem Hämatom. Beteiligung des Nierenbeckenkelchsystems / Urinextravasat: … . AAST Grad … .", u:"Nierenverletzung AAST Grad … - sofortige Befundmitteilung."},
+     {id:"pblutung", n:"Aktive Blutung / Hämatoperitoneum", b:"Hyperdense freie Flüssigkeit perihepatisch, perisplenisch und im kleinen Becken. Aktive Kontrastmittelextravasation in der arteriellen Phase mit Zunahme in der venösen Phase im Bereich … .", u:"Aktive intraabdominelle Blutung - sofortige Befundmitteilung an den Schockraum-Leader (erfolgt am … um … Uhr an …)."},
+     {id:"phohlorgan", n:"Hohlorganverletzung", b:"Freie intraabdominelle Luft, mesenteriale Imbibierung und Wandverdickung von Dünndarmschlingen als Zeichen einer Hohlorganverletzung.", u:"V. a. Hohlorganperforation - sofortige Befundmitteilung an den Chirurgen."}
+   ]},
+   {id:"pskelett", n:"Wirbelsäule & Beckenring", normal:"Kontinuierliche Darstellung der gesamten Wirbelsäule ohne Fraktur oder Luxation. Intakter Beckenring.", items:[
+     {id:"pwkfraktur", n:"Wirbelkörperfraktur", b:"Fraktur des BWK / LWK … (Frakturverlauf, Klassifikation nach AO, Hinterkantenbeteiligung, Spinalkanaleinengung beschreiben).", u:"Wirbelkörperfraktur wie beschrieben - sofortige Befundmitteilung, wirbelsäulenchirurgische Mitbeurteilung."},
+     {id:"pbecken", n:"Beckenringfraktur", b:"Fraktur des vorderen und/oder hinteren Beckenrings: … (Klassifikation z. B. nach Tile / Young-Burgess). Begleitendes pelvines Hämatom: … . Aktive Blutung: nein / ja.", u:"Beckenringfraktur wie beschrieben - sofortige Befundmitteilung; bei aktiver Blutung Embolisation prüfen."},
+     {id:"pextremitaet", n:"Miterfasste Extremitätenfraktur", b:"Miterfasste Fraktur: … ."}
+   ]}
+  ]
+}
+};
+
+/* ================= DATEN: Diagnostische Sicherheit ================= */
+const CERTAINTY = [
+ {lvl:1, name:"Nachweis / beweisend", sub:"Diagnose praktisch sicher (~100 %)", col:"#4fae74", verbs:"ist · zeigt · Nachweis von · beweisend für", phrases:["Nachweis einer akuten Lungenarterienembolie.","Es zeigt sich eine dislozierte distale Radiusfraktur.","Pneumoperitoneum als beweisendes Zeichen einer Hohlorganperforation."]},
+ {lvl:2, name:"Hochwahrscheinlich", sub:"sehr typische Konstellation", col:"#6fb56a", verbs:"hochwahrscheinlich · bis zum Beweis des Gegenteils", phrases:["Hochwahrscheinlich einem Konvexitätsmeningeom entsprechend.","Befund bis zum Beweis des Gegenteils einem Abszess entsprechend."]},
+ {lvl:3, name:"Am ehesten (a. e.)", sub:"wahrscheinlichste Diagnose bei wenigen DD", col:"#9db95c", verbs:"am ehesten vereinbar mit · a. e.", phrases:["Am ehesten vereinbar mit einer akuten unkomplizierten Sigmadivertikulitis.","Läsion a. e. postischämischer Genese."]},
+ {lvl:4, name:"Wahrscheinlich", sub:"gute, aber nicht sichere Zuordnung", col:"#c9b34e", verbs:"wahrscheinlich · spricht für", phrases:["Der Befund spricht am ehesten für eine wahrscheinlich entzündliche Genese.","Wahrscheinlich reaktive Lymphknotenvergrößerung."]},
+ {lvl:5, name:"Vereinbar mit", sub:"passend, aber unspezifisch", col:"#dda647", verbs:"vereinbar mit · kann … entsprechen", phrases:["Befund vereinbar mit einer beginnenden Pneumonie.","Die Läsion kann einem Adenom entsprechen."]},
+ {lvl:6, name:"DD / möglich", sub:"eine von mehreren Möglichkeiten", col:"#df8a45", verbs:"DD · möglich · nicht auszuschließen · differenzialdiagnostisch zu bedenken", phrases:["DD atypisches Hämangiom, DD Metastase - MRT zur weiteren Abklärung empfohlen.","Eine entzündliche Genese ist differenzialdiagnostisch zu bedenken.","Eine diskrete Infiltration ist nicht sicher auszuschließen."]},
+ {lvl:7, name:"Unspezifisch / unklar", sub:"keine sichere Zuordnung möglich", col:"#e0654f", verbs:"unspezifisch · unklar · nicht eindeutig zuzuordnen", phrases:["Unspezifische Marklagerläsionen ohne eindeutiges Verteilungsmuster.","Unklare Läsion - weitere Abklärung mittels … empfohlen."]}
+];
+
+/* ================= APP-LOGIK ================= */
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const state={examId:null, sel:{}, uid:0, dirty:false, manual:false};
+
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),1900);}
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function markify(s){return esc(s).replace(/…/g,"<mark>…</mark>");}
+function autosize(ta){ta.style.height="auto";ta.style.height=(ta.scrollHeight+2)+"px";}
+
+/* ---------- Untersuchung laden ---------- */
+function renderExamPicker(){
+  const p=$("#examPicker");p.innerHTML="";
+  Object.values(EXAMS).forEach(ex=>{
+    const b=document.createElement("button");
+    b.className="exam-chip"+(ex.id===state.examId?" on":"");
+    b.textContent=ex.name;
+    b.onclick=()=>{ if(ex.id===state.examId) return;
+      if(state.dirty && !confirm("Untersuchung wechseln? Aktuelle Auswahl und Texte werden verworfen.")) return;
+      loadExam(ex.id); };
+    p.appendChild(b);
+  });
+}
+function renderPhases(ex){
+  const p=$("#phasePicker");p.innerHTML="";
+  (ex.phases||[]).forEach(ph=>{
+    const b=document.createElement("button");
+    b.className="phase-chip";b.textContent="Phase: "+ph.n;
+    b.onclick=()=>{$("#tTechnik").value=ph.t;autosize($("#tTechnik"));state.dirty=true;renderReport();toast("Technik angepasst: "+ph.n);};
+    p.appendChild(b);
+  });
+}
+function loadExam(id){
+  state.examId=id;state.sel={};state.dirty=false;
+  setManual(false);
+  const ex=EXAMS[id];
+  $("#tTechnik").value=ex.technik;
+  $("#freiBefund").value="";
+  $("#freiBeurt").value=ex.beurteilungNormal;
+  $("#fragestellung").value=$("#fragestellung").value; /* Fragestellung bleibt erhalten */
+  $("#rpExam").textContent=ex.name+" - Befund";
+  renderExamPicker();renderPhases(ex);renderRegions();renderReport();
+  autosize($("#tTechnik"));
+}
+
+/* ---------- Regionen & Instanzen ---------- */
+function renderRegions(){
+  const wrap=$("#regions");wrap.innerHTML="";
+  const ex=EXAMS[state.examId];
+  ex.regions.forEach(reg=>{
+    const d=document.createElement("details");d.className="region";d.id="reg-"+reg.id;
+    const sum=document.createElement("summary");
+    sum.innerHTML='<span class="dot"></span><span class="rname"></span><span class="rcount"></span><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>';
+    sum.querySelector(".rname").textContent=reg.n;
+    d.appendChild(sum);
+    const body=document.createElement("div");body.className="rbody";
+    const nrm=document.createElement("div");nrm.className="rnormal";
+    nrm.innerHTML=reg.normal?("<b>Normal:</b> "+esc(reg.normal)):"<b>Normal:</b> kein Standardsatz - Region erscheint nur bei pathologischem Befund im Bericht.";
+    body.appendChild(nrm);
+    const chips=document.createElement("div");chips.className="chips";
+    reg.items.forEach(it=>{
+      const c=document.createElement("button");c.className="chip";c.textContent=it.n;
+      c.onclick=()=>addInstance(reg,it);
+      chips.appendChild(c);
+    });
+    body.appendChild(chips);
+    const inst=document.createElement("div");inst.className="insts";inst.id="insts-"+reg.id;
+    body.appendChild(inst);
+    d.appendChild(body);
+    wrap.appendChild(d);
+  });
+}
+function addInstance(reg,it){
+  const inst={uid:++state.uid,item:it,b:it.b,u:(it.u||"")};
+  (state.sel[reg.id]=state.sel[reg.id]||[]).push(inst);
+  state.dirty=true;
+  const card=document.createElement("div");card.className="inst";card.dataset.uid=inst.uid;
+  const head=document.createElement("div");head.className="inst-head";
+  const nm=document.createElement("span");nm.className="inst-name";nm.textContent=it.n;
+  const x=document.createElement("button");x.className="xbtn";x.title="Baustein entfernen";x.textContent="✕";
+  x.onclick=()=>{state.sel[reg.id]=state.sel[reg.id].filter(i=>i.uid!==inst.uid);card.remove();updateRegion(reg.id);renderReport();};
+  head.appendChild(nm);head.appendChild(x);card.appendChild(head);
+  const tb=document.createElement("textarea");tb.value=inst.b;tb.spellcheck=false;
+  tb.oninput=()=>{inst.b=tb.value;state.dirty=true;autosize(tb);renderReport();};
+  card.appendChild(tb);
+  const lbl=document.createElement("div");lbl.className="bt-label";lbl.textContent="→ Beurteilung (optional)";
+  card.appendChild(lbl);
+  const tu=document.createElement("textarea");tu.value=inst.u;tu.spellcheck=false;tu.style.minHeight="42px";
+  tu.oninput=()=>{inst.u=tu.value;state.dirty=true;autosize(tu);renderReport();};
+  card.appendChild(tu);
+  if(it.hint){const h=document.createElement("div");h.className="ihint";h.textContent=it.hint;card.appendChild(h);}
+  const holder=$("#insts-"+reg.id);holder.appendChild(card);
+  const det=$("#reg-"+reg.id);det.open=true;
+  autosize(tb);autosize(tu);
+  updateRegion(reg.id);renderReport();
+}
+function updateRegion(regId){
+  const n=(state.sel[regId]||[]).length;
+  const det=$("#reg-"+regId);if(!det)return;
+  det.classList.toggle("path",n>0);
+  det.querySelector(".rcount").textContent=n+" pathol.";
+}
+
+/* ---------- Bericht kompilieren ---------- */
+function compile(){
+  const ex=EXAMS[state.examId];
+  const frage=$("#fragestellung").value.trim();
+  const technik=$("#tTechnik").value.trim();
+  const bLines=[],uLines=[];
+  ex.regions.forEach(reg=>{
+    const sel=state.sel[reg.id]||[];
+    if(sel.length){ sel.forEach(i=>{const t=i.b.trim();if(t)bLines.push(t);}); }
+    else if(reg.normal){ bLines.push(reg.normal); }
+    sel.forEach(i=>{const t=i.u.trim();if(t)uLines.push(t);});
+  });
+  const fb=$("#freiBefund").value.trim(); if(fb)bLines.push(fb);
+  const fu=$("#freiBeurt").value.trim(); if(fu)uLines.push(fu);
+  const befund=bLines.join("\n");
+  const beurt=uLines.join("\n");
+  let plain="";
+  if(frage)plain+="Fragestellung:\n"+frage+"\n\n";
+  plain+="Technik:\n"+technik+"\n\nBefund:\n"+befund+"\n\nBeurteilung:\n"+beurt;
+  return {frage,technik,befund,beurt,plain};
+}
+function renderReport(){
+  const c=compile();
+  $("#rpDate").textContent=new Date().toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit",year:"numeric"});
+  const showF=!!c.frage;
+  $("#rpFrageLbl").style.display=showF?"block":"none";
+  $("#rpFrage").style.display=showF?"block":"none";
+  $("#rpFrage").textContent=c.frage;
+  $("#rpBefund").innerHTML=markify(c.befund);
+  $("#rpBeurt").innerHTML=markify(c.beurt);
+}
+
+/* ---------- Manueller Modus / Kopieren / Export ---------- */
+function setManual(on){
+  state.manual=on;
+  $("#paper").classList.toggle("manual",on);
+  $("#btnManual").textContent=on?"Neu aufbauen (Auto-Modus)":"Manuell bearbeiten";
+  if(on){$("#manualArea").value=compile().plain;autosize($("#manualArea"));}
+}
+$("#btnManual").onclick=()=>{
+  if(state.manual && !confirm("Zurück in den Auto-Modus? Manuelle Änderungen im Berichtsfeld gehen verloren.")) return;
+  setManual(!state.manual); if(!state.manual)renderReport();
+};
+function currentText(){return state.manual?$("#manualArea").value:compile().plain;}
+function copyText(txt,okMsg){
+  const done=()=>toast(okMsg);
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done).catch(()=>fallbackCopy(txt,done));}
+  else fallbackCopy(txt,done);
+}
+function fallbackCopy(txt,done){
+  const ta=document.createElement("textarea");ta.value=txt;ta.style.position="fixed";ta.style.opacity="0";
+  document.body.appendChild(ta);ta.focus();ta.select();
+  try{document.execCommand("copy");done();}catch(e){toast("Kopieren nicht möglich - bitte manuell markieren.");}
+  document.body.removeChild(ta);
+}
+$("#btnCopy").onclick=()=>copyText(currentText(),"Befund kopiert - im RIS einfügen.");
+$("#btnTxt").onclick=()=>{
+  const blob=new Blob([currentText()],{type:"text/plain;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  const d=new Date(),p=n=>String(n).padStart(2,"0");
+  a.download="ct-befund-"+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+"-"+p(d.getHours())+p(d.getMinutes())+".txt";
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  toast("Befund als .txt gespeichert.");
+};
+$("#btnReset").onclick=()=>{ if(confirm("Alles zurücksetzen? Auswahl und Texte dieser Untersuchung werden verworfen.")) loadExam(state.examId); };
+["freiBefund","freiBeurt","fragestellung"].forEach(id=>{$("#"+id).addEventListener("input",()=>{state.dirty=true;renderReport();});});
+$("#tTechnik").addEventListener("input",()=>{state.dirty=true;autosize($("#tTechnik"));renderReport();});
+
+/* ---------- Tabs & mobile Berichtsansicht ---------- */
+$$("#tabs .tab").forEach(t=>t.onclick=()=>{
+  $$("#tabs .tab").forEach(x=>x.classList.remove("on"));t.classList.add("on");
+  $$(".tabpane").forEach(p=>p.classList.remove("on"));
+  $("#pane-"+t.dataset.tab).classList.add("on");
+  document.body.classList.remove("show-report");
+  window.scrollTo({top:0});
+});
+$("#fabReport").onclick=()=>{renderReport();document.body.classList.add("show-report");};
+$("#btnCloseReport").onclick=()=>document.body.classList.remove("show-report");
+
+/* ---------- LOKALD-U ---------- */
+function lokBuild(){
+  const v=id=>$("#"+id).value.trim();
+  const lo=v("lokLo")||"…", a1=v("lokA1")||"…", a2=v("lokA2")||"…", a3=v("lokA3")||"…";
+  const schicht=v("lokSchicht"), hu=v("lokHU");
+  let s="Im Bereich von "+lo+" zeigt sich eine "+v("lokForm")+", "+v("lokRand")+", "+v("lokDichte")+" Raumforderung";
+  if(hu)s+=" (nativ ca. "+hu+" HU)";
+  s+=" mit "+v("lokBinnen")+", Größenausdehnung "+a1+" × "+a2+" × "+a3+" mm";
+  s+=schicht?(" ("+schicht+")."):".";
+  s+=" Nach Kontrastmittelgabe zeigt sich "+v("lokDyn")+".";
+  s+=" Die Raumforderung stellt sich "+v("lokUmg")+" dar.";
+  const ux=v("lokUmgTxt"); if(ux)s+=" "+ux+(/[.!?]$/.test(ux)?"":".");
+  return s;
+}
+$("#lokGen").onclick=()=>{$("#lokOut").textContent=lokBuild();};
+$("#lokCopy").onclick=()=>{const t=$("#lokOut").textContent||lokBuild();$("#lokOut").textContent=t;copyText(t,"Beschreibung kopiert.");};
+$("#lokInsert").onclick=()=>{
+  const t=$("#lokOut").textContent||lokBuild();$("#lokOut").textContent=t;
+  const f=$("#freiBefund");f.value=(f.value?f.value+"\n":"")+t;state.dirty=true;renderReport();
+  $$("#tabs .tab").forEach(x=>x.classList.toggle("on",x.dataset.tab==="befundung"));
+  $$(".tabpane").forEach(p=>p.classList.remove("on"));$("#pane-befundung").classList.add("on");
+  toast("In „Weitere Befunde“ eingefügt.");window.scrollTo({top:0});
+};
+
+/* ---------- Formulierungshilfen ---------- */
+(function renderCert(){
+  const wrap=$("#certList");
+  CERTAINTY.forEach(c=>{
+    const d=document.createElement("div");d.className="cert";
+    const head=document.createElement("div");head.className="cert-head";
+    const num=document.createElement("div");num.className="cert-num";num.style.background=c.col;num.textContent=c.lvl;
+    const h=document.createElement("h3");h.textContent=c.name;
+    const sm=document.createElement("small");sm.textContent=c.sub;h.appendChild(sm);
+    head.appendChild(num);head.appendChild(h);d.appendChild(head);
+    const vb=document.createElement("div");vb.className="verbs";vb.textContent="Verben: "+c.verbs;d.appendChild(vb);
+    const ph=document.createElement("div");
+    c.phrases.forEach(p=>{const b=document.createElement("button");b.className="phrase";b.textContent=p;
+      b.onclick=()=>copyText(p,"Phrase kopiert.");ph.appendChild(b);});
+    d.appendChild(ph);wrap.appendChild(d);
+  });
+})();
+
+/* ---------- Indikationsprüfung ---------- */
+function indUpdate(){
+  const all=$$(".ind"),n=all.filter(c=>c.checked).length;
+  $("#indBar").style.width=Math.round(n/all.length*100)+"%";
+  $("#indDone").classList.toggle("show",n===all.length);
+}
+$$(".ind").forEach(c=>c.addEventListener("change",indUpdate));
+
+/* ---------- Start ---------- */
+loadExam("cct");
+</script>
+</body>
+</html>

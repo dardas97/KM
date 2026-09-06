@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KM-Tools - Kontrastmittel & CT-Planung</title>
+<link rel="stylesheet" href="km.css">
+</head>
+<body>
+<script src="km.js"></script>
+<div class="page">
+  <header class="masthead">
+    <div class="mast-ruler" aria-hidden="true"></div>
+    <div class="mast-top">
+      <a href="index.html" class="home-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 5.5 8 12l6.5 6.5"/></svg>CT-Tools</a>
+      <button type="button" class="rad-mode-toggle" id="radModeToggle" aria-pressed="false" title="Lesesaal-Dunkelmodus" onclick="toggleRadMode()"><span class="mode-track" aria-hidden="true"><span class="mode-thumb"></span></span><span class="mode-label">Rad&nbsp;Mode</span></button>
+    </div>
+    <div class="mast-main">
+      <div class="tool-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="6.5"/><path d="M12 2.5v3.5M12 18v3.5M2.5 12H6M18 12h3.5"/><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/></svg></div>
+      <div class="mast-text">
+        <h1>KM-Tools<span class="h1-sub">Kontrastmittel-Anwendung · CT-Untersuchungsplanung</span></h1>
+        <p class="mast-desc">Klinische Entscheidungshilfen für KM-Anwendung und CT-Untersuchungsplanung.</p>
+      </div>
+    </div>
+  </header>
+
+  <p class="intro">Basierend auf europäischen Leitlinien und hauseigenem Klinikstandard. Ersetzen keine ärztliche Beurteilung.</p>
+
+  <div class="tools-grid">
+    <a href="schilddruese.html" class="tool-card thyro">
+      <div class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v5.2"/><path d="M11 13.5h2"/><path d="M10.8 9.4C9.7 7.9 7.7 7.4 6.3 8.5c-1.8 1.5-1.9 4.7-.6 7.5 1 2.1 2.6 3.6 3.9 3.1 1.2-.4 1.6-2.1 1.4-4.2"/><path d="M13.2 9.4c1.1-1.5 3.1-2 4.5-.9 1.8 1.5 1.9 4.7.6 7.5-1 2.1-2.6 3.6-3.9 3.1-1.2-.4-1.6-2.1-1.4-4.2"/></svg></div>
+      <h2>Schilddrüse</h2>
+      <div class="tool-subtitle">Hyper- / Hypothyreose · Karzinom</div>
+      <p>Risiko und Prophylaxe bei vorbestehenden Schilddrüsenerkrankungen.</p>
+      <ul class="tool-features">
+        <li>TSH/fT3/fT4-Analyse</li>
+        <li>Prophylaxe-Schemata</li>
+        <li>Karzinom, RIT, Amiodaron</li>
+      </ul>
+      <span class="tool-cta">Tool öffnen</span>
+    </a>
+
+    <a href="niere.html" class="tool-card kidney">
+      <div class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.9 3.6c-4.6 0-8.4 3.7-8.4 8.4s3.8 8.4 8.4 8.4c2.6 0 4.2-1.5 4.2-3.4 0-2.4-3-2.6-3-5s3-2.6 3-5c0-1.9-1.6-3.4-4.2-3.4z"/><path d="M15.6 12h3.2"/></svg></div>
+      <h2>Niere</h2>
+      <div class="tool-subtitle">eGFR · Hydrierung · Abstände</div>
+      <p>KM-Gabe bei eingeschränkter Nierenfunktion.</p>
+      <ul class="tool-features">
+        <li>eGFR-Risikobewertung</li>
+        <li>Hydrierungsrechner</li>
+        <li>Dialyse, Metformin, NYHA</li>
+      </ul>
+      <span class="tool-cta">Tool öffnen</span>
+    </a>
+
+    <a href="paravasat.html" class="tool-card paravasat">
+      <div class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 3.5v6M8.5 14.5v6M14 3.5v17"/><path d="M4.9 9.7c1.3 1.6 2 2.7 2 3.7a2 2 0 1 1-4 0c0-1 .7-2.1 2-3.7z"/></svg></div>
+      <h2>Paravasat</h2>
+      <div class="tool-subtitle">Erkennung · Behandlung</div>
+      <p>Akutmanagement nach ESUR 2022.</p>
+      <ul class="tool-features">
+        <li>Schweregrad mild / moderat / schwer</li>
+        <li>Stepwise Algorithmus</li>
+        <li>Prävention und Risikofaktoren</li>
+      </ul>
+      <span class="tool-cta">Tool öffnen</span>
+    </a>
+
+    <a href="phasen.html" class="tool-card phasen">
+      <div class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.2"/><path d="M12 7.3V12l3.2 1.9"/><path d="M12 3.8v1.3M20.2 12h-1.3M12 20.2v-1.3M3.8 12h1.3"/></svg></div>
+      <h2>CT-Phasen &amp; Zugang</h2>
+      <div class="tool-subtitle">Phasen · Flow · Venflon · ZVK · Port</div>
+      <p>Phasen-Slider plus Empfehlungen zu Flussraten und Zugängen.</p>
+      <ul class="tool-features">
+        <li>Interaktiver Phasen-Slider</li>
+        <li>Venflon-Größen nach Flussrate</li>
+        <li>ZVK und Port-Empfehlungen</li>
+      </ul>
+      <span class="tool-cta">Tool öffnen</span>
+    </a>
+  </div>
+
+  <div class="footer-note">
+    Diese Tools dienen der klinischen Entscheidungsunterstützung und ersetzen keine individuelle ärztliche Beurteilung.<br>
+    Quellen: ETA 2021 · ESUR Contrast Media Safety Committee 2018/2025 · ESUR Extravasation Guidelines 2022 · DGN S1 RIT 2022 · S3 Schilddrüsenkarzinom 2025 · ESC HF 2021
+    <span class="byline">Made by Dardan Albani</span>
+  </div>
+</div>
+</body>
+</html>
